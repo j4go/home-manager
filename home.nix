@@ -2,6 +2,7 @@
   imports = [
     #./modules/zsh.nix
     ./modules/bash.nix
+    ./modules/starship.nix
     ./modules/git.nix
     ./modules/packages.nix
   ];
