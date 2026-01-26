@@ -4,6 +4,7 @@
     ./modules/bash.nix
     ./modules/starship.nix
     ./modules/git.nix
+    ./modules/ssh.nix
     ./modules/packages.nix
   ];
 

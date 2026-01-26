@@ -6,7 +6,13 @@
         name = "j4go";
         email = "yianny@163.com";
       };
-      # 可以在这里添加更多 Git 配置，例如 pull.rebase = true
+      # HTTP/HTTPS 代理配置
+      http = {
+        proxy = "http://10.255.126.1:10808";
+      };
+      https = {
+        proxy = "http://10.255.126.1:10808";
+      };
     };
   };
 }
