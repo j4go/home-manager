@@ -1,16 +1,15 @@
 { pkgs, ... }: {
   programs.ssh = {
     enable = true;
-    
-    # ✅ 针对 GitHub 的特殊配置
+    # ✅ 1. 消除警告：显式启用 SSH Agent 管理 (这是推荐的现代配置)
+    addKeysToAgent = "yes";
     matchBlocks = {
       "github.com" = {
         hostname = "github.com";
         user = "git";
-        # 核心魔法：使用 netcat (nc) 通过代理转发 SSH 流量
-        # -X 5 代表 SOCKS5 协议
-        # -x 代理地址
-        proxyCommand = "nc -X 5 -x 10.255.126.1:10808 %h %p";
+        # 使用 Nix 提供的 netcat-openbsd 绝对路径
+        # 这样无论宿主机是 Rocky 还是 Mint，都能保证 -X 5 参数可用
+        proxyCommand = "${pkgs.netcat-openbsd}/bin/nc -X 5 -x 10.255.126.1:10808 %h %p";
       };
     };
   };
