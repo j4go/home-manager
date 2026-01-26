@@ -25,7 +25,7 @@
       grep = "grep --color=auto";
       ls = "ls --color=auto";
       # 简易更新命令
-      hm-update = "(cd ~/.config/home-manager && git add . && nix run home-manager/master -- switch --flake . -b backup)";
+      hm-update = "(cd ~/.config/home-manager && git add . && home-manager switch --flake .  -b backup)";
     };
 
     # ◆ 复杂逻辑与脚本
@@ -62,7 +62,8 @@
               echo -e "语法与构建检查通过！"
               [ -L result ] && unlink result
               echo -e "正在应用新配置 (Switch)..."
-              if nix run home-manager/master -- switch --flake . -b backup; then
+              #if nix run home-manager/master -- switch --flake . -b backup; then
+              if home-manager switch --flake . -b backup; then
                   echo -e "配置应用成功！"
                   echo -e "正在提交 Git 记录..."
                   git commit -m "Update: $(date '+%Y-%m-%d %H:%M:%S')"
