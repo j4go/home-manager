@@ -1,9 +1,14 @@
 { pkgs, ... }: {
   programs.ssh = {
     enable = true;
-    # ✅ 1. 消除警告：显式启用 SSH Agent 管理 (这是推荐的现代配置)
-    addKeysToAgent = "yes";
     matchBlocks = {
+      "*" = {
+        addKeysToAgent = "yes";
+        # 你可以在这里添加其他通用配置，如:
+        # identityFile = "~/.ssh/id_ed25519";
+      };
+
+      # GitHub 专用配置
       "github.com" = {
         hostname = "github.com";
         user = "git";
