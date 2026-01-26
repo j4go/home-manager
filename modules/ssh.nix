@@ -1,6 +1,8 @@
 { pkgs, ... }: {
   programs.ssh = {
     enable = true;
+    # 显式禁用默认配置
+    enableDefaultConfig = false;
     matchBlocks = {
       "*" = {
         addKeysToAgent = "yes";
