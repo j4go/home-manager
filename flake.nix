@@ -26,7 +26,7 @@
         ];
       };
       # Rocky Linux 10.1
-      # 对应命令: nix run ... -- switch --flake .#rocky
+      # 对应命令: nix run ... -- switch --flake .#rocky10
       "rocky10" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.aarch64-linux;
         modules = [
