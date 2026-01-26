@@ -61,6 +61,9 @@
           if [ "$(hostname)" = "mint" ]; then
             FLAKE_NAME="mint"
           fi
+          if [ "$(hostname)" = "fedora" ]; then
+            FLAKE_NAME="fedora"
+          fi
 
           echo -e "🔍 [Target: $FLAKE_NAME] 正在执行预构建检查 (Dry Run)..."
           

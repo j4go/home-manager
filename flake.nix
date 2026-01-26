@@ -13,7 +13,7 @@
 
   outputs = { self, nixpkgs, home-manager, ... }: {
     homeConfigurations = {
-      # 🖥️ 配置一：Rocky Linux 
+      # Rocky Linux 
       # 对应命令: nix run ... -- switch --flake .#rocky
       "rocky" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
@@ -25,7 +25,7 @@
           }
         ];
       };
-      # 💻 配置二：Linux Mint
+      # Linux Mint
       # 对应命令: nix run ... -- switch --flake .#mint
       "mint" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
@@ -36,6 +36,18 @@
             home.homeDirectory = "/home/w";
             # 你甚至可以在这里添加 Mint 特有的配置
             # home.packages = [ pkgs.hello ];
+          }
+        ];
+      };
+      # Fedora
+      # 对应命令: nix run ... -- switch --flake .#fedora
+      "fedora" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.aarch64-linux;
+        modules = [
+          ./home.nix
+          {
+            home.username = "w";
+            home.homeDirectory = "/home/w";
           }
         ];
       };
