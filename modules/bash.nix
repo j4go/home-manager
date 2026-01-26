@@ -58,6 +58,9 @@
           
           # 1. 动态判断主机名
           FLAKE_NAME="rocky" # 默认值
+          if [ "$(hostname)" = "rocky10" ]; then
+            FLAKE_NAME="rocky10"
+          fi
           if [ "$(hostname)" = "mint" ]; then
             FLAKE_NAME="mint"
           fi

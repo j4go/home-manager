@@ -13,10 +13,22 @@
 
   outputs = { self, nixpkgs, home-manager, ... }: {
     homeConfigurations = {
-      # Rocky Linux 
+      # Rocky Linux 9.7
       # 对应命令: nix run ... -- switch --flake .#rocky
       "rocky" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        modules = [
+          ./home.nix
+          {
+            home.username = "w";
+            home.homeDirectory = "/home/w";
+          }
+        ];
+      };
+      # Rocky Linux 10.1
+      # 对应命令: nix run ... -- switch --flake .#rocky
+      "rocky10" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.aarch64-linux;
         modules = [
           ./home.nix
           {
