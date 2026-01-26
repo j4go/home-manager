@@ -24,8 +24,6 @@
       l = "ls -CF";
       grep = "grep --color=auto";
       ls = "ls --color=auto";
-      # 简易更新命令
-      hm-update = "(cd ~/.config/home-manager && git add . && home-manager switch --flake .  -b backup)";
     };
 
     # ◆ 复杂逻辑与脚本
@@ -57,21 +55,36 @@
         (
           cd ~/.config/home-manager || return
           git add .
-          echo -e "正在执行预构建检查 (Dry Run)..."
-          if nix run home-manager/master -- build --flake .; then
-              echo -e "语法与构建检查通过！"
+          
+          # 1. 动态判断主机名
+          FLAKE_NAME="rocky" # 默认值
+          if [ "$(hostname)" = "mint" ]; then
+            FLAKE_NAME="mint"
+          fi
+
+          echo -e "🔍 [Target: $FLAKE_NAME] 正在执行预构建检查 (Dry Run)..."
+          
+          # 🔴 核心修复：使用 Nix 原生构建命令
+          # 直接指向 Flake 内部的具体输出路径，绝不出错
+          if nix build ".#homeConfigurations.$FLAKE_NAME.activationPackage"; then
+              echo -e "✅ 语法与构建检查通过！"
+              
+              # 清理构建产物 (nix build 会生成一个 result 软链接)
               [ -L result ] && unlink result
-              echo -e "正在应用新配置 (Switch)..."
-              #if nix run home-manager/master -- switch --flake . -b backup; then
-              if home-manager switch --flake . -b backup; then
-                  echo -e "配置应用成功！"
-                  echo -e "正在提交 Git 记录..."
-                  git commit -m "Update: $(date '+%Y-%m-%d %H:%M:%S')"
+              
+              echo -e "🚀 正在应用新配置 (Switch)..."
+              
+              # 2. 正式切换
+              # 优先使用本地安装的 home-manager (速度快)
+              if home-manager switch --flake ".#$FLAKE_NAME" -b backup; then
+                  echo -e "🎉 配置应用成功！"
+                  echo -e "💾 正在提交 Git 记录..."
+                  git commit -m "Update from $(hostname): $(date '+%Y-%m-%d %H:%M:%S')"
               else
-                  echo -e "切换失败 (Activation Failed)！请检查报错。"
+                  echo -e "❌ 切换失败 (Activation Failed)！请检查报错。"
               fi
           else
-              echo -e "构建失败 (Build Failed)！配置未应用。"
+              echo -e "💥 构建失败 (Build Failed)！配置未应用。"
           fi
         )
       }

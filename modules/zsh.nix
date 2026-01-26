@@ -7,7 +7,6 @@
     
     shellAliases = {
       ll = "ls -l";
-      hm-update = "home-manager switch --flake ~/.config/home-manager -b backup";
     };
   };
 }
