@@ -6,5 +6,8 @@
     bat
     fzf
     jq
+    xclip
+    wl-clipboard
+    fastfetch
   ];
 }
