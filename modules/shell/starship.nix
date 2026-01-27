@@ -1,7 +1,6 @@
 { config, lib, ... }:
 let 
   cfg = config.myOptions.shell.starship;
-  # 🚀 极简主义 Starship 配置
   settings = { 
     # 基础设置
     command_timeout = 2000;
@@ -11,45 +10,40 @@ let
     # 格式：只显示当前目录、Git 状态和提示符
     format = "$directory$git_branch$git_status$character";
 
-    # 提示符：简单、干净的 $ 符号
+    # 提示符：修复了空格错误，并使用 format 属性来确保简洁
     character = {
-      success_symbol = "[ $ ](bold white)";
-      error_symbol = "[ $ ](bold red)";
-      # 仅在非根用户时显示
-      vicmd_symbol = "[V](bold green)";
+      # 修复了 format 语法，使用 $symbol 变量
+      format = "[$symbol]($style) "; 
+      success_symbol = "$"; # 仅保留符号本身
+      error_symbol = "X";   # 仅保留符号本身
+      style = "bold white";
+      # 移除 vicmd_symbol 的格式化，使用默认的
     };
 
-    # 目录：只显示目录名，不显示颜色
+    # 目录：只显示目录名
     directory = {
       style = "bold white";
       truncate_to_repo = false;
       truncation_length = 2;
-      format = "[$path]($style) "; # 确保路径后有一个空格
+      format = "[$path]($style) ";
     };
 
-    # Git 分支：纯文本，只在非主分支时显示
+    # Git 分支：移除 length=0 警告
     git_branch = {
       symbol = " on ";
       style = "bold white";
-      only_detached = false;
-      truncation_length = 0;
-      format = "[$symbol$branch]($style)"; # 示例: on main
+      # 移除 only_detached，避免警告
+      format = "[$symbol$branch]($style)";
+      # 移除 truncation_length = 0，避免警告
     };
 
     # Git 状态：用简单的符号表示状态
     git_status = {
       style = "bold red";
-      conflicted = "!";
-      ahead = "↑";
-      behind = "↓";
-      diverged = "↕";
-      untracked = "?";
-      stashed = "S";
-      modified = "M";
-      staged = "+";
-      renamed = "R";
-      deleted = "D";
-      format = "([$all]($style)) "; # 状态用括号包裹，并以空格结束
+      conflicted = "!"; ahead = "↑"; behind = "↓"; diverged = "↕";
+      untracked = "?"; stashed = "S"; modified = "M"; staged = "+";
+      renamed = "R"; deleted = "D";
+      format = "([$all]($style)) ";
     };
 
     # 禁用所有默认语言模块，保持极简
@@ -63,7 +57,6 @@ let
     time.disabled = true;
     username.disabled = true;
     hostname.disabled = true;
-    # ... 其他所有未配置的模块默认都是禁用状态 ...
   };
 in {
   config = lib.mkIf cfg.enable {
@@ -71,7 +64,7 @@ in {
       enable = true;
       enableBashIntegration = true;
       enableZshIntegration = true;
-      settings = settings; # 注入配置
+      settings = settings; 
     };
   };
 }
