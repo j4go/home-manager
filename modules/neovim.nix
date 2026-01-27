@@ -10,25 +10,27 @@
     # 📦 插件管理：引入现代主题与基础插件
     plugins = with pkgs.vimPlugins; [
       vim-nix                 # Nix 语言高亮
-      tokyonight-nvim         # 🎨 业界推荐：现代、护眼、高对比度主题
+      nightfox-nvim  # 🎨 包含 carbonfox, nightfox, duskfox 等多种风格
     ];
 
     # 🚀 推荐：使用 Lua 进行现代插件配置
     initLua = ''
-      -- 1. 主题配置 (必须在 colorscheme 之前调用)
-      require("tokyonight").setup({
-        style = "storm",     -- 可选: "storm", "night", "moon", "day"
-        transparent = false, -- 是否透明背景
-        terminal_colors = true,
-        styles = {
-          comments = { italic = true },
-          keywords = { italic = true },
-          functions = { italic = true },
+      -- 1. Nightfox 配置
+      require('nightfox').setup({
+        options = {
+          -- 样式微调，确保高对比度
+          transparent = false,     -- 如果需要背景透明，设为 true
+          terminal_colors = true, 
+          styles = {
+            comments = "italic",   -- 注释使用斜体，保持 Tomorrow 风格的优雅
+            keywords = "bold",     -- 关键字加粗
+            functions = "none",
+          },
         },
       })
 
-      -- 2. 应用主题
-      vim.cmd[[colorscheme tokyonight]]
+      -- 2. 应用主题 (carbonfox 是最接近 Tomorrow Night Bright 的版本)
+      vim.cmd.colorscheme "carbonfox"
     '';
 
     # ⚙️ 核心配置
