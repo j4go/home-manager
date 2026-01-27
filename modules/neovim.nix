@@ -13,16 +13,33 @@
       tokyonight-nvim         # 🎨 业界推荐：现代、护眼、高对比度主题
     ];
 
+    # 🚀 推荐：使用 Lua 进行现代插件配置
+    extraLuaConfig = ''
+      -- 1. 主题配置 (必须在 colorscheme 之前调用)
+      require("tokyonight").setup({
+        style = "moon",     -- 可选: "storm", "night", "moon", "day"
+        transparent = false, -- 是否透明背景
+        terminal_colors = true,
+        styles = {
+          comments = { italic = true },
+          keywords = { italic = true },
+          functions = { italic = true },
+        },
+      })
+
+      -- 2. 应用主题
+      vim.cmd[[colorscheme tokyonight]]
+    '';
     # ⚙️ 核心配置
     extraConfig = ''
       " ==========================================
-      " 1. 基础核心 (Neovim 默认已开启 nocompatible 等多项设置)
+      " 基础核心 (Neovim 默认已开启 nocompatible 等多项设置)
       " ==========================================
       syntax on
       filetype plugin indent on
 
       " ==========================================
-      " 2. 性能与剪切板 (极致性能模式)
+      " 性能与剪切板 (极致性能模式)
       " ==========================================
       " unnamed:     使用 * 寄存器 (鼠标中键)
       " unnamedplus: 使用 + 寄存器 (系统剪切板 Ctrl+C/V)
@@ -30,24 +47,7 @@
       set clipboard^=unnamed,unnamedplus      
 
       " ==========================================
-      " 3. 主题设置 (Tokyo Night)
-      " ==========================================
-      if (has('termguicolors'))
-        set termguicolors
-      endif
-      
-      " 设置主题风格：storm, night, moon, day
-      let g:tokyonight_style = "moon"
-      let g:tokyonight_italic_functions = 1
-      
-      try
-        colorscheme tokyonight
-      catch
-        colorscheme default
-      endtry
-
-      " ==========================================
-      " 4. 快捷键映射
+      " 快捷键映射
       " ==========================================
       let mapleader=";"
       set timeoutlen=500
@@ -59,7 +59,7 @@
       nnoremap <Leader>r <C-r>
 
       " ==========================================
-      " 5. 排版与缩进
+      " 排版与缩进
       " ==========================================
       set tabstop=4
       set softtabstop=4
@@ -69,7 +69,7 @@
       set list listchars=tab:▸\ 
 
       " ==========================================
-      " 6. 文件安全与持久化 (遵循 XDG 标准)
+      " 文件安全与持久化 (遵循 XDG 标准)
       " ==========================================
       " 🚀 优化：Neovim 推荐将数据放在 ~/.local/state/nvim (或 stdpath('state'))
       
@@ -95,7 +95,7 @@
       autocmd FocusGained,BufEnter * checktime
 
       " ==========================================
-      " 7. 搜索与补全
+      " 搜索与补全
       " ==========================================
       set wildmenu
       set path+=**
@@ -107,7 +107,7 @@
       set incsearch
 
       " ==========================================
-      " 8. Markdown 专项优化 (保留原逻辑)
+      " Markdown 专项优化 (保留原逻辑)
       " ==========================================
       let g:markdown_disable_html = 1
       let g:markdown_exclude_embed = 1
@@ -124,7 +124,7 @@
       endfunction
 
       " ==========================================
-      " 9. 界面与体验
+      " 界面与体验
       " ==========================================
       set sidescroll=1
       set laststatus=2
@@ -136,7 +136,7 @@
       set noerrorbells
 
       " ==========================================
-      " 10. 换行行为
+      " 换行行为
       " ==========================================
       set wrap
       set linebreak
