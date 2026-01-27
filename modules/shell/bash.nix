@@ -63,7 +63,7 @@ in {
             else
                 echo -e "💥 构建失败，请检查配置！"
             fi
-            nix-collect-garbage --delete-older-than 10d
+            # nix-collect-garbage --delete-older-than 10d
           )
         }
       '';
