@@ -1,20 +1,47 @@
 { config, lib, ... }:
-let 
+let
   cfg = config.myOptions.shell.starship;
-  settings = { 
+  settings = {
+    # -------------------------------------------------------------------------
+    # 1. 核心格式控制 (Format)
+    # -------------------------------------------------------------------------
+    # 修复点：删除了重复的 format 定义，只保留这一行。
+    # 顺序：用户名 -> 主机名(仅SSH) -> 目录 -> Git -> NixShell -> 换行 -> 提示符
+    format = "$username$hostname$directory$git_branch$git_state$git_status$nix_shell$cmd_duration$line_break$character";
+
     # 基础设置
     add_newline = false;
     command_timeout = 1000;
 
-    # 格式：通过 format 统一控制所有模块的样式和顺序
-    # 提示符的样式将由 Starship 默认的 success_symbol/error_symbol 样式控制
-    format = "$all$nix_shell$git_branch$git_status$directory$character";
+    # -------------------------------------------------------------------------
+    # 2. SSH 主机名 (Hostname) - 您的核心需求
+    # -------------------------------------------------------------------------
+    hostname = {
+      ssh_only = true;       # ✅ 关键：只有 SSH 时才显示
+      format = "[$ssh_symbol$hostname]($style) ";
+      style = "bold #ffaf00"; # 🎃 亮橙色，高辨识度
+      ssh_symbol = "☁️  ";    # ☁️ 云端图标
+      disabled = false;    
+    };
 
-    # 提示符：最稳定、最基础的定义，只保留符号
+    # -------------------------------------------------------------------------
+    # 3. 用户名 (Username)
+    # -------------------------------------------------------------------------
+    username = {
+      style_user = "white dim";
+      show_always = false;   # 本地不显示，SSH 时配合 hostname 自动出现
+      format = "[$user]($style)@";
+      disabled = false;     
+    };
+
+    # -------------------------------------------------------------------------
+    # 4. 其他模块配置
+    # -------------------------------------------------------------------------
+    
+    # 提示符符号
     character = {
-      success_symbol = "➜"; 
-      error_symbol = "✖"; 
-      # 移除所有 format, error_format, style 属性，避免一切警告
+      success_symbol = "[➜](bold green)"; 
+      error_symbol = "[✖](bold red)";
     };
 
     # 目录
@@ -26,7 +53,7 @@ let
 
     # Git 分支
     git_branch = {
-      symbol = " "; 
+      symbol = " ";
       style = "bold purple";
       format = "[$symbol$branch]($style) ";
     };
@@ -37,19 +64,17 @@ let
       style = "bold red";
       up_to_date = "[✓](bold green)";
     };
-    
-    # Nix Shell 模块
+
+    # Nix Shell
     nix_shell = {
       symbol = "❄️ ";
       style = "bold blue";
       format = "[$symbol(nix-shell)]($style) ";
     };
 
-    # 禁用其他模块
+    # 禁用不需要的模块
     package.disabled = true;
     time.disabled = true;
-    username.disabled = true;
-    hostname.disabled = true;
   };
 in {
   config = lib.mkIf cfg.enable {
@@ -57,7 +82,7 @@ in {
       enable = true;
       enableBashIntegration = true;
       enableZshIntegration = true;
-      settings = settings; 
+      settings = settings;
     };
   };
 }
