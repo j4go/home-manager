@@ -8,6 +8,7 @@ in {
       defaultEditor = true;
       viAlias = true;
       vimAlias = true;
+      version.enableNixpkgsReleaseCheck = false;
 
       # 1. 🎨 主题配置：完全保留你的 carbonfox 配置细节
       colorschemes.nightfox = {
