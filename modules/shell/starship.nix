@@ -7,7 +7,7 @@ let
     # -------------------------------------------------------------------------
     # 修复点：删除了重复的 format 定义，只保留这一行。
     # 顺序：用户名 -> 主机名(仅SSH) -> 目录 -> Git -> NixShell -> 换行 -> 提示符
-    format = "$username$hostname$directory$git_branch$git_state$git_status$nix_shell$cmd_duration$line_break$character";
+    format = "$username$hostname$directory$git_branch$git_state$git_status$nix_shell$cmd_duration$character";
 
     # 基础设置
     add_newline = false;
@@ -30,7 +30,7 @@ let
     username = {
       style_user = "white dim";
       show_always = false;   # 本地不显示，SSH 时配合 hostname 自动出现
-      format = "[$user]($style)@";
+      format = "[$user]($style) @";
       disabled = false;     
     };
 
