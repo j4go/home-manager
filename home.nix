@@ -6,6 +6,7 @@
     ./modules/git.nix
     ./modules/ssh.nix
     ./modules/packages.nix
+    ./modules/neovim.nix
   ];
   
   # 状态版本号 (不要随意修改)
