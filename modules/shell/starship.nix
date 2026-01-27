@@ -3,56 +3,44 @@ let
   cfg = config.myOptions.shell.starship;
   settings = { 
     # 基础设置
+    add_newline = false; # 不插入空行
     command_timeout = 2000;
-    add_newline = false;
-    line_break.disabled = true;
 
-    # 格式：通过 format 统一控制所有模块的样式和顺序
+    # 格式：只显示目录、Git 状态和提示符
     format = "$directory$git_branch$git_status$character";
 
-    # 提示符：回归最简定义，移除所有样式和 format 属性
+    # 提示符：使用经典的箭头
     character = {
-      # 仅定义符号本身
-      success_symbol = "$"; 
-      error_symbol = "X";
-      # 移除所有 style, format 属性，避免警告
+      success_symbol = "[➜](bold green)";
+      error_symbol = "[✖](bold red)";
     };
-    
-    # 目录：通过 format 属性来控制路径的显示样式，同时移除 style 属性
+
+    # 目录：简洁的绿色路径
     directory = {
-      style = "bold white"; # 样式保留在模块内，但 Starship 默认会应用
+      style = "bold cyan";
       truncate_to_repo = false;
-      truncation_length = 2;
-      format = "[$path]($style) "; # 路径用方括号包裹，并以空格结束
+      format = "[$path]($style) ";
     };
 
-    # Git 分支
+    # Git 分支：简洁的绿色
     git_branch = {
-      symbol = " on ";
-      style = "bold white";
-      format = "[$symbol$branch]($style)";
+      style = "bold green";
+      format = " on [$symbol$branch]($style) ";
     };
 
-    # Git 状态
+    # Git 状态：只在有改动时显示简洁的符号
     git_status = {
       style = "bold red";
-      conflicted = "!"; ahead = "↑"; behind = "↓"; diverged = "↕";
-      untracked = "?"; stashed = "S"; modified = "M"; staged = "+";
-      renamed = "R"; deleted = "D";
+      conflicted = "!"; ahead = "↑"; behind = "↓";
+      diverged = "↕"; untracked = "?"; stashed = "$";
+      modified = "M"; staged = "+"; renamed = "R"; deleted = "D";
       format = "([$all]($style)) ";
     };
 
-    # 禁用所有默认语言模块，保持极简
+    # 禁用所有语言模块和不必要的上下文
     package.disabled = true;
-    nodejs.disabled = true;
-    python.disabled = true;
-    golang.disabled = true;
-    rust.disabled = true;
-    
-    # 禁用时间、用户名等不必要的上下文
     time.disabled = true;
     username.disabled = true;
-    hostname.disabled = true;
   };
 in {
   config = lib.mkIf cfg.enable {
