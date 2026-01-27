@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, vars, ...}: {
   programs.bash = {
     enable = true;
     enableCompletion = true; 
@@ -23,29 +23,15 @@
     };
     # 复杂逻辑与脚本
     initExtra = ''
-      # --- 动态代理配置 (基于主机名) ---
-      # 💡 最佳实践：使用 case 语句处理多匹配，并添加 no_proxy
-      case "$(hostname)" in
-        "rocky" | "mint")
-          export PROXY_URL="http://10.255.126.1:10808"
-          ;;
-        "fedora" | "rocky10")
-          export PROXY_URL="http://192.168.3.248:10808"
-          ;;
-        *)
-          export PROXY_URL=""
-          ;;
-      esac
-
-      if [ -n "$PROXY_URL" ]; then
-        export http_proxy="$PROXY_URL"
-        export https_proxy="$PROXY_URL"
-        export ftp_proxy="$PROXY_URL"
-        export rsync_proxy="$PROXY_URL"
-        # 🔴 重要：防止本地流量走代理导致连接失败
-        export no_proxy="localhost,127.0.0.1,192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,*.local,*.internal"
+      # --- 代理配置 (由 Nix 在构建时注入) ---
+      ${if vars.proxyUrl != "" then ''
+        export http_proxy="${vars.proxyUrl}"
+        export https_proxy="${vars.proxyUrl}"
+        export ftp_proxy="${vars.proxyUrl}"
+        export rsync_proxy="${vars.proxyUrl}"
+        export no_proxy="${vars.noProxy}"
         export NO_PROXY="$no_proxy"
-      fi
+      '' else "# 此主机未配置代理"}
 
       # --- 系统基础配置继承 ---
       if [ -f /etc/bashrc ]; then . /etc/bashrc;

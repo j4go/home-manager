@@ -1,22 +1,17 @@
-{ pkgs, ... }: {
+{ pkgs, vars, ... }: {
   programs.ssh = {
     enable = true;
-    # 显式禁用默认配置
     enableDefaultConfig = false;
     matchBlocks = {
-      "*" = {
-        addKeysToAgent = "yes";
-        # 你可以在这里添加其他通用配置，如:
-        # identityFile = "~/.ssh/id_ed25519";
-      };
+      "*" = { addKeysToAgent = "yes"; };
 
-      # GitHub 专用配置
       "github.com" = {
         hostname = "github.com";
         user = "git";
-        # 使用 Nix 提供的 netcat-openbsd 绝对路径
-        # 这样无论宿主机是 Rocky 还是 Mint，都能保证 -X 5 参数可用
-        proxyCommand = "${pkgs.netcat-openbsd}/bin/nc -X 5 -x 10.255.126.1:10808 %h %p";
+        # 🚀 动态注入代理 IP
+        proxyCommand = if vars.proxyHost != "" 
+          then "${pkgs.netcat-openbsd}/bin/nc -X 5 -x ${vars.proxyHost} %h %p"
+          else null;
       };
     };
   };
