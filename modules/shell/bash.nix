@@ -44,7 +44,7 @@ in {
         command -v fastfetch >/dev/null && alias neo='fastfetch'
         command -v trash-put >/dev/null && alias rm='trash-put'
 
-        # --- 增强版 Home Manager 更新函数 (构建时注入主机名: ${hostName}) ---
+        # --- 快速部署函数 (Fast Deployment) ---
         hm-save() {
           (
             cd ~/.config/home-manager || return
@@ -53,17 +53,30 @@ in {
             FLAKE_NAME="${hostName}" 
 
             echo -e "🔍 [Target: $FLAKE_NAME] 正在执行预构建检查..."
-            if nix build ".#homeConfigurations.$FLAKE_NAME.activationPackage"; then
-                echo -e "✅ 检查通过！正在应用配置..."
-                [ -L result ] && unlink result
-                if home-manager switch --flake ".#$FLAKE_NAME" -b backup; then
-                    echo -e "🎉 成功！正在提交记录..."
-                    git commit -m "Update from $FLAKE_NAME: $(date '+%Y-%m-%d %H:%M:%S')"
-                fi
+            
+            # 使用 nix run 替代 nix build + home-manager switch，更简洁
+            if home-manager switch --flake ".#$FLAKE_NAME" -b backup; then
+                echo -e "🎉 成功！正在提交记录..."
+                git commit -m "Update from $FLAKE_NAME: $(date '+%Y-%m-%d %H:%M:%S')"
             else
-                echo -e "💥 构建失败，请检查配置！"
+                echo -e "💥 部署失败！"
             fi
-            # nix-collect-garbage --delete-older-than 10d
+          )
+        }
+        
+        # --- 维护函数 ---
+        hm-update() {
+          (
+            cd ~/.config/home-manager || return
+            
+            echo -e "🌐 正在更新 Flake 依赖 (可能需要联网)..."
+            nix flake update
+            
+            echo -e "🧹 正在执行例行磁盘维护 (清理 10 天前的旧版本)..."
+            # 增加 --json 选项，让输出更友好
+            nix-collect-garbage --delete-older-than 10d --json
+            
+            echo -e "✨ 维护完成。"
           )
         }
       '';
