@@ -24,8 +24,7 @@
       };
       modules = [
         ./home.nix
-        # 🚀 注册 Nixvim 的 Home Manager 模块
-        nixvim.homeManagerModules.nixvim
+        nixvim.homeModules.nixvim
         {
           home.username = "w";
           home.homeDirectory = "/home/w";
