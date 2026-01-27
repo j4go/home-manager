@@ -14,7 +14,7 @@
     ];
 
     # 🚀 推荐：使用 Lua 进行现代插件配置
-    extraLuaConfig = ''
+    initLua = ''
       -- 1. 主题配置 (必须在 colorscheme 之前调用)
       require("tokyonight").setup({
         style = "moon",     -- 可选: "storm", "night", "moon", "day"
