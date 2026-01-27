@@ -1,26 +1,31 @@
 # flake.nix
 {
   description = "My Multi-Host Home Manager Configuration";
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }: 
+  outputs = { self, nixpkgs, home-manager, nixvim, ... }@inputs:
   let
-    # 辅助函数：根据主机名生成配置
     mkHome = hostName: system: home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.${system};
-      # 🚀 关键点：将 vars 注入到所有模块中
-      extraSpecialArgs = { 
-        inherit hostName; 
+      extraSpecialArgs = {
+        inherit hostName inputs; # 注入 inputs 方便在模块中引用
         vars = import ./modules/lib/vars.nix { inherit hostName; };
       };
       modules = [
         ./home.nix
+        # 🚀 注册 Nixvim 的 Home Manager 模块
+        nixvim.homeManagerModules.nixvim
         {
           home.username = "w";
           home.homeDirectory = "/home/w";

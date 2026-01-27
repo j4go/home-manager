@@ -1,150 +1,129 @@
 { pkgs, ... }:
 
 {
-  programs.neovim = {
+  programs.nixvim = {
     enable = true;
-    defaultEditor = true;     # 设置 $EDITOR
-    viAlias = true;           # 输入 vi 启动 neovim
-    vimAlias = true;          # 输入 vim 启动 neovim
-    
-    # 📦 插件管理：引入现代主题与基础插件
-    plugins = with pkgs.vimPlugins; [
-      vim-nix                 # Nix 语言高亮
-      nightfox-nvim  # 🎨 包含 carbonfox, nightfox, duskfox 等多种风格
+    defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
+
+    # 1. 🎨 主题配置
+    colorschemes.nightfox = {
+      enable = true;
+      flavor = "carbonfox"; # 你最喜欢的风格
+      settings = {
+        options = {
+          transparent = false;
+          terminal_colors = true;
+          styles = {
+            comments = "italic";
+            keywords = "bold";
+            functions = "NONE";
+            conditionals = "NONE";
+            constants = "NONE";
+          };
+        };
+      };
+    };
+
+    # 2. ⚙️ 基础选项
+    opts = {
+      # 剪切板
+      clipboard = "unnamed,unnamedplus";
+      
+      # 缩进与排版
+      tabstop = 4;
+      softtabstop = 4;
+      shiftwidth = 4;
+      expandtab = true;
+      autoindent = true;
+      list = true;
+      listchars = "tab:▸ ";
+
+      # 搜索
+      hlsearch = true;
+      incsearch = true;
+      ignorecase = true;
+      smartcase = true;
+      wildmenu = true;
+
+      # 界面体验
+      number = true;
+      ruler = true;
+      cursorline = true;
+      wrap = true;
+      linebreak = true;
+      sidescroll = 1;
+      laststatus = 2;
+      history = 10000;
+      backspace = "indent,eol,start";
+      encoding = "utf-8";
+      
+      # 文件持久化
+      undofile = true;
+      swapfile = true;
+      backup = false;
+      autoread = true;
+    };
+
+    # 3. ⌨️ 快捷键与全局变量
+    globals.mapleader = ";";
+
+    keymaps = [
+      {
+        mode = "n";
+        key = "<tab>";
+        action = "<C-w>w";
+        options.desc = "切换分屏";
+      }
+      {
+        mode = "n";
+        key = "<leader>r";
+        action = "<C-r>";
+        options.desc = "重做";
+      }
     ];
 
-    # 🚀 推荐：使用 Lua 进行现代插件配置
-    initLua = ''
-      -- 1. Nightfox 配置
-      require('nightfox').setup({
-        options = {
-          transparent = false,
-          terminal_colors = true,
-          styles = {
-            comments = "italic",
-            keywords = "bold",
-            functions = "NONE",
-            conditionals = "NONE",
-            constants = "NONE",
-          },
-        },
-      })
+    # 4. 📦 插件
+    plugins = {
+      nix.enable = true; 
+    };
 
-      -- 2. 应用主题 (carbonfox 是最接近 Tomorrow Night Bright 的版本)
-      vim.cmd.colorscheme "carbonfox"
-    '';
-
-    # ⚙️ 核心配置
-    extraConfig = ''
+    # 5. 🛠️ 复杂逻辑保留：对于目录创建、Markdown 优化等特定函数
+    extraConfigVim = ''
       " ==========================================
-      " 基础核心 (Neovim 默认已开启 nocompatible 等多项设置)
+      " 文件安全与持久化 (目录自动创建逻辑)
       " ==========================================
-      syntax on
-      filetype plugin indent on
-
-      " ==========================================
-      " 性能与剪切板 (极致性能模式)
-      " ==========================================
-      " unnamed:     使用 * 寄存器 (鼠标中键)
-      " unnamedplus: 使用 + 寄存器 (系统剪切板 Ctrl+C/V)
-      " 开启后，y 就会自动复制到系统，p 就会自动从系统粘贴
-      set clipboard^=unnamed,unnamedplus      
-
-      " ==========================================
-      " 快捷键映射
-      " ==========================================
-      let mapleader=";"
-      set timeoutlen=500
-
-      " 分屏切换
-      nnoremap <tab> <C-w>w
-
-      " 重做
-      nnoremap <Leader>r <C-r>
-
-      " ==========================================
-      " 排版与缩进
-      " ==========================================
-      set tabstop=4
-      set softtabstop=4
-      set shiftwidth=4
-      set expandtab
-      set autoindent
-      set list listchars=tab:▸\ 
-
-      " ==========================================
-      " 文件安全与持久化 (遵循 XDG 标准)
-      " ==========================================
-      " 🚀 优化：Neovim 推荐将数据放在 ~/.local/state/nvim (或 stdpath('state'))
-      
-      set undofile
-      " 自动创建 undo 目录
       let target_undodir = stdpath('state') . '/undo'
       if !isdirectory(target_undodir)
           call mkdir(target_undodir, 'p', 0700)
       endif
       let &undodir = target_undodir
 
-      set swapfile
-      " 自动创建 swap 目录
       let target_swapdir = stdpath('state') . '/swap'
       if !isdirectory(target_swapdir)
           call mkdir(target_swapdir, 'p', 0700)
       endif
-      " // 结尾表示使用绝对路径生成文件名
       let &directory = target_swapdir . '//'
 
-      set nobackup
-      set autoread
       autocmd FocusGained,BufEnter * checktime
 
       " ==========================================
-      " 搜索与补全
-      " ==========================================
-      set wildmenu
-      set path+=**
-      set encoding=utf-8
-      set fileencodings=utf-8,gb18030,latin1,gbk
-      
-      " 高亮搜索结果，并在输入时实时跳转
-      set hlsearch
-      set incsearch
-
-      " ==========================================
-      " Markdown 专项优化 (保留原逻辑)
+      " Markdown 专项优化 
       " ==========================================
       let g:markdown_disable_html = 1
       let g:markdown_exclude_embed = 1
       let g:markdown_disable_flow = 1
-      
+
       augroup MarkdownErrorKiller
           autocmd!
           autocmd FileType markdown call MarkdownErrorClear()
       augroup END
-      
+
       function! MarkdownErrorClear()
           highlight link markdownError Normal
           highlight markdownError term=NONE cterm=NONE ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE gui=NONE
       endfunction
-
-      " ==========================================
-      " 界面与体验
-      " ==========================================
-      set sidescroll=1
-      set laststatus=2
-      set backspace=indent,eol,start
-      set history=10000
-      set number
-      set ruler
-      set cursorline
-      set noerrorbells
-
-      " ==========================================
-      " 换行行为
-      " ==========================================
-      set wrap
-      set linebreak
-      set textwidth=0
     '';
   };
 }
