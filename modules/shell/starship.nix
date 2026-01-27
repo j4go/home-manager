@@ -6,19 +6,15 @@ let
     add_newline = false;
     command_timeout = 1000;
 
-    # 格式：包含 Nix Shell 状态，并以 $ 符号结尾
-    # 提示符的颜色将在 character 模块的 format 中定义
+    # 格式：通过 format 统一控制所有模块的样式和顺序
+    # 提示符的样式将由 Starship 默认的 success_symbol/error_symbol 样式控制
     format = "$all$nix_shell$git_branch$git_status$directory$character";
 
-    # 提示符：回归最纯粹的符号定义，并使用 format 属性来控制颜色
+    # 提示符：最稳定、最基础的定义，只保留符号
     character = {
-      # 仅保留符号本身，移除所有格式化和空格
-      success_symbol = "➜"; # 使用一个干净的符号
-      error_symbol = "✖"; # 使用一个干净的符号
-      
-      # 使用 format 属性来控制颜色
-      format = "[$symbol](bold green) "; # 成功时绿色，注意最后的空格
-      error_format = "[$symbol](bold red) "; # 失败时红色
+      success_symbol = "➜"; 
+      error_symbol = "✖"; 
+      # 移除所有 format, error_format, style 属性，避免一切警告
     };
 
     # 目录
@@ -30,7 +26,7 @@ let
 
     # Git 分支
     git_branch = {
-      symbol = " "; # 使用 Nerdfont 符号
+      symbol = " "; 
       style = "bold purple";
       format = "[$symbol$branch]($style) ";
     };
@@ -42,7 +38,7 @@ let
       up_to_date = "[✓](bold green)";
     };
     
-    # Nix Shell 模块 (非常实用)
+    # Nix Shell 模块
     nix_shell = {
       symbol = "❄️ ";
       style = "bold blue";
