@@ -7,37 +7,33 @@ let
     add_newline = false;
     line_break.disabled = true;
 
-    # 格式：只显示当前目录、Git 状态和提示符
+    # 格式：通过 format 统一控制所有模块的样式和顺序
     format = "$directory$git_branch$git_status$character";
 
-    # 提示符：修复了空格错误，并使用 format 属性来确保简洁
+    # 提示符：回归最简定义，移除所有样式和 format 属性
     character = {
-      # 修复了 format 语法，使用 $symbol 变量
-      format = "[$symbol]($style) "; 
-      success_symbol = "$"; # 仅保留符号本身
-      error_symbol = "X";   # 仅保留符号本身
-      style = "bold white";
-      # 移除 vicmd_symbol 的格式化，使用默认的
+      # 仅定义符号本身
+      success_symbol = "$"; 
+      error_symbol = "X";
+      # 移除所有 style, format 属性，避免警告
     };
-
-    # 目录：只显示目录名
+    
+    # 目录：通过 format 属性来控制路径的显示样式，同时移除 style 属性
     directory = {
-      style = "bold white";
+      style = "bold white"; # 样式保留在模块内，但 Starship 默认会应用
       truncate_to_repo = false;
       truncation_length = 2;
-      format = "[$path]($style) ";
+      format = "[$path]($style) "; # 路径用方括号包裹，并以空格结束
     };
 
-    # Git 分支：移除 length=0 警告
+    # Git 分支
     git_branch = {
       symbol = " on ";
       style = "bold white";
-      # 移除 only_detached，避免警告
       format = "[$symbol$branch]($style)";
-      # 移除 truncation_length = 0，避免警告
     };
 
-    # Git 状态：用简单的符号表示状态
+    # Git 状态
     git_status = {
       style = "bold red";
       conflicted = "!"; ahead = "↑"; behind = "↓"; diverged = "↕";
