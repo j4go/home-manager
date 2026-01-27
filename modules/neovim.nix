@@ -17,7 +17,7 @@
     initLua = ''
       -- 1. 主题配置 (必须在 colorscheme 之前调用)
       require("tokyonight").setup({
-        style = "day",     -- 可选: "storm", "night", "moon", "day"
+        style = "moon",     -- 可选: "storm", "night", "moon", "day"
         transparent = false, -- 是否透明背景
         terminal_colors = true,
         styles = {
