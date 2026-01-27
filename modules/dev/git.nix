@@ -9,7 +9,7 @@ in {
       enable = true;
       
       # 使用 extraConfig (对应你代码中的 settings) 来实现完全的声明式配置
-      extraConfig = {
+      settings = {
         user = {
           name = "j4go";
           email = "yianny@163.com";
