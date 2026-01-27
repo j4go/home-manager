@@ -46,24 +46,31 @@ in {
 
         # --- 快速部署函数 (Fast Deployment) ---
         hm-save() {
-          (
-            cd ~/.config/home-manager || return
-            git add .
-            
-            FLAKE_NAME="${hostName}" 
-
-            echo -e "🔍 [Target: $FLAKE_NAME] 正在执行预构建检查..."
-            
-            # 使用 nix run 替代 nix build + home-manager switch，更简洁
-            if home-manager switch --flake ".#$FLAKE_NAME" -b backup; then
-                echo -e "🎉 成功！正在提交记录..."
-                git commit -m "Update from $FLAKE_NAME: $(date '+%Y-%m-%d %H:%M:%S')"
-            else
-                echo -e "💥 部署失败！"
-            fi
-          )
-        }
-        
+        (
+          cd ~/.config/home-manager || return
+          # 1. 先 git add . 准备好暂存区
+          git add .
+          FLAKE_NAME="${hostName}" 
+          echo -e "🔍 [Target: $FLAKE_NAME] 正在执行预构建检查..."
+          # 2. 执行 home-manager switch
+          # 如果 switch 失败，整个函数将返回非零状态，Starship 显示 ✖
+          if home-manager switch --flake ".#$FLAKE_NAME" -b backup; then
+              echo -e "🎉 配置应用成功！"
+              # 3. 核心修复：检查是否有暂存的文件，避免提交空 commit
+              # git diff --cached --quiet: 检查暂存区是否有差异 (即是否有内容要提交)
+              if ! git diff --cached --quiet; then
+                  echo -e "💾 正在提交 Git 记录..."
+                  # 提交成功，返回值 0
+                  git commit -m "Update from $FLAKE_NAME: $(date '+%Y-%m-%d %H:%M:%S')"
+              else
+                  echo -e "ℹ️ 工作区干净，无内容可提交。"
+                  # 即使没有提交，函数也应返回成功状态 (0)
+              fi
+          else
+              echo -e "💥 部署失败！"
+              return 1 # 确保在 switch 失败时，返回失败状态
+          fi
+        )}
         # --- 维护函数 ---
         hm-update() {
           (
