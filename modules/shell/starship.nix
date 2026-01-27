@@ -20,7 +20,7 @@ let
       ssh_only = true;       # ✅ 关键：只有 SSH 时才显示
       format = "[$ssh_symbol$hostname]($style) ";
       style = "bold #ffaf00"; # 🎃 亮橙色，高辨识度
-      ssh_symbol = "☁️  ";    # ☁️ 云端图标
+      ssh_symbol = " ";    # ☁️ 云端图标
       disabled = false;    
     };
 
