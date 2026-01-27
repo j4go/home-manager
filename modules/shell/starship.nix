@@ -3,44 +3,51 @@ let
   cfg = config.myOptions.shell.starship;
   settings = { 
     # 基础设置
-    add_newline = false; # 不插入空行
-    command_timeout = 2000;
+    add_newline = false;
+    command_timeout = 1000;
 
-    # 格式：只显示目录、Git 状态和提示符
-    format = "$directory$git_branch$git_status$character";
+    # 格式：包含 Nix Shell 状态，并以 $ 符号结尾
+    format = "$all$nix_shell$git_branch$git_status$directory$character";
 
-    # 提示符：使用经典的箭头
+    # 提示符
     character = {
-      success_symbol = "[➜](bold green)";
-      error_symbol = "[✖](bold red)";
+      success_symbol = "[ $ ](bold green)";
+      error_symbol = "[ ✗ ](bold red)";
     };
 
-    # 目录：简洁的绿色路径
+    # 目录
     directory = {
       style = "bold cyan";
-      truncate_to_repo = false;
+      truncation_length = 2;
       format = "[$path]($style) ";
     };
 
-    # Git 分支：简洁的绿色
+    # Git 分支
     git_branch = {
-      style = "bold green";
-      format = " on [$symbol$branch]($style) ";
+      symbol = " "; # 使用 Nerdfont 符号
+      style = "bold purple";
+      format = "[$symbol$branch]($style) ";
     };
 
-    # Git 状态：只在有改动时显示简洁的符号
+    # Git 状态
     git_status = {
+      format = "[$all]($style) ";
       style = "bold red";
-      conflicted = "!"; ahead = "↑"; behind = "↓";
-      diverged = "↕"; untracked = "?"; stashed = "$";
-      modified = "M"; staged = "+"; renamed = "R"; deleted = "D";
-      format = "([$all]($style)) ";
+      up_to_date = "[✓](bold green)";
+    };
+    
+    # Nix Shell 模块 (非常实用)
+    nix_shell = {
+      symbol = "❄️ ";
+      style = "bold blue";
+      format = "[$symbol(nix-shell)]($style) ";
     };
 
-    # 禁用所有语言模块和不必要的上下文
+    # 禁用其他模块
     package.disabled = true;
     time.disabled = true;
     username.disabled = true;
+    hostname.disabled = true;
   };
 in {
   config = lib.mkIf cfg.enable {
