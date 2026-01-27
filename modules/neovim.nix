@@ -18,13 +18,14 @@
       -- 1. Nightfox 配置
       require('nightfox').setup({
         options = {
-          -- 样式微调，确保高对比度
-          transparent = false,     -- 如果需要背景透明，设为 true
-          terminal_colors = true, 
+          transparent = false,
+          terminal_colors = true,
           styles = {
-            comments = "italic",   -- 注释使用斜体，保持 Tomorrow 风格的优雅
-            keywords = "bold",     -- 关键字加粗
-            functions = "none",
+            comments = "italic",
+            keywords = "bold",
+            functions = "NONE",
+            conditionals = "NONE",
+            constants = "NONE",
           },
         },
       })
