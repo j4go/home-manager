@@ -4,8 +4,8 @@
     enableCompletion = true;
 
     historyControl = [ "ignoreboth" ];
-    historyFileSize = 20000;
-    historySize = 10000;
+    historyFileSize = 200000;
+    historySize = 100000;
     
     shellOptions = [
       "histappend"
@@ -97,3 +97,4 @@
     '';
   };
 }
+

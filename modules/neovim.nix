@@ -38,8 +38,8 @@
         set termguicolors
       endif
       
-      " 设置主题风格：storm, night(推荐), moon, day
-      let g:tokyonight_style = "night"
+      " 设置主题风格：storm, night, moon, day
+      let g:tokyonight_style = "day"
       let g:tokyonight_italic_functions = 1
       
       try
