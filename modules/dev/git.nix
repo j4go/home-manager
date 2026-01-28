@@ -1,33 +1,46 @@
 { config, lib, ... }:
 
 let
-  cfg = config.myOptions.dev.git;
   proxy = config.myOptions.proxy;
 in {
-  config = lib.mkIf cfg.enable {
-    programs.git = {
-      enable = true;
+  programs.git = {
+    enable = true;
+    
+    # ✅ 统一使用 settings (对应 .gitconfig 结构)
+    settings = {
+      # 1. 用户身份
+      user = {
+        name = "j4go";
+        email = "yianny@163.com";
+        # 顺便还能加个签名 key
+        # signingkey = "ssh-ed25519 ..."; 
+      };
       
-      # 使用 extraConfig (对应你代码中的 settings) 来实现完全的声明式配置
-      settings = {
-        user = {
-          name = "j4go";
-          email = "yianny@163.com";
-        };
-        
-        push = {
-          autoSetupRemote = true;
-        };
+      # 2. 核心行为
+      init = {
+        defaultBranch = "main";
+      };
 
-        # 🚀 动态代理注入逻辑
-        # 仅当全局 proxy.enable 为 true 时，以下属性才会被写入 .gitconfig
-        http = lib.mkIf proxy.enable {
-          proxy = "http://${proxy.address}";
-        };
-        
-        https = lib.mkIf proxy.enable {
-          proxy = "http://${proxy.address}";
-        };
+      push = {
+        autoSetupRemote = true;
+      };
+      
+      pull = {
+        rebase = true; # 推荐：pull 时默认使用 rebase 保持历史干净
+      };
+
+      # 3. 动态代理 (逻辑保持不变，这在 settings 里工作得很好)
+      http = lib.mkIf proxy.enable {
+        proxy = "http://${proxy.address}";
+      };
+      
+      https = lib.mkIf proxy.enable {
+        proxy = "http://${proxy.address}";
+      };
+      
+      # 4. 安全目录 (解决多用户/sudo 时的 git 报错)
+      safe = {
+        directory = "*";
       };
     };
   };
