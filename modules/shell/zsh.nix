@@ -5,7 +5,7 @@ let
   unstablePkgs = inputs.nixpkgs-unstable.legacyPackages.${system};
 in {
   config = lib.mkIf cfg.enable {
-
+    
     programs.zsh = {
       enable = true;
       syntaxHighlighting.enable = true;
@@ -49,61 +49,64 @@ in {
         { name = "powerlevel10k-config"; src = lib.cleanSource ./.; file = ".p10k.zsh"; }
       ];
 
-      initExtraFirst = ''
-        if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
-          source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
-        fi
-      '';
-
-      initExtra = ''
-        zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 
-        zstyle ':completion:*' menu select
-
-        # 🌐 自动代理注入
-        ${if proxy.enable then ''
-          export http_proxy="http://${proxy.address}"
-          export https_proxy="http://${proxy.address}"
-          export all_proxy="http://${proxy.address}"
-          export no_proxy="localhost,127.0.0.1,192.168.0.0/16,10.0.0.0/8,*.local,*.internal"
-        '' else "# Proxy disabled"}
-
-        # 🐍 Mamba/Conda 延迟加载
-        mamba_setup() {
-            local mamba_path="''${HOME}/.nix-profile/etc/profile.d"
-            if [[ -f "$mamba_path/conda.sh" ]]; then
-                source "$mamba_path/conda.sh"
-                source "$mamba_path/mamba.sh"
-            fi
-            unalias mamba conda 2>/dev/null
-            unfunction mamba_setup
-        }
-        alias mamba='mamba_setup; mamba'
-        alias conda='mamba_setup; conda'
-
-        function edit() {
-            for file in "$@"; do
-                [[ ! -e "$file" ]] && touch "$file" && echo "📄 Created: $file"
-            done
-            $EDITOR "$@"
-        }
-
-        function hm-save() {
-          cd ~/.config/home-manager || return
-          git add .
-          FLAKE_NAME="${hostName}"
-          if home-manager switch --flake ".#$FLAKE_NAME" -b backup; then
-              echo "🎉 Switch Successful!"
-              [[ $(git diff --cached) ]] && git commit -m "Update from $FLAKE_NAME: $(date '+%Y-%m-%d %H:%M:%S')" || echo "ℹ️ No changes."
-          else
-              return 1
+      initContent = lib.mkMerge [
+        # 1. 对应原 initExtraFirst：使用 mkBefore 确保 P10k 极速启动逻辑置于顶端
+        (lib.mkBefore ''
+          if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
+            source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
           fi
-        }
+        '')
 
-        function hm-fix() {
-          cd ~/.config/home-manager || return
-          nix flake update && nix-collect-garbage --delete-older-than 10d
-        }
-      '';
+        # 2. 对应原 initExtra：常规初始化逻辑
+        ''
+          zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 
+          zstyle ':completion:*' menu select
+
+          # 🌐 自动代理注入
+          ${if proxy.enable then ''
+            export http_proxy="http://${proxy.address}"
+            export https_proxy="http://${proxy.address}"
+            export all_proxy="http://${proxy.address}"
+            export no_proxy="localhost,127.0.0.1,192.168.0.0/16,10.0.0.0/8,*.local,*.internal"
+          '' else "# Proxy disabled"}
+
+          # 🐍 Mamba/Conda 延迟加载
+          mamba_setup() {
+              local mamba_path="''${HOME}/.nix-profile/etc/profile.d"
+              if [[ -f "$mamba_path/conda.sh" ]]; then
+                  source "$mamba_path/conda.sh"
+                  source "$mamba_path/mamba.sh"
+              fi
+              unalias mamba conda 2>/dev/null
+              unfunction mamba_setup
+          }
+          alias mamba='mamba_setup; mamba'
+          alias conda='mamba_setup; conda'
+
+          # 🚀 实用函数
+          function edit() {
+              for file in "$@"; do [[ ! -e "$file" ]] && touch "$file" && echo "📄 Created: $file"; done
+              $EDITOR "$@"
+          }
+
+          function hm-save() {
+            cd ~/.config/home-manager || return
+            git add .
+            FLAKE_NAME="${hostName}"
+            if home-manager switch --flake ".#$FLAKE_NAME" -b backup; then
+                echo "🎉 Switch Successful!"
+                [[ $(git diff --cached) ]] && git commit -m "Update from $FLAKE_NAME: $(date '+%Y-%m-%d %H:%M:%S')" || echo "ℹ️ No changes."
+            else
+                return 1
+            fi
+          }
+
+          function hm-fix() {
+            cd ~/.config/home-manager || return
+            nix flake update && nix-collect-garbage --delete-older-than 10d
+          }
+        ''
+      ];
     };
   };
 }

@@ -1,5 +1,7 @@
 # =============================================================================
-# Starship-Clone Style Powerlevel10k Config (Tomorrow Night Optimized)
+# 🚀 Powerlevel10k - Starship Clone Edition
+# -----------------------------------------------------------------------------
+# 目标：完全对标 Starship 配置文件，实现“无缝切换”体验
 # =============================================================================
 
 () {
@@ -7,97 +9,97 @@
   unset -m '(POWERLEVEL9K_*|DEFAULT_USER)~POWERLEVEL9K_GITSTATUS_DIR'
 
   # -------------------------------------------------------------------------
-  # 1. 核心布局 (完全模拟您的 Starship 顺序)
+  # 1. 核心布局 (完全对标 Starship format)
   # -------------------------------------------------------------------------
   typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
-    context                 # 用户名 @ 主机名
-    dir                     # 目录 (无图标)
-    vcs                     # Git
+    context                 # 用户名 @ 主机名 (仅 SSH)
+    dir                     # 目录
+    vcs                     # Git 分支与状态
     nix_shell               # Nix Shell
-    command_execution_time  # 耗时
+    command_execution_time  # 执行耗时
     prompt_char             # ➜ 提示符
   )
-  typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=()
+  typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=() # 保持右侧清空
 
   # -------------------------------------------------------------------------
-  # 2. 全局样式 (彻底扁平化)
+  # 2. 全局扁平化样式 (No Background, No Separators)
   # -------------------------------------------------------------------------
   typeset -g POWERLEVEL9K_MODE=nerdfont-v3
-  typeset -g POWERLEVEL9K_BACKGROUND=               # 无背景
-  typeset -g POWERLEVEL9K_LEFT_SEGMENT_SEPARATOR='' # 禁用色块连接符
+  typeset -g POWERLEVEL9K_BACKGROUND=
+  typeset -g POWERLEVEL9K_LEFT_SEGMENT_SEPARATOR=''
   typeset -g POWERLEVEL9K_RIGHT_SEGMENT_SEPARATOR=''
   typeset -g POWERLEVEL9K_LEFT_PROMPT_LAST_SEGMENT_END_SYMBOL=''
   typeset -g POWERLEVEL9K_LEFT_PROMPT_FIRST_SEGMENT_START_SYMBOL=''
-
-  # 紧凑型间距
+  
+  # 间距微调
   typeset -g POWERLEVEL9K_LEFT_SUBSEGMENT_SEPARATOR=' '
   typeset -g POWERLEVEL9K_LEFT_LEFT_WHITESPACE=''
   typeset -g POWERLEVEL9K_LEFT_RIGHT_WHITESPACE=' '
 
   # -------------------------------------------------------------------------
-  # 3. 模块级精修 (核心修正点)
+  # 3. 模块级精修
   # -------------------------------------------------------------------------
 
-  # [Context] - 用户名 @ 主机名 (模拟 w @ fedora)
-  # 颜色对应 Starship: bold #ffaf00 (ANSI yellow)
-  typeset -g POWERLEVEL9K_CONTEXT_DEFAULT_FOREGROUND='yellow'
-  typeset -g POWERLEVEL9K_CONTEXT_REMOTE_FOREGROUND='yellow'
-  typeset -g POWERLEVEL9K_CONTEXT_ROOT_FOREGROUND='yellow'
-  # 移除默认的 icon 和显示逻辑限制，使其始终显示
-  typeset -g POWERLEVEL9K_CONTEXT_VISUAL_IDENTIFIER_EXPANSION=''
-  typeset -g POWERLEVEL9K_CONTEXT_PREFIX=''
-  # 模板修改为 %n @ %m (n=user, m=host)
+  # [Context] - 模拟 Starship 的 username + hostname (ssh_only)
+  # 逻辑：非 SSH 且非 Root 时隐藏
+  typeset -g POWERLEVEL9K_CONTEXT_DEFAULT_CONTENT_EXPANSION='' 
+  # SSH 或 Root 时的样式 (Starship: bold #ffaf00)
+  typeset -g POWERLEVEL9K_CONTEXT_REMOTE_FOREGROUND='214' # 亮橙色
+  typeset -g POWERLEVEL9K_CONTEXT_ROOT_FOREGROUND='214'
+  typeset -g POWERLEVEL9K_CONTEXT_REMOTE_SUDO_FOREGROUND='214'
+  # 格式：user @ host
   typeset -g POWERLEVEL9K_CONTEXT_TEMPLATE='%n @ %m'
-  # 确保在本地也显示 (模拟您的截图)
-  unset POWERLEVEL9K_CONTEXT_{DEFAULT,SUDO}_{CONTENT,VISUAL_IDENTIFIER}_EXPANSION
+  typeset -g POWERLEVEL9K_CONTEXT_VISUAL_IDENTIFIER_EXPANSION='' # 禁用图标
 
-  # [Directory] - 目录 (修正 .../ 和图标问题)
-  typeset -g POWERLEVEL9K_DIR_FOREGROUND='cyan'
-  typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND='cyan'
-  typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND='cyan'
+  # [Directory] - 目录 (Starship: bold cyan, truncation_length = 2)
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND='14' # Cyan
+  typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND='14'
+  typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND='14'
   typeset -g POWERLEVEL9K_DIR_ANCHOR_BOLD=true
-  # 关键：彻底移除文件夹图标
-  typeset -g POWERLEVEL9K_DIR_VISUAL_IDENTIFIER_EXPANSION=''
-  # 关键：实现 Starship 的 truncation_length = 2 (不显示 .../)
-  typeset -g POWERLEVEL9K_DIR_MAX_LENGTH=0
+  typeset -g POWERLEVEL9K_DIR_VISUAL_IDENTIFIER_EXPANSION='' # 禁用文件夹图标
+  # 缩写策略：保留最后 2 级目录
   typeset -g POWERLEVEL9K_DIR_SHORTEN_STRATEGY=truncate_to_last
   typeset -g POWERLEVEL9K_DIR_SHORTEN_DIR_LENGTH=2
-  typeset -g POWERLEVEL9K_DIR_SHORTEN_DELIMITER='' # 移除省略号前缀
-  # 移除锁图标 (针对只读目录)
-  typeset -g POWERLEVEL9K_DIR_SHOW_WRITABLE=false
-
-  # [VCS] - Git 分支 (Purple)
+  typeset -g POWERLEVEL9K_DIR_MIN_COMMAND_COLUMNS=40
+  
+  # [VCS] - Git (Starship: bold purple)
   typeset -g POWERLEVEL9K_VCS_BRANCH_ICON=' '
-  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND='magenta'
-  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND='magenta'
-  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND='magenta'
-  typeset -g POWERLEVEL9K_VCS_VISUAL_IDENTIFIER_EXPANSION='' # 移除额外的 Git 图标，仅保留 branch_icon
-  typeset -g POWERLEVEL9K_VCS_DISABLE_GITSTATUS_FORMATTING=false
-  typeset -g POWERLEVEL9K_VCS_CONTENT_EXPANSION='(${P9K_CONTENT})'
+  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND='13'    # Purple/Magenta
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND='13'
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND='13'
+  typeset -g POWERLEVEL9K_VCS_VISUAL_IDENTIFIER_EXPANSION='' # 仅保留 branch_icon
+  
+  # Git 状态符号对标 Starship
+  typeset -g POWERLEVEL9K_VCS_CLEAN_PPT_BEFORE_ICON=' '
+  typeset -g POWERLEVEL9K_VCS_CLEAN_CONTENT_EXPANSION='${P9K_CONTENT} %F{green}✓%f'
+  # 当有改动时显示红色 (Starship 逻辑)
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_PPT_BEFORE_ICON=' '
 
-  # [Character] - ➜ (强制绿色)
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_BACKGROUND=
+  # [Character] - ➜ (对标 Starship character 模块)
   typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_VIINS_FOREGROUND='green'
   typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_VIINS_FOREGROUND='red'
   typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_VIINS_CONTENT_EXPANSION='➜'
   typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_VIINS_CONTENT_EXPANSION='✖'
-  # 移除可能存在的缩进
   typeset -g POWERLEVEL9K_PROMPT_CHAR_LEFT_LEFT_WHITESPACE=''
 
-  # [Nix Shell] - (❄️ nix-shell)
-  typeset -g POWERLEVEL9K_NIX_SHELL_FOREGROUND='blue'
+  # [Nix Shell] - ❄️ (nix-shell) (Starship: bold blue)
+  typeset -g POWERLEVEL9K_NIX_SHELL_FOREGROUND='12' # Blue
   typeset -g POWERLEVEL9K_NIX_SHELL_VISUAL_IDENTIFIER_EXPANSION='❄️ '
   typeset -g POWERLEVEL9K_NIX_SHELL_CONTENT_EXPANSION='(nix-shell)'
 
-  # [Command Duration] - took 10s
-  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=3
-  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=248
+  # [Command Duration] - took 10s (Starship: dim white)
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=2
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND='246' # Dim grey
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FORMAT='d h m s'
   typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_PREFIX='took '
 
   # -------------------------------------------------------------------------
   # 4. 环境控制
   # -------------------------------------------------------------------------
-  typeset -g POWERLEVEL9K_PROMPT_ADD_NEWLINE=false # 强制单行显示，不换行
+  typeset -g POWERLEVEL9K_PROMPT_ADD_NEWLINE=false
   typeset -g POWERLEVEL9K_TRANSIENT_PROMPT=always
   typeset -g POWERLEVEL9K_INSTANT_PROMPT=verbose
+  
+  # 禁用所有默认图标，只保留我们显式定义的
+  typeset -g POWERLEVEL9K_VISUAL_IDENTIFIER_EXPANSION=''
 }
