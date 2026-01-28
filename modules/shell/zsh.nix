@@ -1,37 +1,10 @@
-{ config, lib, pkgs, inputs, system, ... }:
-
+{ config, lib, pkgs, inputs, system, hostName, ... }:
 let
   cfg = config.myOptions.shell.zsh;
   proxy = config.myOptions.proxy;
   unstablePkgs = inputs.nixpkgs-unstable.legacyPackages.${system};
 in {
   config = lib.mkIf cfg.enable {
-    
-    programs = {
-      eza = {
-        enable = true;
-        package = unstablePkgs.eza;
-        enableZshIntegration = true;
-        icons = "auto";
-        git = true;
-      };
-
-      zoxide = {
-        enable = true;
-        enableZshIntegration = true;
-      };
-
-      fzf = {
-        enable = true;
-        enableZshIntegration = true;
-      };
-
-      # ✅ 修正点：移除 thefuck，改用业界推荐的 pay-respects
-      pay-respects = {
-        enable = true;
-        enableZshIntegration = true;
-      };
-    };
 
     programs.zsh = {
       enable = true;
@@ -56,6 +29,8 @@ in {
       };
 
       shellAliases = {
+        "7z" = "7zz";
+        grep = "grep --color=auto";
         l = "eza -lh --icons=auto";
         ll = "eza -lha --icons=auto --sort=name --group-directories-first";
         la = "eza -a --icons=auto";
@@ -64,27 +39,14 @@ in {
         so = "source ~/.zshrc";
         gitup = "git add . && git commit -m \"update: $(date +%Y-%m-%d)\" && git push";
         rm = "trash-put";
-        
-        # 代理控制
+        f = "fuck";
         setproxy = "export all_proxy=http://${proxy.address} http_proxy=http://${proxy.address} https_proxy=http://${proxy.address}";
         unproxy = "unset all_proxy http_proxy https_proxy";
-
-        # ✅ 修正点：将 f 别名指向 pay-respects
-        # pay-respects 默认命令是 'fuck'，我们将其映射为 'f'
-        f = "fuck";
       };
 
       plugins = [
-        {
-          name = "powerlevel10k";
-          src = pkgs.zsh-powerlevel10k;
-          file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
-        }
-        {
-          name = "powerlevel10k-config";
-          src = lib.cleanSource ./.;
-          file = ".p10k.zsh";
-        }
+        { name = "powerlevel10k"; src = pkgs.zsh-powerlevel10k; file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme"; }
+        { name = "powerlevel10k-config"; src = lib.cleanSource ./.; file = ".p10k.zsh"; }
       ];
 
       initExtraFirst = ''
@@ -97,12 +59,13 @@ in {
         zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 
         zstyle ':completion:*' menu select
 
-        # 🤫 静态标题锁定
-        case $TERM in
-          xterm*|rxvt*)
-            print -Pn "\e]0;Terminal\a"
-            ;;
-        esac
+        # 🌐 自动代理注入
+        ${if proxy.enable then ''
+          export http_proxy="http://${proxy.address}"
+          export https_proxy="http://${proxy.address}"
+          export all_proxy="http://${proxy.address}"
+          export no_proxy="localhost,127.0.0.1,192.168.0.0/16,10.0.0.0/8,*.local,*.internal"
+        '' else "# Proxy disabled"}
 
         # 🐍 Mamba/Conda 延迟加载
         mamba_setup() {
@@ -117,12 +80,28 @@ in {
         alias mamba='mamba_setup; mamba'
         alias conda='mamba_setup; conda'
 
-        # 🚀 实用函数
         function edit() {
             for file in "$@"; do
                 [[ ! -e "$file" ]] && touch "$file" && echo "📄 Created: $file"
             done
             $EDITOR "$@"
+        }
+
+        function hm-save() {
+          cd ~/.config/home-manager || return
+          git add .
+          FLAKE_NAME="${hostName}"
+          if home-manager switch --flake ".#$FLAKE_NAME" -b backup; then
+              echo "🎉 Switch Successful!"
+              [[ $(git diff --cached) ]] && git commit -m "Update from $FLAKE_NAME: $(date '+%Y-%m-%d %H:%M:%S')" || echo "ℹ️ No changes."
+          else
+              return 1
+          fi
+        }
+
+        function hm-fix() {
+          cd ~/.config/home-manager || return
+          nix flake update && nix-collect-garbage --delete-older-than 10d
         }
       '';
     };
