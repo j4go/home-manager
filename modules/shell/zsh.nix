@@ -6,6 +6,14 @@ let
 in {
   config = lib.mkIf cfg.enable {
     
+    programs.fzf = {
+      enable = true;
+      enableZshIntegration = true;
+      defaultOptions = [
+        "--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+      ];
+    };
+
     programs.zsh = {
       enable = true;
       syntaxHighlighting.enable = true;
@@ -25,9 +33,19 @@ in {
         LANG = "en_US.UTF-8";
         LC_ALL = "en_US.UTF-8";
         PYTHONPYCACHEPREFIX = "/tmp/python-cache";
+
+        # 让 Zsh 下的 man 手册也支持 bat 高亮
+        MANPAGER = "sh -c 'col -bx | bat -l man -p'";
+        MANROFFOPT = "-c";
       };
 
       shellAliases = {
+        # Bat 现代化替代方案
+        cat   = "bat";
+        man   = "batman";      
+        bgrep = "batgrep";    
+        bdiff = "batdiff";   
+
         "7z" = "7zz";
         grep = "grep --color=auto";
         l = "eza -lh --icons=auto";
@@ -45,10 +63,10 @@ in {
 
       initContent = lib.mkMerge [
         ''
+          # Zsh 补全样式优化
           zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 
           zstyle ':completion:*' menu select
 
-          # 代理配置
           ${if proxy.enable then ''
             export http_proxy="http://${proxy.address}"
             export https_proxy="http://${proxy.address}"
@@ -69,11 +87,13 @@ in {
           alias mamba='mamba_setup; mamba'
           alias conda='mamba_setup; conda'
 
+          # 快速编辑/创建文件
           edit() {
               for file in "$@"; do [[ ! -e "$file" ]] && touch "$file" && echo "📄 Created: $file"; done
               $EDITOR "$@"
           }
 
+          # Home Manager 运维函数
           hm-save() {
             cd ~/.config/home-manager || return
             git add .

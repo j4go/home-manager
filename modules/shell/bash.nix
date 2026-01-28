@@ -19,6 +19,9 @@ in {
       fzf = {
         enable = true;
         enableBashIntegration = true;
+        defaultOptions = [
+          "--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+        ];
       };
 
       pay-respects = {
@@ -44,9 +47,19 @@ in {
         LANG = "en_US.UTF-8";
         LC_ALL = "en_US.UTF-8";
         PYTHONPYCACHEPREFIX = "/tmp/python-cache";
+        
+        # 让系统默认的 man 手册使用 bat 进行渲染
+        MANPAGER = "sh -c 'col -bx | bat -l man -p'";
+        MANROFFOPT = "-c";
       };
 
       shellAliases = {
+        # Bat 现代化替代方案
+        cat   = "bat";
+        man   = "batman";      # 需要 bat-extras.batman
+        bgrep = "batgrep";     # 需要 bat-extras.batgrep
+        bdiff = "batdiff";     # 需要 bat-extras.batdiff
+
         "7z" = "7zz";
         l = "eza -lh --icons=auto"; 
         ll = "eza -lha --icons=auto --sort=name --group-directories-first";
@@ -55,7 +68,6 @@ in {
         grep = "grep --color=auto";
         gitup = "git add . && git commit -m 'update: $(date +%Y-%m-%d)' && git push";
         rm = "trash-put";
-        # ✅ 补全别名
         h = "history";
         so = "source ~/.bashrc";
         f = "fuck";
@@ -64,11 +76,9 @@ in {
       };
 
       initExtra = ''
-        # 🤫 静态标题锁定 + 历史同步
-        # 在 Bash 中，我们通过 printf 确保标题在每次提示符刷新时锁定
+        # sync history
         export PROMPT_COMMAND="history -a; history -n"
 
-        # 🌐 自动代理注入
         ${if proxy.enable then ''
           export http_proxy="http://${proxy.address}"
           export https_proxy="http://${proxy.address}"
@@ -89,7 +99,6 @@ in {
         alias mamba='mamba_setup; mamba'
         alias conda='mamba_setup; conda'
 
-        # 🚀 实用函数 
         edit() {
             for file in "$@"; do
                 [[ ! -e "$file" ]] && touch "$file" && echo "📄 Created: $file"
