@@ -10,7 +10,6 @@
       address = "192.168.3.248:10808";
     };
     shell.zsh.enable = false;
-    shell.bash.enable = true;
     shell.starship.enable = true;
   };
 

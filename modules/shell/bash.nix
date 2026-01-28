@@ -1,16 +1,14 @@
 { config, lib, pkgs, hostName, ... }:
 let
-  cfg = config.myOptions.shell.bash;
+  # 变量引用，以便在 initExtra 中使用代理逻辑
   proxy = config.myOptions.proxy;
 in {
-  config = lib.mkIf cfg.enable {
+  config = {
     
     # ========================================================================
     # 🛠️ 现代 Shell 工具套件 (Modern Tool Suite)
     # ========================================================================
-    # 在开启 Bash 时，自动启用这些增强工具，无需在 packages.nix 手动管理
     programs = {
-      # 替代 ls：提供图标、Git 状态、更好的排版
       eza = {
         enable = true;
         enableBashIntegration = true;
@@ -18,13 +16,11 @@ in {
         git = true;
       };
       
-      # 替代 cd：智能目录跳转 (z dir)
       zoxide = {
         enable = true;
         enableBashIntegration = true;
       };
 
-      # 替代 Ctrl+R：模糊历史搜索
       fzf = {
         enable = true;
         enableBashIntegration = true;
@@ -38,19 +34,17 @@ in {
       enable = true;
       enableCompletion = true;
 
-      # --- 历史记录控制 (对标 Zsh) ---
+      # --- 历史记录控制 ---
       historySize = 100000;
       historyFileSize = 200000;
-      # ignoreboth: 忽略空格开头的命令和重复命令
-      # erasedups: 清除整个历史文件中的重复行 (更激进)
       historyControl = [ "ignoreboth" "erasedups" ];
 
       # --- Shell 选项 ---
       shellOptions = [ 
-        "histappend"     # 追加历史而非覆盖
-        "checkwinsize"   # 窗口大小改变时重绘
-        "globstar"       # 开启 ** 递归匹配 (类似 Zsh)
-        "cdspell"        # 路径拼写自动纠正
+        "histappend"
+        "checkwinsize"
+        "globstar"
+        "cdspell"
         "dirspell" 
       ];
 
@@ -62,25 +56,25 @@ in {
       # --- 别名系统 ---
       shellAliases = {
         "7z" = "7zz";
-        # 基础命令增强 (利用 eza)
         l = "eza -lh --icons=auto"; 
         ll = "eza -lha --icons=auto --sort=name --group-directories-first";
         la = "eza -a --icons=auto";
-        lt = "eza --tree --level=2 --icons=auto"; # 树状视图
+        lt = "eza --tree --level=2 --icons=auto";
         grep = "grep --color=auto";
         gitup = "git add . && git commit -m 'update: $(date +%Y-%m-%d)' && git push";
-        
-        # 安全删除 (安装 trash-cli)
         rm = "trash-put"; 
       };
 
-      # --- 初始化脚本 (Init Extra) ---
+      # --- 初始化脚本 (针对 GNOME 终端标题优化) ---
       initExtra = ''
         # ---------------------------------------------------------------------
-        # 🔄 历史记录实时同步 (History Sync)
+        # 🤫 终端标题静默处理 (Fix GNOME Terminal Title)
         # ---------------------------------------------------------------------
-        # 让 Bash 像 Zsh 一样，在一个窗口执行命令，另一个窗口立即能搜到。
-        export PROMPT_COMMAND="history -a; history -n; $PROMPT_COMMAND"
+        # 1. 重置 PROMPT_COMMAND：仅保留历史同步，移除系统默认的标题更新序列
+        export PROMPT_COMMAND="history -a; history -n"
+
+        # 2. 设置一次性静态标题：防止标题栏显示正在运行的命令
+        echo -ne "\033]0;Terminal\033\\"
 
         # ---------------------------------------------------------------------
         # 🌐 代理配置 (声明式注入)
@@ -95,8 +89,6 @@ in {
         # ---------------------------------------------------------------------
         # 🚀 实用函数 (Functions)
         # ---------------------------------------------------------------------
-        
-        # 快速创建并编辑文件 (移植自你的 edit 函数)
         edit() {
             for file in "$@"; do
                 if [ ! -e "$file" ]; then
@@ -107,25 +99,20 @@ in {
             $EDITOR "$@"
         }
 
-        # Home Manager 快速部署 (带 Git 检查)
         hm-save() {
         (
           cd ~/.config/home-manager || return
-          # 1. 暂存所有变更
           git add .
           FLAKE_NAME="${hostName}" 
           echo -e "🔍 [Target: $FLAKE_NAME] Pre-check..."
           
-          # 2. 尝试构建并切换
           if home-manager switch --flake ".#$FLAKE_NAME" -b backup; then
               echo -e "🎉 Switch Successful!"
-              
-              # 3. 检查是否有实际变更需要提交
               if ! git diff --cached --quiet; then
                   echo -e "💾 Committing changes..."
                   git commit -m "Update from $FLAKE_NAME: $(date '+%Y-%m-%d %H:%M:%S')"
               else
-                  echo -e "ℹ️ No changes to commit (clean working tree)."
+                  echo -e "ℹ️ No changes to commit."
               fi
           else
               echo -e "💥 Deployment Failed!"
@@ -133,7 +120,6 @@ in {
           fi
         )}
 
-        # 系统维护
         hm-fix() {
           (
             cd ~/.config/home-manager || return

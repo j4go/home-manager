@@ -11,7 +11,6 @@ with lib; {
     };
     shell = {
       zsh.enable = mkEnableOption "Zsh 模块";
-      bash.enable = mkEnableOption "Bash 模块";
       starship.enable = mkEnableOption "Starship 提示符";
     };
   };
