@@ -61,6 +61,7 @@ in {
 
       # --- 别名系统 ---
       shellAliases = {
+        "7z" = "7zz";
         # 基础命令增强 (利用 eza)
         l = "eza -lh --icons=auto"; 
         ll = "eza -lha --icons=auto --sort=name --group-directories-first";

@@ -20,6 +20,9 @@ in {
         wl-clipboard
         trash-cli
         hyperfine
+        zip
+        unzip
+        _7zz  
       ]) 
       
       # 2. 增量包：使用 unstablePkgs
