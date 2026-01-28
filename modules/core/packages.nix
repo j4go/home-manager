@@ -15,10 +15,10 @@ in {
         fd
         htop
         bat
-        fzf
         jq
         xclip
         wl-clipboard
+        trash-cli
       ]) 
       
       # 2. 增量包：使用 unstablePkgs
