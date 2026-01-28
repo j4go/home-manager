@@ -2,7 +2,7 @@
 
 let
   proxy = config.myOptions.proxy;
-  # 锁定 OpenBSD 版本的 nc 路径，防止调用到系统的 Ncat
+  # 自动下载并锁定绝对路径
   nc = "${pkgs.netcat-openbsd}/bin/nc";
 in {
   programs.ssh = {
@@ -10,21 +10,15 @@ in {
     enableDefaultConfig = true;
 
     matchBlocks = {
-      "*" = { addKeysToAgent = "yes"; };
-
       "github.com" = {
-        # 🚀 绝招 1: 使用 443 端口 (GitHub 的 SSH 备用端口)
-        # 很多代理服务器会拦截 22 端口，但不会拦截 443
+        # 强制使用 443 端口，绕过可能的 22 端口封锁
         hostname = "ssh.github.com";
         port = 443;
         user = "git";
-
-        # 🚀 绝招 2: 锁定路径并尝试 HTTP CONNECT 协议
-        # 如果你的代理地址 10808 实际上是 HTTP 代理，用 -X 5 必断
-        # 请根据测试结果选择：
-        # - SOCKS5 代理用: -X 5
-        # - HTTP 代理用:   -X connect
+        
+        # 动态注入 ProxyCommand
         proxyCommand = lib.mkIf proxy.enable 
+          # 建议先试 -X connect (HTTP 协议)，如果不行再试 -X 5 (SOCKS 协议)
           "${nc} -X connect -x ${proxy.address} %h %p";
       };
     };
