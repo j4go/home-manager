@@ -1,13 +1,13 @@
 { config, lib, pkgs, ... }:
 
 let
-  # 依然需要读取全局的代理配置，以便动态生成 ProxyCommand
   proxy = config.myOptions.proxy;
 in {
   programs.ssh = {
     enable = true;
     
-    enableDefaultConfig = false; 
+    # ✅ 建议改为 true，以包含系统基础配置
+    enableDefaultConfig = true; 
 
     matchBlocks = {
       "*" = { 
@@ -17,8 +17,10 @@ in {
       "github.com" = {
         hostname = "github.com";
         user = "git";
-        # 这里的 lib.mkIf 依然有效：只有当全局 proxy 开启时，才会写入这行 ProxyCommand
-        proxyCommand = lib.mkIf proxy.enable 
+        # 🚀 增加判断：确保 proxy.address 不为空且开启
+        proxyCommand = lib.mkIf (proxy.enable && proxy.address != "") 
+          # 如果你的代理是 Clash/V2Ray，通常 7890 端口同时支持 HTTP 和 SOCKS
+          # 这里推荐使用 nc -X 5 (SOCKS5)
           "${pkgs.netcat-openbsd}/bin/nc -X 5 -x ${proxy.address} %h %p";
       };
     };
