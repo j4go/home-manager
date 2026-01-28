@@ -12,8 +12,6 @@
     shell.zsh.enable = false;
     shell.bash.enable = true;
     shell.starship.enable = true;
-    editors.neovim.enable = true;
-    dev.packages.enable = true;
   };
 
   # 机器特定的基本信息

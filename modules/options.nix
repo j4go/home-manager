@@ -14,14 +14,5 @@ with lib; {
       bash.enable = mkEnableOption "Bash 模块";
       starship.enable = mkEnableOption "Starship 提示符";
     };
-    editors = {
-      neovim.enable = mkEnableOption "Nixvim 编辑器";
-    };
-    dev = {
-      direnv.enable = mkEnableOption "Dir env config";
-      git.enable = mkEnableOption "Git 版本控制";
-      ssh.enable = mkEnableOption "SSH 客户端配置";
-      packages.enable = mkEnableOption "常用系统工具包";
-    };
   };
 }

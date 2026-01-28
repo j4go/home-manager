@@ -1,5 +1,6 @@
 { ... }: {
   imports = [
+    ./neovim.nix
     ./bat.nix
     ./btop.nix
     ./direnv.nix
