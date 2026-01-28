@@ -19,6 +19,7 @@ in {
         xclip
         wl-clipboard
         trash-cli
+        hyperfine
       ]) 
       
       # 2. 增量包：使用 unstablePkgs
