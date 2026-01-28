@@ -6,6 +6,8 @@
     ../../modules/shell/starship.nix
     ../../modules/editors/neovim.nix
     ../../modules/core/packages.nix
+    ../../modules/dev/ssh.nix
+    ../../modules/dev/git.nix
   ];
 
   # 🚀 为这台机器量身定做开关
