@@ -26,7 +26,7 @@ in {
 
       pay-respects = {
         enable = true;
-        enableBashIntegration = true;
+        enableBashIntegration = false;
       };
     };
 
@@ -70,7 +70,7 @@ in {
         rm = "trash-put";
         h = "history";
         so = "source ~/.bashrc";
-        f = "fuck";
+        f = "pay-respects";
         setproxy = "export all_proxy=http://${proxy.address} http_proxy=http://${proxy.address} https_proxy=http://${proxy.address}";
         unproxy = "unset all_proxy http_proxy https_proxy";
       };
