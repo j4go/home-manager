@@ -2,23 +2,37 @@
 
 let
   proxy = config.myOptions.proxy;
-  # 自动下载并锁定绝对路径
   nc = "${pkgs.netcat-openbsd}/bin/nc";
 in {
   programs.ssh = {
     enable = true;
-    enableDefaultConfig = true;
+    
+    # ✅ 1. 听从警告：关闭隐式默认配置，改为完全声明式
+    enableDefaultConfig = false; 
 
     matchBlocks = {
+      # ✅ 2. 将全局默认行为显式写在 "*" 匹配块中
+      "*" = { 
+        # 自动将密钥添加到 SSH Agent
+        addKeysToAgent = "yes"; 
+        
+        # 保持连接活跃
+        serverAliveInterval = 60;
+        serverAliveCountMax = 3;
+        
+        # 允许通过控制套件复用连接 (提升多次连接同一主机的速度)
+        controlMaster = "auto";
+        controlPath = "~/.ssh/master-%r@%h:%p";
+        controlPersist = "10m";
+      };
+      
+      # ✅ 3. 特定主机的代理逻辑
       "github.com" = {
-        # 强制使用 443 端口，绕过可能的 22 端口封锁
         hostname = "ssh.github.com";
         port = 443;
         user = "git";
-        
-        # 动态注入 ProxyCommand
         proxyCommand = lib.mkIf proxy.enable 
-          # 建议先试 -X connect (HTTP 协议)，如果不行再试 -X 5 (SOCKS 协议)
+          # 建议使用 -X connect (根据你之前的测试)
           "${nc} -X connect -x ${proxy.address} %h %p";
       };
     };
