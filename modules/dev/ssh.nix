@@ -7,7 +7,7 @@ in {
   programs.ssh = {
     enable = true;
     
-    # ✅ 1. 听从警告：关闭隐式默认配置，改为完全声明式
+    # ✅ 1. 关闭隐式默认配置，改为完全声明式
     enableDefaultConfig = false; 
 
     matchBlocks = {
@@ -32,7 +32,6 @@ in {
         port = 443;
         user = "git";
         proxyCommand = lib.mkIf proxy.enable 
-          # 建议使用 -X connect (根据你之前的测试)
           "${nc} -X connect -x ${proxy.address} %h %p";
       };
     };

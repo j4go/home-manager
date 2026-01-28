@@ -1,0 +1,10 @@
+{ ... }: {
+  imports = [
+    ./bat.nix
+    ./btop.nix
+    ./direnv.nix
+    ./htop.nix
+    ./ssh.nix
+    ./git.nix
+  ];
+}

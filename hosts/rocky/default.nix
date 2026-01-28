@@ -1,13 +1,6 @@
 { ... }: {
-  # 导入所有可能的模块（但生效与否由下方的开关决定）
   imports = [
-    ../../modules/shell/zsh.nix
-    ../../modules/shell/bash.nix
-    ../../modules/shell/starship.nix
-    ../../modules/editors/neovim.nix
-    ../../modules/core/packages.nix
-    ../../modules/dev/ssh.nix
-    ../../modules/dev/git.nix
+    ../../modules/common-import.nix
   ];
 
   # 🚀 为这台机器量身定做开关
