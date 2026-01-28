@@ -56,7 +56,7 @@ in {
         so = "source ~/.zshrc";
         gitup = "git add . && git commit -m \"update: $(date +%Y-%m-%d)\" && git push";
         rm = "trash-put";
-        f = "fuck";
+        f = "pay-respects";
         setproxy = "export all_proxy=http://${proxy.address} http_proxy=http://${proxy.address} https_proxy=http://${proxy.address}";
         unproxy = "unset all_proxy http_proxy https_proxy";
       };

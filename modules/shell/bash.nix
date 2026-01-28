@@ -23,7 +23,6 @@ in {
           "--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
         ];
       };
-
       pay-respects = {
         enable = true;
         enableBashIntegration = false;
