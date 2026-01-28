@@ -7,6 +7,7 @@
     ../../modules/editors/neovim.nix
     ../../modules/dev/git.nix
     ../../modules/dev/ssh.nix
+    ../../modules/dev/direnv.nix
     ../../modules/core/packages.nix
   ];
 
@@ -22,6 +23,7 @@
     editors.neovim.enable = true;
     dev.git.enable = true;
     dev.ssh.enable = true;
+    dev.direnv.enable = true;
     dev.packages.enable = true;
   };
 
