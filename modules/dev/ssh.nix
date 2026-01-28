@@ -7,9 +7,7 @@ in {
   programs.ssh = {
     enable = true;
     
-    # 建议设为 true，除非你有非常特殊的 ~/.ssh/config 管理需求
-    # 设为 false 会导致 Home Manager 不会覆盖你的 config 文件，但也失去了声明式管理的意义
-    enableDefaultConfig = true; 
+    enableDefaultConfig = false; 
 
     matchBlocks = {
       "*" = { 
