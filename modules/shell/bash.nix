@@ -28,9 +28,14 @@ in {
       };
       # fuzzy search
       fzf = {
-        enable = true;
+        enable = true; # 自动绑定 Ctrl-R, Ctrl-T, Alt-C
         enableBashIntegration = true;
+        enableZshIntegration = true;
         defaultOptions = [
+          "--height 30%" 
+          "--layout=reverse" 
+          "--border"
+          # 使用 bat 进行实时预览
           "--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
         ];
       };
@@ -38,6 +43,7 @@ in {
       pay-respects = {
         enable = true;
         enableBashIntegration = false;
+        enableZshIntegration = true;
       };
     };
 
@@ -62,6 +68,10 @@ in {
         # 让系统默认的 man 手册使用 bat 进行渲染
         MANPAGER = "sh -c 'col -bx | bat -l man -p'";
         MANROFFOPT = "-c";
+
+        # 使用 fd 代替 find 作为后端
+        FZF_DEFAULT_COMMAND = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
+        FZF_CTRL_T_COMMAND = "$FZF_DEFAULT_COMMAND";
       };
 
       shellAliases = {
