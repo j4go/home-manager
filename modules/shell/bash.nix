@@ -78,6 +78,7 @@ in {
         dig = "doggo";
         nslookup = "doggo";
         ping = "gping";
+        lg = "lazygit";
       };
 
       initExtra = ''
