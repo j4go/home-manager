@@ -1,6 +1,5 @@
 { config, lib, ... }:
 let
-  # 修正后的 inherit 列表，去掉了不存在的 displayTab，增加了 text
   inherit (config.lib.htop) leftMeters rightMeters bar text graph led;
 in
 {
@@ -18,10 +17,10 @@ in
       (bar "Memory")
       (bar "Swap")
     ]) // (with config.lib.htop; rightMeters [
-      (text "Tasks")          # 替代 displayTab
-      (text "LoadAverage")    # 替代 displayTab
-      (text "Uptime")         # 替代 displayTab
-      (text "Battery")        # 替代 displayTab
+      (text "Tasks")          
+      (text "LoadAverage")   
+      (text "Uptime")       
+     # (text "Battery")    
     ]);
   };
 }
