@@ -5,19 +5,17 @@ let
 in {
   
   # =================================================================
-  # 1. 新增：Lazygit 配置
-  #    (这是独立的模块，不会干扰 programs.git)
+  # 1. Lazygit 配置 
   # =================================================================
   programs.lazygit = {
     enable = true;
     settings = {
       gui = {
-        showIcons = true;       # 显示图标
-        border = "rounded";     # 圆角边框
+        showIcons = true;
+        border = "rounded";
       };
       git = {
         paging = {
-          # 让 Lazygit 内部调用 Delta 进行渲染
           colorArg = "always";
           pager = "delta --dark --paging=never";
         };
@@ -26,25 +24,29 @@ in {
   };
 
   # =================================================================
-  # 2. 优化：Git 配置
+  # 2. Delta 配置
+  # =================================================================
+  programs.delta = {
+    enable = true;
+    # ⚠️ 必须显式开启，对应警告: automatic enablement is deprecated
+    enableGitIntegration = true; 
+    
+    # 原来的 options 移到这里
+    options = {
+      navigate = true;
+      line-numbers = true;
+      side-by-side = true;
+      syntax-theme = "Dracula"; 
+    };
+  };
+
+  # =================================================================
+  # 3. Git 核心配置
   # =================================================================
   programs.git = {
     enable = true;
 
-    # [新增] 启用 Delta 美化
-    # 注意：这是 programs.git 的标准属性，通常与 settings 并列不会冲突
-    # 如果报错，说明你的自定义 git 模块不支持 delta 属性，请移除此块
-    delta = {
-      enable = true;
-      options = {
-        navigate = true;      # 启用 n/N 跳转
-        line-numbers = true;  # 显示行号
-        side-by-side = true;  # 并排显示
-        syntax-theme = "Dracula"; 
-      };
-    };
-
-    # [严格保留] settings格式原封不动
+    # [严格保留] settings 格式原封不动
     settings = {
       user = {
         name = "j4go";
