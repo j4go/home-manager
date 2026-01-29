@@ -3,7 +3,8 @@ let
   proxy = config.myOptions.proxy;
   unstablePkgs = inputs.nixpkgs-unstable.legacyPackages.${system};
 
-  # 1. 🎨 FZF 基础 UI 配置 (严格去除了预览逻辑，防止全局污染和报错)
+  ######################## FZF Config Begin
+  # FZF 基础 UI 配置 (严格去除了预览逻辑，防止全局污染和报错)
   fzfConfig = [
     "--height 40%"
     "--layout=reverse"
@@ -13,13 +14,12 @@ let
     "--bind 'ctrl-/:toggle-preview'"
   ];
   fzfConfigStr = builtins.concatStringsSep " " fzfConfig;
-
-  # 2. 🔍 搜索后端
+  # 搜索后端
   fzfCommand = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
-
-  # 3. 🧠 智能预览逻辑 (彻底去除了内部所有单引号，确保 Bash export 绝对安全)
+  # 智能预览逻辑 (彻底去除了内部所有单引号，确保 Bash export 绝对安全)
   # 逻辑：如果是目录则 eza，如果是文件则 bat，否则显示提示
   smartPreview = "[[ -d {} ]] && eza --tree --color=always --icons=auto --level=2 {} || [[ -f {} ]] && bat --style=numbers --color=always --line-range=:500 {} || echo No-preview-available";
+  ######################## FZF Config End
 
 in {
   config = {
@@ -78,21 +78,21 @@ in {
       };
 
       initExtra = ''
-        # --- FZF 环境变量强制注入 (修复了引号冲突) ---
+
+        # --- FZF 环境变量强制注入 ---
         export FZF_DEFAULT_OPTS="${fzfConfigStr}"
         export FZF_DEFAULT_COMMAND="${fzfCommand}"
 
-        # 🚀 文件搜索 (Ctrl-T): 使用不含单引号的智能预览逻辑
+        # 历史记录 (Ctrl-R): 彻底隐藏预览窗，极致清爽
+        export FZF_CTRL_R_OPTS="--preview-window hidden"
+
+        # 文件搜索 (Ctrl-T): 使用不含单引号的智能预览逻辑
         export FZF_CTRL_T_OPTS="--preview '${smartPreview}'"
         export FZF_CTRL_T_COMMAND="${fzfCommand}"
 
-        # 🚀 目录搜索 (Alt-C): 树状结构预览
+        # 目录搜索 (Alt-C): 树状结构预览
         export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always --icons=auto --level=2 {}'"
 
-        # 🚀 历史记录 (Ctrl-R): 彻底隐藏预览窗，极致清爽
-        export FZF_CTRL_R_OPTS="--preview-window hidden"
-
-        # --- 其他原有配置 ---
         export PROMPT_COMMAND="history -a; history -n"
 
         ${if proxy.enable then ''
@@ -133,6 +133,7 @@ in {
           fi
         )}
       '';
+
     };
   };
 }
