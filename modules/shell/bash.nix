@@ -3,7 +3,7 @@ let
   proxy = config.myOptions.proxy;
   unstablePkgs = inputs.nixpkgs-unstable.legacyPackages.${system};
 
-  # 1. 🎨 FZF 基础 UI 配置（不含全局预览，防止干扰 Ctrl-R）
+  # 1. 🎨 FZF 基础 UI 配置 (严格去除了预览逻辑，防止全局污染和报错)
   fzfConfig = [
     "--height 40%"
     "--layout=reverse"
@@ -14,59 +14,33 @@ let
   ];
   fzfConfigStr = builtins.concatStringsSep " " fzfConfig;
 
-  # 2. 🔍 FZF 搜索后端命令
+  # 2. 🔍 搜索后端
   fzfCommand = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
 
-  # 3. 🧠 智能预览逻辑 (Smart Preview Script)
-  # 判断是目录则显示 tree，是文件则显示 bat，否则不显示
-  smartPreview = ''
-    if [ -d {} ]; then
-      eza --tree --color=always --icons=auto --level=2 {}
-    elif [ -f {} ]; then
-      bat --style=numbers --color=always --line-range=:500 {}
-    else
-      echo "No preview available"
-    fi
-  '';
+  # 3. 🧠 智能预览逻辑 (彻底去除了内部所有单引号，确保 Bash export 绝对安全)
+  # 逻辑：如果是目录则 eza，如果是文件则 bat，否则显示提示
+  smartPreview = "[[ -d {} ]] && eza --tree --color=always --icons=auto --level=2 {} || [[ -f {} ]] && bat --style=numbers --color=always --line-range=:500 {} || echo No-preview-available";
 
 in {
   config = {
     programs = {
-      zoxide = {
-        enable = true;
-        enableBashIntegration = true;
-        enableZshIntegration = true;
-        options = [ "--cmd cd" ]; 
-      };
-      eza = {
-        enable = true;
-        enableBashIntegration = true;
-        enableZshIntegration = true;
-        git = true;
-        extraOptions = [ "--group-directories-first" "--header" ];
-      };
+      zoxide = { enable = true; enableBashIntegration = true; options = [ "--cmd cd" ]; };
+      eza = { enable = true; enableBashIntegration = true; git = true; extraOptions = [ "--group-directories-first" "--header" ]; };
       fzf = {
         enable = true; 
         enableBashIntegration = true;
         enableZshIntegration = true;
-        # 仅注入基础 UI 配置
-        defaultOptions = fzfConfig;
+        defaultOptions = fzfConfig; # 注入基础 UI
       };
-      pay-respects = {
-        enable = true;
-        enableBashIntegration = false;
-        enableZshIntegration = true;
-      };
+      pay-respects = { enable = true; enableBashIntegration = false; enableZshIntegration = true; };
     };
 
     programs.bash = {
       enable = true;
       enableCompletion = true;
-
       historySize = 1000000;
       historyFileSize = 1000000;
       historyControl = [ "ignoreboth" "erasedups" ];
-
       shellOptions = [ "histappend" "checkwinsize" "globstar" "cdspell" "dirspell" ];
 
       sessionVariables = {
@@ -104,19 +78,18 @@ in {
       };
 
       initExtra = ''
-        # --- FZF 环境变量注入 (针对交互式 Shell 优化) ---
-        # 1. 全局基础配置
+        # --- FZF 环境变量强制注入 (修复了引号冲突) ---
         export FZF_DEFAULT_OPTS="${fzfConfigStr}"
         export FZF_DEFAULT_COMMAND="${fzfCommand}"
 
-        # 2. 🚀 文件搜索 (Ctrl-T): 开启智能预览
+        # 🚀 文件搜索 (Ctrl-T): 使用不含单引号的智能预览逻辑
         export FZF_CTRL_T_OPTS="--preview '${smartPreview}'"
         export FZF_CTRL_T_COMMAND="${fzfCommand}"
 
-        # 3. 🚀 目录搜索 (Alt-C): 开启树状结构预览
+        # 🚀 目录搜索 (Alt-C): 树状结构预览
         export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always --icons=auto --level=2 {}'"
 
-        # 4. 🚀 历史记录 (Ctrl-R): 强制隐藏预览窗口，防止报错并保持界面清爽
+        # 🚀 历史记录 (Ctrl-R): 彻底隐藏预览窗，极致清爽
         export FZF_CTRL_R_OPTS="--preview-window hidden"
 
         # --- 其他原有配置 ---
@@ -126,8 +99,7 @@ in {
           export http_proxy="http://${proxy.address}"
           export https_proxy="http://${proxy.address}"
           export all_proxy="http://${proxy.address}"
-          export no_proxy="localhost,127.0.0.1,192.168.0.0/16,10.0.0.0/8,*.local,*.internal"
-        '' else "# Proxy disabled"}
+        '' else ""}
 
         mamba_setup() {
             local mamba_path="''${HOME}/.nix-profile/etc/profile.d"
@@ -160,15 +132,7 @@ in {
               return 1
           fi
         )}
-
-        hm-fix() {
-          (
-            cd ~/.config/home-manager || return
-            nix flake update && nix-collect-garbage --delete-older-than 10d 
-          )
-        }
       '';
     };
   };
 }
-
