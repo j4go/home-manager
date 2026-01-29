@@ -53,14 +53,14 @@ in {
       };
     };
 
-    home.sessionVariables = {
-      # 使用 lib.mkForce 强制覆盖 Home Manager 默认生成的变量
-      FZF_DEFAULT_OPTS = lib.mkForce "${fzfConfigStr}";
+    # home.sessionVariables = {
+    #   # 使用 lib.mkForce 强制覆盖 Home Manager 默认生成的变量
+    #   FZF_DEFAULT_OPTS = lib.mkForce "${fzfConfigStr}";
 
-      # 使用 fd 替代 find，并包含隐藏文件
-      FZF_DEFAULT_COMMAND = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
-      FZF_CTRL_T_COMMAND = "$FZF_DEFAULT_COMMAND";
-    };
+    #   # 使用 fd 替代 find，并包含隐藏文件
+    #   FZF_DEFAULT_COMMAND = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
+    #   FZF_CTRL_T_COMMAND = "$FZF_DEFAULT_COMMAND";
+    # };
 
     programs.bash = {
       enable = true;
@@ -83,6 +83,11 @@ in {
         # 让系统默认的 man 手册使用 bat 进行渲染
         MANPAGER = "sh -c 'col -bx | bat -l man -p'";
         MANROFFOPT = "-c";
+
+        # 使用 lib.mkForce 确保覆盖 programs.fzf 模块可能生成的默认值
+        FZF_DEFAULT_OPTS = lib.mkForce "${fzfConfigStr}";
+        FZF_DEFAULT_COMMAND = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
+        FZF_CTRL_T_COMMAND = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
       };
 
       shellAliases = {
