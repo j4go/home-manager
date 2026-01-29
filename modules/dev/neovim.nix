@@ -34,6 +34,9 @@
     # ==========================================
     opts = {
       # --- 剪切板 ---
+      # Linux 的 Neovim 通常依赖外部工具（Provider）来通过管道（Pipe）与系统剪切板通信。
+      # 按下 x -> Neovim 删除字符 -> Spawn xclip 进程 -> 写入数据 -> 等待进程结束。
+      # 我们可以将 x 映射为 "_x（使用黑洞寄存器），这样它就不会触发剪切板写入，速度瞬间起飞。
       clipboard = "unnamed,unnamedplus";
       
       # --- 缩进与排版 ---
@@ -43,7 +46,7 @@
       expandtab = true;
       autoindent = true;
       list = true;
-      listchars = "tab:▸ ,trail:·"; # 稍微优化了一下 listchars
+      listchars = "tab:▸ ,trail:·";
 
       # --- 搜索 ---
       hlsearch = true;
@@ -98,6 +101,13 @@
         key = "<Esc>";
         action = ":nohlsearch<CR>";
         options = { silent = true; desc = "UI: Clear Highlight"; };
+      }
+      # 性能优化：x 删除字符时不写入剪切板，避免 Linux 下的 I/O 阻塞
+      {
+        mode = "n";
+        key = "x";
+        action = "\"_x";
+        options.desc = "Delete char without copying (Speedup)";
       }
     ];
 
