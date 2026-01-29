@@ -3,7 +3,7 @@ let
   proxy = config.myOptions.proxy;
   unstablePkgs = inputs.nixpkgs-unstable.legacyPackages.${system};
 
-  ######################## FZF Config Begin
+  ######################## FZF Config Begin ######################## 
   # FZF 基础 UI 配置 (严格去除了预览逻辑，防止全局污染和报错)
   fzfConfig = [
     "--height 40%"
@@ -19,7 +19,7 @@ let
   # 智能预览逻辑 (彻底去除了内部所有单引号，确保 Bash export 绝对安全)
   # 逻辑：如果是目录则 eza，如果是文件则 bat，否则显示提示
   smartPreview = "[[ -d {} ]] && eza --tree --color=always --icons=auto --level=2 {} || [[ -f {} ]] && bat --style=numbers --color=always --line-range=:500 {} || echo No-preview-available";
-  ######################## FZF Config End
+  ######################## FZF Config End ######################## 
 
 in {
   config = {
@@ -75,6 +75,9 @@ in {
         neo = "fastfetch";
         fetch = "fastfetch";
         neofetch = "fastfetch";
+        dig = "doggo";
+        nslookup = "doggo";
+        ping = "gping";
       };
 
       initExtra = ''
