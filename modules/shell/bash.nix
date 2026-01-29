@@ -15,6 +15,9 @@ let
   ];
   fzfConfigStr = builtins.concatStringsSep " " fzfConfig;
 
+  # FZF 搜索命令
+  fzfCommand = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
+
 in {
   config = {
     programs = {
@@ -83,11 +86,6 @@ in {
         # 让系统默认的 man 手册使用 bat 进行渲染
         MANPAGER = "sh -c 'col -bx | bat -l man -p'";
         MANROFFOPT = "-c";
-
-        # 使用 lib.mkForce 确保覆盖 programs.fzf 模块可能生成的默认值
-        FZF_DEFAULT_OPTS = lib.mkForce "${fzfConfigStr}";
-        FZF_DEFAULT_COMMAND = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
-        FZF_CTRL_T_COMMAND = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
       };
 
       shellAliases = {
@@ -124,9 +122,16 @@ in {
       };
 
       initExtra = ''
+
+        # --- FZF 强制环境变量注入 ---
+        export FZF_DEFAULT_OPTS='${fzfConfigStr}'
+        export FZF_DEFAULT_COMMAND='${fzfCommand}'
+        export FZF_CTRL_T_COMMAND='${fzfCommand}'
+
         # sync history
         export PROMPT_COMMAND="history -a; history -n"
 
+        # proxy
         ${if proxy.enable then ''
           export http_proxy="http://${proxy.address}"
           export https_proxy="http://${proxy.address}"
@@ -173,6 +178,7 @@ in {
             nix flake update && nix-collect-garbage --delete-older-than 10d 
           )
         }
+
       '';
     };
   };
