@@ -74,6 +74,10 @@ in {
         unproxy = "unset all_proxy http_proxy https_proxy";
 
         hm = "cd ~/.config/home-manager/";
+        os = "fastfetch";
+        neo = "fastfetch";
+        fetch = "fastfetch";
+        neofetch = "fastfetch";
       };
 
       initExtra = ''
