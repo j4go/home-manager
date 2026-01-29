@@ -122,11 +122,10 @@ in {
       };
 
       initExtra = ''
-
-        # --- FZF 强制环境变量注入 ---
-        export FZF_DEFAULT_OPTS='${fzfConfigStr}'
-        export FZF_DEFAULT_COMMAND='${fzfCommand}'
-        export FZF_CTRL_T_COMMAND='${fzfCommand}'
+        # fzf vars
+        export FZF_DEFAULT_OPTS="${fzfConfigStr}"
+        export FZF_DEFAULT_COMMAND="${fzfCommand}"
+        export FZF_CTRL_T_COMMAND="${fzfCommand}"
 
         # sync history
         export PROMPT_COMMAND="history -a; history -n"
