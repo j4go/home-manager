@@ -5,17 +5,28 @@ let
 in {
   config = {
     programs = {
-      eza = {
-        enable = true;
-        package = unstablePkgs.eza; 
-        enableBashIntegration = true;
-        icons = "auto";
-        git = true;
-      };
+      # modern cd command:z (type z is a function)
       zoxide = {
         enable = true;
         enableBashIntegration = true;
+        enableZshIntegration = true;
+        # 进阶选项：用 zoxide 替换 cd 命令 (可选)
+        # 这会让 cd 命令拥有 z 的智能跳转能力，同时保留 cd 的基础功能
+        options = [ "--cmd cd" ]; 
       };
+      # modern ls
+      eza = {
+        enable = true;
+        enableBashIntegration = true;
+        enableZshIntegration = true;
+        git = true;
+        # 利用 extraOptions 设置全局默认值，减少 alias 的长度
+        extraOptions = [
+          "--group-directories-first"
+          "--header"
+        ];
+      };
+      # fuzzy search
       fzf = {
         enable = true;
         enableBashIntegration = true;
@@ -23,6 +34,7 @@ in {
           "--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
         ];
       };
+      # modern thefuck
       pay-respects = {
         enable = true;
         enableBashIntegration = false;
@@ -53,6 +65,15 @@ in {
       };
 
       shellAliases = {
+        # eza modern ls
+        # 保持网格视图，适合快速浏览
+        ls = "eza --icons=auto --git";
+        # 详细列表，带相对时间，显示隐藏文件
+        ll = "eza -l -a --icons=auto --git --time-style=relative";
+        la = "ll";
+        # 树状视图，忽略 .git 和 node_modules (防止刷屏)
+        lt = "eza --tree --level=2 --icons=auto --git --ignore-glob='.git|node_modules'";
+
         # Bat 现代化替代方案
         cat   = "bat";
         man   = "batman";      # 需要 bat-extras.batman
@@ -60,10 +81,6 @@ in {
         bdiff = "batdiff";     # 需要 bat-extras.batdiff
 
         "7z" = "7zz";
-        l = "eza -lh --icons=auto"; 
-        ll = "eza -lha --icons=auto --sort=name --group-directories-first";
-        la = "eza -a --icons=auto";
-        lt = "eza --tree --level=2 --icons=auto";
         grep = "grep --color=auto";
         gitup = "git add . && git commit -m 'update: $(date +%Y-%m-%d)' && git push";
         rm = "trash-put";
