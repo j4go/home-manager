@@ -3,67 +3,61 @@ let
   proxy = config.myOptions.proxy;
   unstablePkgs = inputs.nixpkgs-unstable.legacyPackages.${system};
 
-  # fzf业界标准：将 UI 参数提取为独立变量，确保一致性
+  # 1. 🎨 FZF 基础 UI 配置（不含全局预览，防止干扰 Ctrl-R）
   fzfConfig = [
     "--height 40%"
     "--layout=reverse"
     "--border"
-    "--inline-info" # 紧凑型显示匹配数
-    "--color='header:italic'" # 样式微调
-    "--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
-    "--bind 'ctrl-/:toggle-preview'" # 专家技巧：按下 Ctrl-/ 可以隐藏/显示预览窗
+    "--inline-info"
+    "--color='header:italic'"
+    "--bind 'ctrl-/:toggle-preview'"
   ];
   fzfConfigStr = builtins.concatStringsSep " " fzfConfig;
 
-  # FZF 搜索命令
+  # 2. 🔍 FZF 搜索后端命令
   fzfCommand = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
+
+  # 3. 🧠 智能预览逻辑 (Smart Preview Script)
+  # 判断是目录则显示 tree，是文件则显示 bat，否则不显示
+  smartPreview = ''
+    if [ -d {} ]; then
+      eza --tree --color=always --icons=auto --level=2 {}
+    elif [ -f {} ]; then
+      bat --style=numbers --color=always --line-range=:500 {}
+    else
+      echo "No preview available"
+    fi
+  '';
 
 in {
   config = {
     programs = {
-      # modern cd command:z (type z is a function)
       zoxide = {
         enable = true;
         enableBashIntegration = true;
         enableZshIntegration = true;
-        # 进阶选项：用 zoxide 替换 cd 命令 (可选)
-        # 这会让 cd 命令拥有 z 的智能跳转能力，同时保留 cd 的基础功能
         options = [ "--cmd cd" ]; 
       };
-      # modern ls
       eza = {
         enable = true;
         enableBashIntegration = true;
         enableZshIntegration = true;
         git = true;
-        # 利用 extraOptions 设置全局默认值，减少 alias 的长度
-        extraOptions = [
-          "--group-directories-first"
-          "--header"
-        ];
+        extraOptions = [ "--group-directories-first" "--header" ];
       };
       fzf = {
-        enable = true; # 自动绑定 Ctrl-R, Ctrl-T, Alt-C
+        enable = true; 
         enableBashIntegration = true;
         enableZshIntegration = true;
+        # 仅注入基础 UI 配置
         defaultOptions = fzfConfig;
       };
-      # modern thefuck
       pay-respects = {
         enable = true;
         enableBashIntegration = false;
         enableZshIntegration = true;
       };
     };
-
-    # home.sessionVariables = {
-    #   # 使用 lib.mkForce 强制覆盖 Home Manager 默认生成的变量
-    #   FZF_DEFAULT_OPTS = lib.mkForce "${fzfConfigStr}";
-
-    #   # 使用 fd 替代 find，并包含隐藏文件
-    #   FZF_DEFAULT_COMMAND = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
-    #   FZF_CTRL_T_COMMAND = "$FZF_DEFAULT_COMMAND";
-    # };
 
     programs.bash = {
       enable = true;
@@ -73,37 +67,26 @@ in {
       historyFileSize = 1000000;
       historyControl = [ "ignoreboth" "erasedups" ];
 
-      shellOptions = [ 
-        "histappend" "checkwinsize" "globstar" "cdspell" "dirspell" 
-      ];
+      shellOptions = [ "histappend" "checkwinsize" "globstar" "cdspell" "dirspell" ];
 
       sessionVariables = {
         EDITOR = "nvim";
         LANG = "en_US.UTF-8";
         LC_ALL = "en_US.UTF-8";
         PYTHONPYCACHEPREFIX = "/tmp/python-cache";
-        
-        # 让系统默认的 man 手册使用 bat 进行渲染
         MANPAGER = "sh -c 'col -bx | bat -l man -p'";
         MANROFFOPT = "-c";
       };
 
       shellAliases = {
-        # eza modern ls
-        # 保持网格视图，适合快速浏览
         ls = "eza --icons=auto --git";
-        # 详细列表，带相对时间，显示隐藏文件
         ll = "eza -l -a --icons=auto --git --time-style=relative";
         la = "ll";
-        # 树状视图，忽略 .git 和 node_modules (防止刷屏)
         lt = "eza --tree --level=2 --icons=auto --git --ignore-glob='.git|node_modules'";
-
-        # Bat 现代化替代方案
         cat   = "bat";
-        man   = "batman";      # 需要 bat-extras.batman
-        bgrep = "batgrep";     # 需要 bat-extras.batgrep
-        bdiff = "batdiff";     # 需要 bat-extras.batdiff
-
+        man   = "batman";
+        bgrep = "batgrep";
+        bdiff = "batdiff";
         "7z" = "7zz";
         grep = "grep --color=auto";
         gitup = "git add . && git commit -m 'update: $(date +%Y-%m-%d)' && git push";
@@ -113,7 +96,6 @@ in {
         f = "pay-respects";
         setproxy = "export all_proxy=http://${proxy.address} http_proxy=http://${proxy.address} https_proxy=http://${proxy.address}";
         unproxy = "unset all_proxy http_proxy https_proxy";
-
         hm = "cd ~/.config/home-manager/";
         os = "fastfetch";
         neo = "fastfetch";
@@ -122,15 +104,24 @@ in {
       };
 
       initExtra = ''
-        # fzf vars
+        # --- FZF 环境变量注入 (针对交互式 Shell 优化) ---
+        # 1. 全局基础配置
         export FZF_DEFAULT_OPTS="${fzfConfigStr}"
         export FZF_DEFAULT_COMMAND="${fzfCommand}"
+
+        # 2. 🚀 文件搜索 (Ctrl-T): 开启智能预览
+        export FZF_CTRL_T_OPTS="--preview '${smartPreview}'"
         export FZF_CTRL_T_COMMAND="${fzfCommand}"
 
-        # sync history
+        # 3. 🚀 目录搜索 (Alt-C): 开启树状结构预览
+        export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always --icons=auto --level=2 {}'"
+
+        # 4. 🚀 历史记录 (Ctrl-R): 强制隐藏预览窗口，防止报错并保持界面清爽
+        export FZF_CTRL_R_OPTS="--preview-window hidden"
+
+        # --- 其他原有配置 ---
         export PROMPT_COMMAND="history -a; history -n"
 
-        # proxy
         ${if proxy.enable then ''
           export http_proxy="http://${proxy.address}"
           export https_proxy="http://${proxy.address}"
@@ -138,7 +129,6 @@ in {
           export no_proxy="localhost,127.0.0.1,192.168.0.0/16,10.0.0.0/8,*.local,*.internal"
         '' else "# Proxy disabled"}
 
-        # Mamba 延迟加载
         mamba_setup() {
             local mamba_path="''${HOME}/.nix-profile/etc/profile.d"
             if [[ -f "$mamba_path/conda.sh" ]]; then
@@ -177,7 +167,6 @@ in {
             nix flake update && nix-collect-garbage --delete-older-than 10d 
           )
         }
-
       '';
     };
   };
