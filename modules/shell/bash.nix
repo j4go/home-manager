@@ -2,6 +2,19 @@
 let
   proxy = config.myOptions.proxy;
   unstablePkgs = inputs.nixpkgs-unstable.legacyPackages.${system};
+
+  # fzf业界标准：将 UI 参数提取为独立变量，确保一致性
+  fzfConfig = [
+    "--height 40%"
+    "--layout=reverse"
+    "--border"
+    "--inline-info" # 紧凑型显示匹配数
+    "--color='header:italic'" # 样式微调
+    "--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+    "--bind 'ctrl-/:toggle-preview'" # 专家技巧：按下 Ctrl-/ 可以隐藏/显示预览窗
+  ];
+  fzfConfigStr = builtins.concatStringsSep " " fzfConfig;
+
 in {
   config = {
     programs = {
@@ -26,18 +39,11 @@ in {
           "--header"
         ];
       };
-      # fuzzy search
       fzf = {
         enable = true; # 自动绑定 Ctrl-R, Ctrl-T, Alt-C
         enableBashIntegration = true;
         enableZshIntegration = true;
-        defaultOptions = [
-          "--height 30%" 
-          "--layout=reverse" 
-          "--border"
-          # 使用 bat 进行实时预览
-          "--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
-        ];
+        defaultOptions = fzfConfig;
       };
       # modern thefuck
       pay-respects = {
@@ -45,6 +51,15 @@ in {
         enableBashIntegration = false;
         enableZshIntegration = true;
       };
+    };
+
+    home.sessionVariables = {
+      # 使用 lib.mkForce 强制覆盖 Home Manager 默认生成的变量
+      FZF_DEFAULT_OPTS = lib.mkForce "${fzfConfigStr}";
+
+      # 使用 fd 替代 find，并包含隐藏文件
+      FZF_DEFAULT_COMMAND = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
+      FZF_CTRL_T_COMMAND = "$FZF_DEFAULT_COMMAND";
     };
 
     programs.bash = {
@@ -68,10 +83,6 @@ in {
         # 让系统默认的 man 手册使用 bat 进行渲染
         MANPAGER = "sh -c 'col -bx | bat -l man -p'";
         MANROFFOPT = "-c";
-
-        # 使用 fd 代替 find 作为后端
-        FZF_DEFAULT_COMMAND = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
-        FZF_CTRL_T_COMMAND = "$FZF_DEFAULT_COMMAND";
       };
 
       shellAliases = {
