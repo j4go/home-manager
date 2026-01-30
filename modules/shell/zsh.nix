@@ -1,11 +1,17 @@
-{ config, lib, pkgs, inputs, system, hostName, ... }:
-let
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  system,
+  hostName,
+  ...
+}: let
   cfg = config.myOptions.shell.zsh;
   proxy = config.myOptions.proxy;
   unstablePkgs = inputs.nixpkgs-unstable.legacyPackages.${system};
 in {
   config = lib.mkIf cfg.enable {
-    
     programs.fzf = {
       enable = true;
       enableZshIntegration = true;
@@ -41,10 +47,10 @@ in {
 
       shellAliases = {
         # Bat 现代化替代方案
-        cat   = "bat";
-        man   = "batman";      
-        bgrep = "batgrep";    
-        bdiff = "batdiff";   
+        cat = "bat";
+        man = "batman";
+        bgrep = "batgrep";
+        bdiff = "batdiff";
 
         "7z" = "7zz";
         grep = "grep --color=auto";
@@ -64,15 +70,19 @@ in {
       initContent = lib.mkMerge [
         ''
           # Zsh 补全样式优化
-          zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 
+          zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
           zstyle ':completion:*' menu select
 
-          ${if proxy.enable then ''
-            export http_proxy="http://${proxy.address}"
-            export https_proxy="http://${proxy.address}"
-            export all_proxy="http://${proxy.address}"
-            export no_proxy="localhost,127.0.0.1,192.168.0.0/16,10.0.0.0/8,*.local,*.internal"
-          '' else "# Proxy disabled"}
+          ${
+            if proxy.enable
+            then ''
+              export http_proxy="http://${proxy.address}"
+              export https_proxy="http://${proxy.address}"
+              export all_proxy="http://${proxy.address}"
+              export no_proxy="localhost,127.0.0.1,192.168.0.0/16,10.0.0.0/8,*.local,*.internal"
+            ''
+            else "# Proxy disabled"
+          }
 
           # Mamba 延迟加载
           mamba_setup() {

@@ -1,18 +1,20 @@
-{ config, lib, pkgs, ... }:
-
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   proxy = config.myOptions.proxy;
 in {
-  
   # =================================================================
-  # 1. Lazygit 配置 
+  # 1. Lazygit 配置
   # =================================================================
   programs.lazygit = {
     enable = true;
     settings = {
       gui = {
         language = "en";
-        timeFormat = "2006-01-02"; 
+        timeFormat = "2006-01-02";
         shortTimeFormat = "15:04";
         showIcons = false;
         border = "rounded";
@@ -34,12 +36,12 @@ in {
   # =================================================================
   programs.delta = {
     enable = true;
-    enableGitIntegration = true; 
+    enableGitIntegration = true;
     options = {
       navigate = true;
       line-numbers = true;
       side-by-side = true;
-      syntax-theme = "Dracula"; 
+      syntax-theme = "Dracula";
     };
   };
 

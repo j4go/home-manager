@@ -1,4 +1,4 @@
-{ ... }: {
+{...}: {
   imports = [
     ../../modules/common-import.nix
   ];

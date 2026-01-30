@@ -1,9 +1,16 @@
-{ config, lib, pkgs, inputs, system, hostName, ... }:
-let
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  system,
+  hostName,
+  ...
+}: let
   proxy = config.myOptions.proxy;
   unstablePkgs = inputs.nixpkgs-unstable.legacyPackages.${system};
 
-  ######################## FZF Config Begin ######################## 
+  ######################## FZF Config Begin ########################
   # FZF 基础 UI 配置 (严格去除了预览逻辑，防止全局污染和报错)
   fzfConfig = [
     "--height 40%"
@@ -19,20 +26,32 @@ let
   # 智能预览逻辑 (彻底去除了内部所有单引号，确保 Bash export 绝对安全)
   # 逻辑：如果是目录则 eza，如果是文件则 bat，否则显示提示
   smartPreview = "[[ -d {} ]] && eza --tree --color=always --icons=auto --level=2 {} || [[ -f {} ]] && bat --style=numbers --color=always --line-range=:500 {} || echo No-preview-available";
-  ######################## FZF Config End ######################## 
-
+  ######################## FZF Config End ########################
 in {
   config = {
     programs = {
-      zoxide = { enable = true; enableBashIntegration = true; options = [ "--cmd cd" ]; };
-      eza = { enable = true; enableBashIntegration = true; git = true; extraOptions = [ "--group-directories-first" "--header" ]; };
+      zoxide = {
+        enable = true;
+        enableBashIntegration = true;
+        options = ["--cmd cd"];
+      };
+      eza = {
+        enable = true;
+        enableBashIntegration = true;
+        git = true;
+        extraOptions = ["--group-directories-first" "--header"];
+      };
       fzf = {
-        enable = true; 
+        enable = true;
         enableBashIntegration = true;
         enableZshIntegration = true;
         defaultOptions = fzfConfig; # 注入基础 UI
       };
-      pay-respects = { enable = true; enableBashIntegration = false; enableZshIntegration = true; };
+      pay-respects = {
+        enable = true;
+        enableBashIntegration = false;
+        enableZshIntegration = true;
+      };
     };
 
     programs.bash = {
@@ -40,8 +59,8 @@ in {
       enableCompletion = true;
       historySize = 1000000;
       historyFileSize = 1000000;
-      historyControl = [ "ignoreboth" "erasedups" ];
-      shellOptions = [ "histappend" "checkwinsize" "globstar" "cdspell" "dirspell" ];
+      historyControl = ["ignoreboth" "erasedups"];
+      shellOptions = ["histappend" "checkwinsize" "globstar" "cdspell" "dirspell"];
 
       sessionVariables = {
         EDITOR = "nvim";
@@ -57,8 +76,8 @@ in {
         ll = "eza -l -a --icons=auto --git --time-style=relative";
         la = "ll";
         lt = "eza --tree --level=2 --icons=auto --git --ignore-glob='.git|node_modules'";
-        cat   = "bat";
-        man   = "batman";
+        cat = "bat";
+        man = "batman";
         bgrep = "batgrep";
         bdiff = "batdiff";
         "7z" = "7zz";
@@ -101,11 +120,15 @@ in {
 
         export PROMPT_COMMAND="history -a; history -n"
 
-        ${if proxy.enable then ''
-          export http_proxy="http://${proxy.address}"
-          export https_proxy="http://${proxy.address}"
-          export all_proxy="http://${proxy.address}"
-        '' else ""}
+        ${
+          if proxy.enable
+          then ''
+            export http_proxy="http://${proxy.address}"
+            export https_proxy="http://${proxy.address}"
+            export all_proxy="http://${proxy.address}"
+          ''
+          else ""
+        }
 
         mamba_setup() {
             local mamba_path="''${HOME}/.nix-profile/etc/profile.d"
@@ -128,35 +151,29 @@ in {
 
         hm-save() {
           (
-              # 1. 进入目录
               cd ~/.config/home-manager || return
-              
-              # 2. 🎨 执行格式化 (新增步骤)
-              # 如果格式化失败(比如有语法错误)，则直接中断函数，不执行后续操作
+
+              # 1. 🟢 关键：先 git add，让 Nix 能“看见”新文件
+              # 这不会提交，只是把文件放进暂存区
+              git add .
+
+              # 2. 🟢 执行格式化，显式指定目录
               echo -e "🧹 Running nix fmt..."
-              if ! nix fmt; then
-                  echo -e "❌ Format failed! Please check your syntax."
+              if ! nix fmt .; then
+                  echo -e "❌ Format failed!"
                   return 1
               fi
 
-              # 3. 添加变动到暂存区
-              # 注意：必须在格式化之后 add，这样才能把格式化后的变动包含进去
+              # 3. 🟢 再次 git add (重要)
+              # 因为格式化会修改文件内容，我们需要把格式化后的改动再次放入暂存区
               git add .
-              
-              # 4. 执行构建与切换
-              FLAKE_NAME="${hostName}" 
+
+              # 4. 构建与切换
+              FLAKE_NAME="${hostName}"
               if home-manager switch --flake ".#$FLAKE_NAME" -b backup; then
                   echo -e "🎉 Switch Successful!"
-                  
-                  # 5. 提交变动
-                  # 只有当暂存区有差异时才 commit
-                  if [[ $(git diff --cached) ]]; then
-                      git commit -m "Update from $FLAKE_NAME: $(date '+%Y-%m-%d %H:%M:%S')"
-                  else
-                      echo "ℹ️ No changes to commit."
-                  fi
+                  [[ $(git diff --cached) ]] && git commit -m "Update: $(date '+%Y-%m-%d %H:%M:%S')" || echo "ℹ️ No changes."
               else
-                  echo -e "❌ Switch failed!"
                   return 1
               fi
           )

@@ -1,5 +1,8 @@
-{ config, lib, ... }:
-let
+{
+  config,
+  lib,
+  ...
+}: let
   cfg = config.myOptions.shell.starship;
   settings = {
     # -------------------------------------------------------------------------
@@ -13,14 +16,14 @@ let
     command_timeout = 1000;
 
     # -------------------------------------------------------------------------
-    # 2. SSH 主机名 (Hostname) 
+    # 2. SSH 主机名 (Hostname)
     # -------------------------------------------------------------------------
     hostname = {
-      ssh_only = true;       # ✅ 关键：只有 SSH 时才显示
+      ssh_only = true; # ✅ 关键：只有 SSH 时才显示
       format = "[$ssh_symbol$hostname]($style) ";
       style = "bold #ffaf00"; # 🎃 亮橙色，高辨识度
-      ssh_symbol = " ";    
-      disabled = false;    
+      ssh_symbol = " ";
+      disabled = false;
     };
 
     # -------------------------------------------------------------------------
@@ -28,18 +31,18 @@ let
     # -------------------------------------------------------------------------
     username = {
       style_user = "white dim";
-      show_always = false;   # 本地不显示，SSH 时配合 hostname 自动出现
+      show_always = false; # 本地不显示，SSH 时配合 hostname 自动出现
       format = "[$user]($style) @";
-      disabled = false;     
+      disabled = false;
     };
 
     # -------------------------------------------------------------------------
     # 4. 其他模块配置
     # -------------------------------------------------------------------------
-    
+
     # 提示符符号
     character = {
-      success_symbol = "[➜](bold green)"; 
+      success_symbol = "[➜](bold green)";
       error_symbol = "[✖](bold red)";
     };
 

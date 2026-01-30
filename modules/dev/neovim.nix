@@ -1,12 +1,10 @@
-{ ... }:
-
-{
+{...}: {
   programs.nixvim = {
     enable = true;
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
-    
+
     # 取消版本检查，加快构建速度
     version.enableNixpkgsReleaseCheck = false;
 
@@ -37,8 +35,8 @@
       # 移除全局 clipboard = "unnamedplus"。
       # 理由：Linux 下频繁调用外部 xclip 会导致卡顿。
       # 现在采用“显式交互”策略，只有按 ;;y 时才调用系统剪切板。
-      clipboard = ""; 
-      
+      clipboard = "";
+
       # --- 缩进与排版 ---
       tabstop = 4;
       softtabstop = 4;
@@ -66,7 +64,7 @@
       history = 10000;
       backspace = "indent,eol,start";
       encoding = "utf-8";
-      
+
       # 按键超时 ---
       # 对应 .vimrc 的 set timeoutlen=600
       timeoutlen = 600;
@@ -76,9 +74,9 @@
       swapfile = true;
       backup = false;
       autoread = true;
-      
+
       # 设定持久化文件的存储路径 (对应下方 Lua 逻辑)
-      undodir = "/tmp/.nvim-undo"; 
+      undodir = "/tmp/.nvim-undo";
     };
 
     # ==========================================
@@ -149,7 +147,10 @@
         mode = "n";
         key = "<Esc>";
         action = ":nohlsearch<CR><Esc>"; # 末尾 <Esc> 防御性清除
-        options = { silent = true; desc = "UI: Clear Highlight"; };
+        options = {
+          silent = true;
+          desc = "UI: Clear Highlight";
+        };
       }
       # x 使用黑洞寄存器
       {
@@ -163,43 +164,43 @@
     # ==========================================
     # 4. ⚡ 自动命令 (Auto Commands)
     # ==========================================
-    
+
     autoGroups = {
-      restore_cursor = { clear = true; };
-      markdown_fix = { clear = true; };
-      smart_cursorline = { clear = true; };
-      indent_fix = { clear = true; };
+      restore_cursor = {clear = true;};
+      markdown_fix = {clear = true;};
+      smart_cursorline = {clear = true;};
+      indent_fix = {clear = true;};
     };
 
     autoCmd = [
       # 智能 Cursorline (Smart Cursorline)
       # 目的：输入时关闭高亮减少延迟，浏览时开启高亮方便定位
       {
-        event = [ "InsertEnter" "WinLeave" ];
+        event = ["InsertEnter" "WinLeave"];
         group = "smart_cursorline";
-        pattern = [ "*" ];
+        pattern = ["*"];
         command = "set nocursorline";
       }
       {
-        event = [ "InsertLeave" "WinEnter" ];
+        event = ["InsertLeave" "WinEnter"];
         group = "smart_cursorline";
-        pattern = [ "*" ];
+        pattern = ["*"];
         command = "set cursorline";
       }
 
       # 目的：Makefile 和 Go 必须使用真实 Tab，不能转空格
       {
-        event = [ "FileType" ];
+        event = ["FileType"];
         group = "indent_fix";
-        pattern = [ "make" "go" ];
+        pattern = ["make" "go"];
         command = "setlocal noexpandtab";
       }
 
       # 恢复上次退出时的光标位置
       {
-        event = [ "BufReadPost" ];
+        event = ["BufReadPost"];
         group = "restore_cursor";
-        pattern = [ "*" ];
+        pattern = ["*"];
         callback = {
           __raw = ''
             function()
@@ -214,12 +215,12 @@
           '';
         };
       }
-      
+
       # Markdown 渲染修复
       {
-        event = [ "FileType" ];
+        event = ["FileType"];
         group = "markdown_fix";
-        pattern = [ "markdown" ];
+        pattern = ["markdown"];
         callback = {
           __raw = ''
             function()
@@ -229,11 +230,11 @@
           '';
         };
       }
-      
+
       # 文件被外部修改时自动加载
       {
-        event = [ "FocusGained" "BufEnter" ];
-        pattern = [ "*" ];
+        event = ["FocusGained" "BufEnter"];
+        pattern = ["*"];
         command = "checktime";
       }
     ];
@@ -242,7 +243,7 @@
     # 5. 📦 插件
     # ==========================================
     plugins = {
-      nix.enable = true; 
+      nix.enable = true;
       treesitter = {
         enable = true;
         settings.highlight.enable = true;
@@ -261,7 +262,7 @@
       if vim.fn.isdirectory(undo_dir) == 0 then
         vim.fn.mkdir(undo_dir, "p", 448)
       end
-      
+
       if vim.fn.isdirectory(swap_dir) == 0 then
         vim.fn.mkdir(swap_dir, "p", 448)
       end
