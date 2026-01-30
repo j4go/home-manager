@@ -16,6 +16,7 @@ in {
         shortTimeFormat = "15:04";
         showIcons = true;
         border = "rounded";
+        nerdFontsVersion = "3";
       };
       git = {
         pagers = [
