@@ -43,13 +43,11 @@ in {
       fzf = {
         enable = true;
         enableBashIntegration = true;
-        enableZshIntegration = true;
         defaultOptions = fzfConfig; # 注入基础 UI
       };
       pay-respects = {
         enable = true;
-        enableBashIntegration = false;
-        enableZshIntegration = true;
+        enableBashIntegration = true;
       };
     };
 

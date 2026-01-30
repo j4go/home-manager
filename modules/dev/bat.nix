@@ -11,11 +11,12 @@
       theme = "Dracula"; # 设置你喜欢的主题
       style = "plain"; # 可选：简约风格
     };
-    # 2. 额外插件 (强烈建议保留，太好用了)
-    extraPackages = with pkgs.bat-extras; [
-      batman # 让 man 命令也带高亮
-      batgrep # 配合 ripgrep 显示高亮
-      batdiff # 提供 batdiff 命令
-    ];
   };
+
+  # 2. 额外插件 (强烈建议保留，太好用了)
+  home.packages = with pkgs.bat-extras; [
+    batman # 让 man 命令也带高亮
+    batgrep # 配合 ripgrep 显示高亮
+    batdiff # 提供 batdiff 命令
+  ];
 }

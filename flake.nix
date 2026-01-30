@@ -3,8 +3,6 @@
 
   inputs = {
     # 1. 核心稳定化：锁定到最新的稳定分支
-    # 注意：当前最新稳定版为 24.11，25.11 尚未发布。
-    # 如果该分支不存在，请回退到 nixos-24.11 或使用 nixos-unstable
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
 
     # 2. home-manager 依赖主 nixpkgs
@@ -31,13 +29,11 @@
     nixpkgs-unstable,
     ...
   } @ inputs: let
-    # --- 新增配置开始 ---
     # 定义支持的系统架构 (匹配您的 hosts 配置)
     systems = ["x86_64-linux" "aarch64-linux"];
 
     # 辅助函数：为所有架构生成配置
     forAllSystems = nixpkgs.lib.genAttrs systems;
-    # --- 新增配置结束 ---
 
     overlay-unstable = final: prev: {
       unstable = import nixpkgs-unstable {
