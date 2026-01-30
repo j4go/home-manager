@@ -78,8 +78,7 @@ in {
         dig = "doggo";
         nslookup = "doggo";
         ping = "gping";
-        lg = "LC_TIME=en_US.UTF-8 lazygit";
-        lazygit = "LC_TIME=en_US.UTF-8 lazygit";
+        lg = "lazygit";
         su = "su -";
       };
 
