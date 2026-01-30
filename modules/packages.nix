@@ -6,7 +6,6 @@ in {
   home.packages = 
     # 1. 主体包：使用稳定的 pkgs
     (with pkgs; [
-      tealdeer
       yq-go
       jq            # JSON 处理
       ripgrep       # 极速搜索
@@ -20,6 +19,7 @@ in {
       zip
       unzip
       _7zz          # 现代 7zip 
+      ouch
 
       duf           # 磁盘空间查看
       dust       # 目录占用分析
@@ -28,6 +28,7 @@ in {
       delta         # Git Diff 增强
       sd            # 极速文本替换
       doggo         # 现代 DNS 查询
+      procs
     ]) 
     
     # 2. 增量包：使用 unstablePkgs
@@ -35,7 +36,7 @@ in {
       unstablePkgs.fastfetch
     ];
 
-    # 为 tealdeer 开启自动更新缓存
+    # tealdeer && 开启自动更新缓存
     programs.tealdeer = {
       enable = true;
       settings.updates.auto_update = true;

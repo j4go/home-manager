@@ -80,6 +80,7 @@ in {
         ping = "gping";
         lg = "lazygit";
         su = "su -";
+        m = "tldr";
       };
 
       initExtra = ''
@@ -126,19 +127,47 @@ in {
         }
 
         hm-save() {
-        (
-          cd ~/.config/home-manager || return
-          git add .
-          FLAKE_NAME="${hostName}" 
-          if home-manager switch --flake ".#$FLAKE_NAME" -b backup; then
-              echo -e "🎉 Switch Successful!"
-              [[ $(git diff --cached) ]] && git commit -m "Update from $FLAKE_NAME: $(date '+%Y-%m-%d %H:%M:%S')" || echo "ℹ️ No changes."
-          else
-              return 1
-          fi
-        )}
-      '';
+          (
+              # 1. 进入目录
+              cd ~/.config/home-manager || return
+              
+              # 2. 🎨 执行格式化 (新增步骤)
+              # 如果格式化失败(比如有语法错误)，则直接中断函数，不执行后续操作
+              echo -e "🧹 Running nix fmt..."
+              if ! nix fmt; then
+                  echo -e "❌ Format failed! Please check your syntax."
+                  return 1
+              fi
 
+              # 3. 添加变动到暂存区
+              # 注意：必须在格式化之后 add，这样才能把格式化后的变动包含进去
+              git add .
+              
+              # 4. 执行构建与切换
+              FLAKE_NAME="${hostName}" 
+              if home-manager switch --flake ".#$FLAKE_NAME" -b backup; then
+                  echo -e "🎉 Switch Successful!"
+                  
+                  # 5. 提交变动
+                  # 只有当暂存区有差异时才 commit
+                  if [[ $(git diff --cached) ]]; then
+                      git commit -m "Update from $FLAKE_NAME: $(date '+%Y-%m-%d %H:%M:%S')"
+                  else
+                      echo "ℹ️ No changes to commit."
+                  fi
+              else
+                  echo -e "❌ Switch failed!"
+                  return 1
+              fi
+          )
+        }
+
+        hm-fix() {
+            cd ~/.config/home-manager || return
+            nix flake update && nix-collect-garbage --delete-older-than 10d
+        }
+
+      '';
     };
   };
 }
