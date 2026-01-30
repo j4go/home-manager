@@ -11,6 +11,7 @@ in {
     enable = true;
     settings = {
       gui = {
+        language = "en";
         showIcons = true;
         border = "rounded";
       };
@@ -30,10 +31,7 @@ in {
   # =================================================================
   programs.delta = {
     enable = true;
-    # ⚠️ 必须显式开启，对应警告: automatic enablement is deprecated
     enableGitIntegration = true; 
-    
-    # 原来的 options 移到这里
     options = {
       navigate = true;
       line-numbers = true;
@@ -47,7 +45,6 @@ in {
   # =================================================================
   programs.git = {
     enable = true;
-
     # [严格保留] settings 格式原封不动
     settings = {
       user = {
@@ -57,7 +54,6 @@ in {
       push = {
         autoSetupRemote = true;
       };
-      
       # 🚀 动态代理注入逻辑 (保留)
       # 仅当全局 proxy.enable 为 true 时，以下属性才会被写入 .config/git/config
       http = lib.mkIf proxy.enable {
