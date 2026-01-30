@@ -14,7 +14,7 @@ in {
         language = "en";
         timeFormat = "2006-01-02"; 
         shortTimeFormat = "15:04";
-        showIcons = true;
+        showIcons = false;
         border = "rounded";
         nerdFontsVersion = "3";
       };
