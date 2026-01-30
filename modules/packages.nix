@@ -1,12 +1,7 @@
 {
   pkgs,
-  inputs,
-  system,
   ...
-}: let
-  # 核心：从 inputs 中获取 unstable 的包集
-  unstablePkgs = inputs.nixpkgs-unstable.legacyPackages.${system};
-in {
+}: {
   home.packages =
     # 1. 主体包：使用稳定的 pkgs
     (with pkgs; [
@@ -34,9 +29,9 @@ in {
       doggo # 现代 DNS 查询
       procs
     ])
-    # 2. 增量包：使用 unstablePkgs
+    # 2. 增量包：如果是通过 overlay 注入，则直接使用 pkgs.unstable
     ++ [
-      unstablePkgs.fastfetch
+      pkgs.unstable.fastfetch
     ];
 
   # tealdeer && 开启自动更新缓存

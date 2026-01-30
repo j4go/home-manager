@@ -9,7 +9,6 @@
 }: let
   cfg = config.myOptions.shell.zsh;
   proxy = config.myOptions.proxy;
-  unstablePkgs = inputs.nixpkgs-unstable.legacyPackages.${system};
 in {
   config = lib.mkIf cfg.enable {
     programs.fzf = {

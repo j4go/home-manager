@@ -8,7 +8,6 @@
   ...
 }: let
   proxy = config.myOptions.proxy;
-  unstablePkgs = inputs.nixpkgs-unstable.legacyPackages.${system};
 
   ######################## FZF Config Begin ########################
   # FZF 基础 UI 配置 (严格去除了预览逻辑，防止全局污染和报错)

@@ -28,6 +28,7 @@
     nixpkgs,
     home-manager,
     nixvim,
+    nixpkgs-unstable,
     ...
   } @ inputs: let
     # --- 新增配置开始 ---
@@ -38,9 +39,21 @@
     forAllSystems = nixpkgs.lib.genAttrs systems;
     # --- 新增配置结束 ---
 
+    overlay-unstable = final: prev: {
+      unstable = import nixpkgs-unstable {
+        system = prev.system;
+        config.allowUnfree = true;
+      };
+    };
+
     mkHome = hostName: system:
       home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [overlay-unstable];
+          config.allowUnfree = true;
+        };
+
         # 将 system 显式传递给所有模块
         extraSpecialArgs = {inherit inputs hostName system;};
         modules = [
