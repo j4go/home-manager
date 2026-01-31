@@ -141,29 +141,25 @@ in {
       };
 
       initExtra = lib.mkAfter ''
-        # --- 彻底粉碎所有来源的 DNF 搜索 (系统 + pay-respects) ---
+        # --- 彻底粉碎 DNF 搜索建议 (兼容 source 且无报错) ---
 
-        # 屏蔽信号捕捉（防止二进制拦截）
+        # 清理信号捕捉（切断二进制钩子）
         trap - ERR
         trap - DEBUG
 
-        # 劫持并锁定函数：使用 if 守卫防止 source 报错
-        if ! [[ "$(declare -p -f command_not_found_handle 2>/dev/null)" =~ "readonly" ]]; then
-          command_not_found_handle() {
-            printf "bash: %s: command not found\n" "$1" >&2
-            return 127
-          }
-          command_not_found_handler() {
-            command_not_found_handle "$@"
-          }
-          # 影子函数：让 DNF5 的自愈逻辑彻底失效
-          __dnf5_command_not_found_setup() { :; }
-          __dnf5_command_not_found_handler() { :; }
+        # 影子函数：劫持系统自愈逻辑，使其失效
+        # 不使用 readonly，确保执行 so (source) 时不会引发冲突
+        __dnf5_command_not_found_setup() { :; }
+        __dnf5_command_not_found_handler() { :; }
 
-          readonly -f command_not_found_handle
-          readonly -f command_not_found_handler
-          readonly -f __dnf5_command_not_found_setup
-        fi
+        # 定义纯净报错函数，覆盖系统默认行为
+        command_not_found_handle() {
+          printf "bash: %s: command not found\n" "$1" >&2
+          return 127
+        }
+        command_not_found_handler() {
+          command_not_found_handle "$@"
+        }
 
         # 同步终端历史
         export PROMPT_COMMAND="history -a; history -n"
