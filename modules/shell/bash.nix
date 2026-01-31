@@ -107,7 +107,9 @@ in {
 
       # 别名系统：分类管理
       shellAliases = {
-        # 基础命令增强
+        os = "fastfetch";
+        neo = "fastfetch";
+        fetch = "fastfetch";
         su = "su -";
         "7z" = "7zz";
         so = "source ~/.bashrc";
@@ -125,7 +127,6 @@ in {
         h = "history";
         lg = "lazygit";
         f = "pay-respects";
-        os = "fastfetch";
         ping = "gping";
         dig = "doggo";
         print = "figlet";
