@@ -137,30 +137,31 @@ in {
 
       # 交互式初始化增强
       initExtra = ''
-        # --- 彻底屏蔽系统级命令搜索建议 ---
+        # --- 彻底屏蔽 Rocky 10 / DNF5 命令搜索建议 ---
 
-        # 1. 禁用 PackageKit 和 DNF 的交互式安装提示变量（官方预留开关）
-        export COMMAND_NOT_FOUND_INSTALL_PROMPT=never
+        # 1. 禁用 DNF5 插件官方开关
+        export DNF5_COMMAND_NOT_FOUND_DISABLE=1
+        export DNF5_COMMAND_NOT_FOUND_NO_PROMPT=1
+        export COMMAND_NOT_FOUND_AUTO_INSTALL=never
         export CONF_SW_NO_PROMPT=1
 
-        # 2. 定义静默的处理函数（不加 readonly，避免 source 报错）
-        # 放在 initExtra 末尾可确保覆盖系统默认定义
+        # 2. 清除并重定义钩子函数
+        unset -f command_not_found_handle 2>/dev/null
+        unset -f command_not_found_handler 2>/dev/null
+        unset -f __dnf5_command_not_found_handler 2>/dev/null
+
         command_not_found_handle() {
           printf "bash: %s: command not found\n" "$1" >&2
           return 127
         }
 
-        command_not_found_handler() {
-          command_not_found_handle "$@"
-        }
+        # 3. 重置 PROMPT_COMMAND (不再追加旧的系统变量)
+        # 如果你使用了 Starship，它会自动在此之后接管并添加自己的逻辑
+        export PROMPT_COMMAND="history -a; history -n"
 
-        # 3. 彻底清洗 PROMPT_COMMAND，移除系统注入的 PackageKit 扫描逻辑
-        # 使用 Bash 内置的字符串替换功能
-        export PROMPT_COMMAND=''${PROMPT_COMMAND//_pkg_search_command_not_found/}
-
-        # 交互行为优化：历史命令确认与多终端同步
+        # 使用“历史扩展”符号（如 !!、!$、!n 等）时，系统不会立即执行该命令，而是先将扩展后的完整命令展示在你的输入行中;
+        # 允许你预览、修改，再次按下回车后才会真正执行。它是防止误操作、提升终端操作确定性的关键配置。
         shopt -s histverify
-        export PROMPT_COMMAND="history -a; history -n; $PROMPT_COMMAND"
 
         # 自动注入网络代理（若启用）
         ${lib.optionalString proxy.enable ''
