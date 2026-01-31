@@ -1,8 +1,9 @@
 {pkgs, ...}: {
   programs.zellij = {
     enable = true;
-    # 自动集成到 Bash
-    enableBashIntegration = true;
+    # 自动集成到 Bash 设置为true的话每次会自动进入zellij,打开一个新的会话
+    # 这里要设置为false
+    enableBashIntegration = false;
 
     # 核心设置
     settings = {

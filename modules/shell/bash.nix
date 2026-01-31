@@ -115,7 +115,6 @@ in {
         ll = "eza -l -a --icons=auto --git --time-style=relative";
         la = "ll";
         lt = "eza --tree --level=2 --icons=auto --git --ignore-glob='.git|node_modules'";
-        ze = "zellij";
         m = "tldr";
         cat = "bat";
         man = "batman";
@@ -131,6 +130,10 @@ in {
         dig = "doggo";
         print = "figlet";
 
+        # zellij 常用
+        ze = "zellij";
+        zels = "zellij list-sessions";
+
         # 代理手动控制
         setproxy = "export all_proxy=http://${proxy.address} http_proxy=http://${proxy.address} https_proxy=http://${proxy.address} no_proxy=${noProxyStr} NO_PROXY=${noProxyStr}";
         unproxy = "unset all_proxy http_proxy https_proxy no_proxy NO_PROXY";
@@ -141,6 +144,26 @@ in {
       };
 
       initExtra = lib.mkAfter ''
+        # --- Zellij 自动启动与会话锁定逻辑 ---
+        # 逻辑：
+        # 1. 检查当前是否已在 Zellij 会话中 ($ZELLIJ 变量为空)
+        # 2. 检查当前是否为交互式 Shell ($- 包含 i)
+        # 3. 排除 SSH 远程连接或特定的 IDE 终端 (可选)
+        if [[ -z "$ZELLIJ" && $- == *i* ]]; then
+          if command -v zellij &> /dev/null; then
+            # attach: 尝试连接
+            # -c w: 如果名为 "w" 的会话不存在，则以 "w" 为名创建它
+            # exec: 让 Zellij 替换当前的 bash 进程，退出时直接关闭终端窗口
+            exec zellij attach -c w
+          fi
+        fi
+
+        # 注入补全脚本 (即便不自动启动，补全也是必要的)
+        if command -v zellij &> /dev/null; then
+          eval "$(zellij setup --generate-completion bash)"
+        fi
+
+
         # --- 彻底粉碎 DNF 搜索建议 ---
 
         # 清理信号捕捉（切断二进制钩子）
@@ -167,9 +190,11 @@ in {
           eval "$(starship init bash)"
         fi
 
+
         # 使用“历史扩展”符号（如 !!、!$、!n 等）时，系统不会立即执行该命令，而是先将扩展后的完整命令展示在你的输入行中;
         # 允许你预览、修改，再次按下回车后才会真正执行。它是防止误操作、提升终端操作确定性的关键配置。
         shopt -s histverify
+
 
         # 自动注入网络代理（若启用）
         ${lib.optionalString proxy.enable ''
@@ -177,6 +202,7 @@ in {
           export https_proxy="http://${proxy.address}"
           export all_proxy="http://${proxy.address}"
         ''}
+
 
         # Mamba/Conda 懒加载：仅在调用时加载环境，优化启动速度
         mamba_setup() {
@@ -190,16 +216,10 @@ in {
         alias mamba='mamba_setup; mamba'
         alias conda='mamba_setup; conda'
 
+
         # 实用函数：快速创建并进入目录
         mkcd() { mkdir -p "$1" && cd "$1"; }
 
-        # 实用函数：智能编辑（自动创建不存在的文件）
-        edit() {
-          for file in "$@"; do
-            [[ ! -e "$file" ]] && touch "$file" && echo "📄 Created: $file"
-          done
-          $EDITOR "$@"
-        }
 
         # Home-Manager 维护函数：集成格式化、构建与自动提交
         hm-save() {
@@ -218,11 +238,13 @@ in {
           )
         }
 
+
         # 系统清理与更新
         hm-fix() {
           cd ~/.config/home-manager || return
           nix flake update && nix-collect-garbage --delete-older-than 10d
         }
+
       '';
     };
   };
