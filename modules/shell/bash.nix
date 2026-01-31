@@ -137,22 +137,31 @@ in {
 
       # 交互式初始化增强
       initExtra = ''
-        # --- 彻底粉碎 DNF5 / Rocky 10 命令搜索建议 (影子函数方案) ---
+        # --- 彻底粉碎 DNF5 / Rocky 10 命令搜索建议 (绝杀方案) ---
 
-        # 1. 禁用 DNF5 官方控制变量
+        # 1. 屏蔽 DNF5 及其插件的所有已知环境变量
         export DNF5_COMMAND_NOT_FOUND_DISABLE=1
         export DNF5_CNF_DISABLED=1
+        export DNF5_COMMAND_NOT_FOUND_NO_PROMPT=1
+        export COMMAND_NOT_FOUND_AUTO_INSTALL=never
         export CONF_SW_NO_PROMPT=1
 
-        # 2. 影子函数策略：定义空的 DNF5 内部安装和处理函数
-        # 即使系统脚本尝试调用它们，也只会执行冒号（即“无操作”）
+        # 2. 强行重置所有的信号捕获 (DNF5 喜欢挂载在 ERR 或 DEBUG 信号上)
+        trap - ERR
+        trap - DEBUG
+        trap - EXIT
+
+        # 3. 影子函数：将 DNF5 的内部调用全部导向空操作
         __dnf5_command_not_found_setup() { :; }
         __dnf5_command_not_found_handler() { :; }
 
-        # 3. 卸载并重定义标准钩子
-        unset -f command_not_found_handle 2>/dev/null
-        unset -f command_not_found_handler 2>/dev/null
+        # 4. 路径伪装：创建一个假的 dnf5-command-not-found 别名/函数
+        # 即使系统尝试直接调用二进制文件，也会被这个空函数拦截
+        dnf5-command-not-found() { :; }
+        /usr/libexec/dnf5/dnf5-command-not-found() { :; }
 
+        # 5. 定义纯净报错并覆盖标准钩子
+        unset -f command_not_found_handle 2>/dev/null
         command_not_found_handle() {
           printf "bash: %s: command not found\n" "$1" >&2
           return 127
@@ -161,11 +170,8 @@ in {
           command_not_found_handle "$@"
         }
 
-        # 4. 清除 ERR 信号捕捉（防止二进制钩子触发）
-        trap - ERR
-
-        # 5. 彻底重置 PROMPT_COMMAND (不再追加旧的系统变量)
-        # 这一步切断了系统脚本在每次提示符出现时“自愈”的可能性
+        # 6. 彻底重置 PROMPT_COMMAND (不再追加 $PROMPT_COMMAND)
+        # 这一步会洗掉系统在 /etc/profile.d/ 中注入的所有 DNF 逻辑
         export PROMPT_COMMAND="history -a; history -n"
 
         # 使用“历史扩展”符号（如 !!、!$、!n 等）时，系统不会立即执行该命令，而是先将扩展后的完整命令展示在你的输入行中;
