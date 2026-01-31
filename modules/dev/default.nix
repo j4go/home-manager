@@ -7,5 +7,6 @@
     ./htop.nix
     ./ssh.nix
     ./git.nix
+    ./zellij.nix
   ];
 }

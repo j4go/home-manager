@@ -29,6 +29,7 @@
       sd # 极速文本替换
       doggo # 现代 DNS 查询
       procs
+      bottom
 
       # --- 字体安装区域 ---
       nerd-fonts.jetbrains-mono
