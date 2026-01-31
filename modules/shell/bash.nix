@@ -137,21 +137,22 @@ in {
 
       # 交互式初始化增强
       initExtra = ''
-        # --- 彻底屏蔽 Rocky 10 / DNF5 命令搜索建议 (精简稳健版) ---
+        # --- 彻底粉碎 DNF5 / Rocky 10 命令搜索建议 (影子函数方案) ---
 
-        # 1. 禁用 DNF5 插件官方开关
+        # 1. 禁用 DNF5 官方控制变量
         export DNF5_COMMAND_NOT_FOUND_DISABLE=1
+        export DNF5_CNF_DISABLED=1
         export CONF_SW_NO_PROMPT=1
 
-        # 2. 清理信号捕捉器
-        trap - ERR
+        # 2. 影子函数策略：定义空的 DNF5 内部安装和处理函数
+        # 即使系统脚本尝试调用它们，也只会执行冒号（即“无操作”）
+        __dnf5_command_not_found_setup() { :; }
+        __dnf5_command_not_found_handler() { :; }
 
-        # 3. 重置并清洗 PROMPT_COMMAND (核心：直接赋值，不追加旧的系统逻辑)
-        # 这会彻底洗掉系统注入的 DNF 搜索钩子
-        export PROMPT_COMMAND="history -a; history -n"
+        # 3. 卸载并重定义标准钩子
+        unset -f command_not_found_handle 2>/dev/null
+        unset -f command_not_found_handler 2>/dev/null
 
-        # 4. 定义纯净报错函数 (不再使用 readonly，确保 source 不报错)
-        # Home Manager 将此段放在 .bashrc 末尾，足以覆盖系统默认定义
         command_not_found_handle() {
           printf "bash: %s: command not found\n" "$1" >&2
           return 127
@@ -159,6 +160,13 @@ in {
         command_not_found_handler() {
           command_not_found_handle "$@"
         }
+
+        # 4. 清除 ERR 信号捕捉（防止二进制钩子触发）
+        trap - ERR
+
+        # 5. 彻底重置 PROMPT_COMMAND (不再追加旧的系统变量)
+        # 这一步切断了系统脚本在每次提示符出现时“自愈”的可能性
+        export PROMPT_COMMAND="history -a; history -n"
 
         # 使用“历史扩展”符号（如 !!、!$、!n 等）时，系统不会立即执行该命令，而是先将扩展后的完整命令展示在你的输入行中;
         # 允许你预览、修改，再次按下回车后才会真正执行。它是防止误操作、提升终端操作确定性的关键配置。
