@@ -139,12 +139,12 @@ in {
       initExtra = ''
         # --- 彻底屏蔽系统级命令搜索建议 ---
 
-        # 1. 禁用 PackageKit 和 DNF 的交互式安装提示变量
+        # 1. 禁用 PackageKit 和 DNF 的交互式安装提示变量（官方预留开关）
         export COMMAND_NOT_FOUND_INSTALL_PROMPT=never
         export CONF_SW_NO_PROMPT=1
 
-        # 2. 定义静默的未找到命令处理函数（不使用 readonly 以避免 source 报错）
-        # 由于 Home-Manager 的 initExtra 位于 .bashrc 末尾，它会覆盖系统默认定义
+        # 2. 定义静默的处理函数（不加 readonly，避免 source 报错）
+        # 放在 initExtra 末尾可确保覆盖系统默认定义
         command_not_found_handle() {
           printf "bash: %s: command not found\n" "$1" >&2
           return 127
@@ -154,8 +154,8 @@ in {
           command_not_found_handle "$@"
         }
 
-        # 3. 清洗 PROMPT_COMMAND，移除可能残留的系统搜索钩子
-        # 某些发行版会将搜索逻辑注入到每个命令执行后的 PROMPT_COMMAND 中
+        # 3. 彻底清洗 PROMPT_COMMAND，移除系统注入的 PackageKit 扫描逻辑
+        # 使用 Bash 内置的字符串替换功能
         export PROMPT_COMMAND=''${PROMPT_COMMAND//_pkg_search_command_not_found/}
 
         # 交互行为优化：历史命令确认与多终端同步
