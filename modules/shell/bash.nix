@@ -98,6 +98,11 @@ in {
         MANROFFOPT = "-c";
         NO_PROXY = noProxyStr;
         no_proxy = noProxyStr;
+        # 禁用dnf插件
+        DNF5_COMMAND_NOT_FOUND_DISABLE = "1";
+        DNF5_CNF_DISABLED = "1";
+        COMMAND_NOT_FOUND_AUTO_INSTALL = "never";
+        CONF_SW_NO_PROMPT = "1";
       };
 
       # 别名系统：分类管理
@@ -137,6 +142,30 @@ in {
 
       # 交互式初始化增强
       initExtra = ''
+        # --- 彻底粉碎所有来源的 DNF 搜索 (系统 + pay-respects) ---
+
+        # 屏蔽信号捕捉（防止二进制拦截）
+        trap - ERR
+        trap - DEBUG
+
+        # 劫持并锁定函数：使用 if 守卫防止 source 报错
+        if ! [[ "$(declare -p -f command_not_found_handle 2>/dev/null)" =~ "readonly" ]]; then
+          command_not_found_handle() {
+            printf "bash: %s: command not found\n" "$1" >&2
+            return 127
+          }
+          command_not_found_handler() {
+            command_not_found_handle "$@"
+          }
+          # 影子函数：让 DNF5 的自愈逻辑彻底失效
+          __dnf5_command_not_found_setup() { :; }
+          __dnf5_command_not_found_handler() { :; }
+
+          readonly -f command_not_found_handle
+          readonly -f command_not_found_handler
+          readonly -f __dnf5_command_not_found_setup
+        fi
+
         # 同步终端历史
         export PROMPT_COMMAND="history -a; history -n"
 
