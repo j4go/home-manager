@@ -140,8 +140,7 @@ in {
         gitup = "git add . && git commit -m \"update: $(date +%Y-%m-%d)\" && git push";
       };
 
-      # 交互式初始化增强
-      initExtra = ''
+      initExtra = lib.mkAfter ''
         # --- 彻底粉碎所有来源的 DNF 搜索 (系统 + pay-respects) ---
 
         # 屏蔽信号捕捉（防止二进制拦截）
