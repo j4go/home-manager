@@ -1,4 +1,8 @@
 {pkgs, ...}: {
+  # 允许 Home Manager 管理字体配置文件
+  # 这步如果不做，即使安装了包，终端也找不到字体
+  fonts.fontconfig.enable = true;
+
   home.packages =
     # 1. 主体包：使用稳定的 pkgs
     (with pkgs; [
@@ -25,6 +29,9 @@
       sd # 极速文本替换
       doggo # 现代 DNS 查询
       procs
+
+      # --- 字体安装区域 ---
+      nerd-fonts.jetbrains-mono
     ])
     # 2. 增量包：如果是通过 overlay 注入，则直接使用 pkgs.unstable
     ++ [
