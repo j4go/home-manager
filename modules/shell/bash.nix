@@ -137,25 +137,26 @@ in {
 
       # 交互式初始化增强
       initExtra = ''
-        # 使用变量守卫，防止 source ~/.bashrc 时重复定义只读函数导致报错
-        if [[ -z "$_CNF_FIXED" ]]; then
-          command_not_found_handle() {
-            # 立即报错并退出，绝不调用 dnf
-            printf "bash: %s: command not found\n" "$1" >&2
-            return 127
-          }
+        # --- 彻底屏蔽系统级命令搜索建议 ---
 
-          command_not_found_handler() {
-            command_not_found_handle "$@"
-          }
+        # 1. 禁用 PackageKit 和 DNF 的交互式安装提示变量
+        export COMMAND_NOT_FOUND_INSTALL_PROMPT=never
+        export CONF_SW_NO_PROMPT=1
 
-          # 锁定函数，防止系统级脚本后续篡改
-          readonly -f command_not_found_handle
-          readonly -f command_not_found_handler
+        # 2. 定义静默的未找到命令处理函数（不使用 readonly 以避免 source 报错）
+        # 由于 Home-Manager 的 initExtra 位于 .bashrc 末尾，它会覆盖系统默认定义
+        command_not_found_handle() {
+          printf "bash: %s: command not found\n" "$1" >&2
+          return 127
+        }
 
-          # 加上锁标记
-          export _CNF_FIXED=1
-        fi
+        command_not_found_handler() {
+          command_not_found_handle "$@"
+        }
+
+        # 3. 清洗 PROMPT_COMMAND，移除可能残留的系统搜索钩子
+        # 某些发行版会将搜索逻辑注入到每个命令执行后的 PROMPT_COMMAND 中
+        export PROMPT_COMMAND=''${PROMPT_COMMAND//_pkg_search_command_not_found/}
 
         # 交互行为优化：历史命令确认与多终端同步
         shopt -s histverify
