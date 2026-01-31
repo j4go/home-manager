@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   home.packages =
     # 1. 主体包：使用稳定的 pkgs
     (with pkgs; [
