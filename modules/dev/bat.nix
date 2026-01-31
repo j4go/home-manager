@@ -9,7 +9,8 @@
     config = {
       pager = "less -FR"; # 保持类似 less 的翻页体验
       theme = "gruvbox-light"; # 设置你喜欢的主题
-      style = "numbers,changes"; # 可选：简约风格
+      # style = "numbers,changes"; # 可选：简约风格
+      style = "header,grid,numbers";
     };
   };
 
