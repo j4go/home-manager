@@ -113,7 +113,6 @@ in {
 
         # 现代工具替代
         m = "tldr";
-        c = "\cat";
         cat = "bat --style=plain";
         man = "batman";
         bgrep = "batgrep";
@@ -138,8 +137,21 @@ in {
 
       # 交互式初始化增强
       initExtra = ''
-        # 禁用系统自带的 command-not-found 插件，防止输入错命令时卡顿
-        unset -f command_not_found_handle
+        # 强制覆盖并锁定命令未找到钩子，彻底屏蔽 dnf 检索
+        command_not_found_handle() {
+          # $1 是用户输入的错误命令
+          printf "bash: %s: command not found\n" "$1" >&2
+          return 127
+        }
+
+        # 处理带 'r' 的变体
+        command_not_found_handler() {
+          command_not_found_handle "$@"
+        }
+
+        # 核心步骤：将函数设为只读，防止系统级脚本后续重新定义它
+        readonly -f command_not_found_handle
+        readonly -f command_not_found_handler
 
         # 交互行为优化：历史命令确认与多终端同步
         shopt -s histverify
