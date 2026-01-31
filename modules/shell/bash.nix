@@ -113,6 +113,7 @@ in {
 
         # 现代工具替代
         m = "tldr";
+        c = "\cat";
         cat = "bat --style=plain";
         man = "batman";
         bgrep = "batgrep";
