@@ -129,6 +129,7 @@ in {
         os = "fastfetch";
         ping = "gping";
         dig = "doggo";
+        print = "figlet";
 
         # 代理手动控制
         setproxy = "export all_proxy=http://${proxy.address} http_proxy=http://${proxy.address} https_proxy=http://${proxy.address} no_proxy=${noProxyStr} NO_PROXY=${noProxyStr}";
