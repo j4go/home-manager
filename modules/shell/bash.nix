@@ -141,14 +141,13 @@ in {
       };
 
       initExtra = lib.mkAfter ''
-        # --- 彻底粉碎 DNF 搜索建议 (兼容 source 且无报错) ---
+        # --- 彻底粉碎 DNF 搜索建议 ---
 
         # 清理信号捕捉（切断二进制钩子）
         trap - ERR
         trap - DEBUG
 
         # 影子函数：劫持系统自愈逻辑，使其失效
-        # 不使用 readonly，确保执行 so (source) 时不会引发冲突
         __dnf5_command_not_found_setup() { :; }
         __dnf5_command_not_found_handler() { :; }
 
@@ -163,6 +162,10 @@ in {
 
         # 同步终端历史
         export PROMPT_COMMAND="history -a; history -n"
+
+        if command -v starship >/dev/null; then
+          eval "$(starship init bash)"
+        fi
 
         # 使用“历史扩展”符号（如 !!、!$、!n 等）时，系统不会立即执行该命令，而是先将扩展后的完整命令展示在你的输入行中;
         # 允许你预览、修改，再次按下回车后才会真正执行。它是防止误操作、提升终端操作确定性的关键配置。
