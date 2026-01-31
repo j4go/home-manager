@@ -19,7 +19,7 @@
       zip
       unzip
       _7zz # 现代 7zip
-      ouch
+      ouch # 自动识别所有的后缀名 使用参数一致 体验最好
 
       duf # 磁盘空间查看
       dust # 目录占用分析
@@ -28,11 +28,17 @@
       delta # Git Diff 增强
       sd # 极速文本替换
       doggo # 现代 DNS 查询
-      procs
-      bottom
+      procs # 进程查看
+      bottom # 类似btop htop
 
       # --- 字体安装区域 ---
       nerd-fonts.jetbrains-mono
+
+      # 终端输出
+      figlet # 经典 ASCII 艺术字生成器
+      toilet # FIGlet 的增强版，支持彩色输出和更多过滤器
+      chafa # 现代终端图形预览器（支持图像转 ASCII/六角单元）
+      lolcat # 为任何文本输出添加彩虹渐变效果
     ])
     # 2. 增量包：如果是通过 overlay 注入，则直接使用 pkgs.unstable
     ++ [
