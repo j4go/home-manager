@@ -115,8 +115,7 @@ in {
         ll = "eza -l -a --icons=auto --git --time-style=relative";
         la = "ll";
         lt = "eza --tree --level=2 --icons=auto --git --ignore-glob='.git|node_modules'";
-
-        # 现代工具替代
+        t = "zellij";
         m = "tldr";
         cat = "bat";
         man = "batman";
