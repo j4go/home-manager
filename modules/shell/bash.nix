@@ -137,21 +137,25 @@ in {
 
       # 交互式初始化增强
       initExtra = ''
-        # 强制覆盖并锁定命令未找到钩子，彻底屏蔽 dnf 检索
-        command_not_found_handle() {
-          # $1 是用户输入的错误命令
-          printf "bash: %s: command not found\n" "$1" >&2
-          return 127
-        }
+        # 使用变量守卫，防止 source ~/.bashrc 时重复定义只读函数导致报错
+        if [[ -z "$_CNF_FIXED" ]]; then
+          command_not_found_handle() {
+            # 立即报错并退出，绝不调用 dnf
+            printf "bash: %s: command not found\n" "$1" >&2
+            return 127
+          }
 
-        # 处理带 'r' 的变体
-        command_not_found_handler() {
-          command_not_found_handle "$@"
-        }
+          command_not_found_handler() {
+            command_not_found_handle "$@"
+          }
 
-        # 核心步骤：将函数设为只读，防止系统级脚本后续重新定义它
-        readonly -f command_not_found_handle
-        readonly -f command_not_found_handler
+          # 锁定函数，防止系统级脚本后续篡改
+          readonly -f command_not_found_handle
+          readonly -f command_not_found_handler
+
+          # 加上锁标记
+          export _CNF_FIXED=1
+        fi
 
         # 交互行为优化：历史命令确认与多终端同步
         shopt -s histverify
