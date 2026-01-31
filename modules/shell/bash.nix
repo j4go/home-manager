@@ -138,6 +138,9 @@ in {
 
       # 交互式初始化增强
       initExtra = ''
+        # 禁用系统自带的 command-not-found 插件，防止输入错命令时卡顿
+        unset -f command_not_found_handle
+
         # 交互行为优化：历史命令确认与多终端同步
         shopt -s histverify
         export PROMPT_COMMAND="history -a; history -n; $PROMPT_COMMAND"
