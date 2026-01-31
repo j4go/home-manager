@@ -118,7 +118,7 @@ in {
 
         # 现代工具替代
         m = "tldr";
-        cat = "bat --style=plain";
+        cat = "bat";
         man = "batman";
         bgrep = "batgrep";
         bdiff = "batdiff";
