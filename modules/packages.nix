@@ -31,9 +31,23 @@
       pkgs.unstable.fastfetch
     ];
 
-  # tealdeer && 开启自动更新缓存
+  # tealdeer：现代化的 tldr 客户端
   programs.tealdeer = {
     enable = true;
-    settings.updates.auto_update = true;
+    settings = {
+      updates = {
+        # 禁用触发式更新：防止在查询时因网络请求导致终端卡顿
+        # 手动更新命令：tldr -u
+        auto_update = false;
+        # 自动更新间隔（若开启）：建议设为 168 小时（一周）
+        auto_update_interval_hours = 168;
+      };
+      display = {
+        # 紧凑模式：去除多余空行，提升屏幕信息密度
+        compact = true;
+        # 启用颜色输出
+        use_pager = false;
+      };
+    };
   };
 }
