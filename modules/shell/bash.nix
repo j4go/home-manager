@@ -137,38 +137,43 @@ in {
 
       # 交互式初始化增强
       initExtra = ''
-        # --- 彻底粉碎 DNF5 / Rocky 10 命令搜索建议 (V4 终极版) ---
+        # --- 彻底粉碎 DNF5 / Rocky 10 命令搜索建议 (上帝锁死版) ---
 
-        # 1. 禁用 DNF5 插件的所有交互式与自动化变量 (全量拦截)
+        # 1. 屏蔽 DNF5 插件所有已知环境变量开关
         export DNF5_COMMAND_NOT_FOUND_DISABLE=1
-        export DNF5_COMMAND_NOT_FOUND_INTERACTIVE=0
         export DNF5_CNF_DISABLED=1
-        export CONF_SW_NO_PROMPT=1
+        export DNF5_COMMAND_NOT_FOUND_INTERACTIVE=0
         export COMMAND_NOT_FOUND_AUTO_INSTALL=never
+        export CONF_SW_NO_PROMPT=1
 
-        # 2. 清理信号捕捉器 (DNF5 经常挂载在 ERR 信号上实现静默触发)
+        # 2. 彻底重置信号捕获 (这是 DNF5 在后台偷偷运行的关键)
         trap - ERR
         trap - DEBUG
 
-        # 3. 影子函数策略：定义空的 DNF5 内部安装函数，使其“自愈”逻辑彻底失效
-        # 系统脚本在 /etc/profile.d/ 中会尝试运行此函数来重新安装钩子
+        # 3. 影子函数：劫持 DNF5 内部私有函数，使其自愈逻辑失效
         __dnf5_command_not_found_setup() { :; }
         __dnf5_command_not_found_handler() { :; }
 
-        # 4. 定义纯净报错函数 (不使用 readonly，避免 source 报错)
-        # 我们通过第 5 步的 PROMPT_COMMAND 重置来确保它不会被系统改回去
-        command_not_found_handle() {
-          printf "bash: %s: command not found\n" "$1" >&2
-          return 127
-        }
-        command_not_found_handler() {
-          command_not_found_handle "$@"
-        }
-
-        # 5. 关键：彻底清洗并重置 PROMPT_COMMAND
-        # 必须直接赋值 (=)，绝对不能包含旧的 $PROMPT_COMMAND
-        # 这样就彻底切断了系统脚本在每次命令结束后“重新修复”DNF 钩子的机会
+        # 4. 彻底清洗并重置 PROMPT_COMMAND (不再追加旧的系统变量)
+        # 这一步切断了系统在每次显示提示符时“重新修复”DNF 钩子的可能性
         export PROMPT_COMMAND="history -a; history -n"
+
+        # 5. 条件式只读锁定：既能锁死函数，又能彻底解决 "so" 时的报错
+        # 逻辑：仅当函数尚未被锁定时才进行定义和加锁
+        if ! [[ "$(declare -p -f command_not_found_handle 2>/dev/null)" =~ "readonly" ]]; then
+          command_not_found_handle() {
+            printf "bash: %s: command not found\n" "$1" >&2
+            return 127
+          }
+          command_not_found_handler() {
+            command_not_found_handle "$@"
+          }
+          # 强制锁定，任何系统脚本都无法再修改它
+          readonly -f command_not_found_handle
+          readonly -f command_not_found_handler
+          readonly -f __dnf5_command_not_found_setup
+          readonly -f __dnf5_command_not_found_handler
+        fi
 
         # 使用“历史扩展”符号（如 !!、!$、!n 等）时，系统不会立即执行该命令，而是先将扩展后的完整命令展示在你的输入行中;
         # 允许你预览、修改，再次按下回车后才会真正执行。它是防止误操作、提升终端操作确定性的关键配置。
