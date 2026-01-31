@@ -137,32 +137,34 @@ in {
 
       # 交互式初始化增强
       initExtra = ''
-        # --- 彻底屏蔽 Rocky 10 / DNF5 命令搜索建议 ---
-
-        # 1. 禁用 DNF5 插件的全局环境变量
+        # 1. 屏蔽 DNF5 及其插件的所有已知控制变量
         export DNF5_COMMAND_NOT_FOUND_DISABLE=1
+        export DNF5_CNF_DISABLED=1
         export DNF5_COMMAND_NOT_FOUND_NO_PROMPT=1
         export COMMAND_NOT_FOUND_AUTO_INSTALL=never
         export CONF_SW_NO_PROMPT=1
 
-        # 2. 强力卸载所有可能的钩子函数（包括 DNF5 私有函数）
-        unset -f command_not_found_handle 2>/dev/null
-        unset -f command_not_found_handler 2>/dev/null
-        unset -f __dnf5_command_not_found_handler 2>/dev/null
-        unset -f __dnf5_command_not_found_setup 2>/dev/null
+        # 2. 清理系统可能埋下的 "ERR" 信号捕捉器 (DNF5 常用此招)
+        trap - ERR
 
-        # 3. 定义我们自己的纯净报错函数
-        command_not_found_handle() {
-          printf "bash: %s: command not found\n" "$1" >&2
-          return 127
-        }
-        command_not_found_handler() {
-          command_not_found_handle "$@"
-        }
-
-        # 4. 重置 PROMPT_COMMAND (不再追加旧的系统变量)
-        # 如果你使用了 Starship，它会自动在此之后接管并添加自己的逻辑
+        # 3. 彻底重置 PROMPT_COMMAND (不再追加 $PROMPT_COMMAND)
+        # 这一步会洗掉系统在 /etc/profile.d/ 中注入的所有 DNF 检索脚本
         export PROMPT_COMMAND="history -a; history -n"
+
+        # 4. 只读守卫函数：定义并锁定报错行为，同时防止 source 报错
+        # 我们先检查函数是否已经是 readonly，如果是则跳过，彻底解决 "readonly function" 报错
+        if [[ "$(declare -p -f command_not_found_handle 2>/dev/null)" != *"readonly"* ]]; then
+          command_not_found_handle() {
+            printf "bash: %s: command not found\n" "$1" >&2
+            return 127
+          }
+          command_not_found_handler() {
+            command_not_found_handle "$@"
+          }
+          # 锁定函数，让系统脚本无法在运行时重新覆盖它
+          readonly -f command_not_found_handle
+          readonly -f command_not_found_handler
+        fi
 
         # 使用“历史扩展”符号（如 !!、!$、!n 等）时，系统不会立即执行该命令，而是先将扩展后的完整命令展示在你的输入行中;
         # 允许你预览、修改，再次按下回车后才会真正执行。它是防止误操作、提升终端操作确定性的关键配置。
