@@ -137,21 +137,26 @@ in {
 
       # 交互式初始化增强
       initExtra = ''
-        # --- 彻底屏蔽 Rocky 10 / DNF5 命令搜索建议 (精简纯净版) ---
+        # --- 彻底粉碎 DNF5 / Rocky 10 命令搜索建议 (V4 终极版) ---
 
-        # 1. 禁用 DNF5 插件官方开关
+        # 1. 禁用 DNF5 插件的所有交互式与自动化变量 (全量拦截)
         export DNF5_COMMAND_NOT_FOUND_DISABLE=1
+        export DNF5_COMMAND_NOT_FOUND_INTERACTIVE=0
         export DNF5_CNF_DISABLED=1
         export CONF_SW_NO_PROMPT=1
+        export COMMAND_NOT_FOUND_AUTO_INSTALL=never
 
-        # 2. 影子函数：定义空的自愈函数，让系统脚本空转
+        # 2. 清理信号捕捉器 (DNF5 经常挂载在 ERR 信号上实现静默触发)
+        trap - ERR
+        trap - DEBUG
+
+        # 3. 影子函数策略：定义空的 DNF5 内部安装函数，使其“自愈”逻辑彻底失效
+        # 系统脚本在 /etc/profile.d/ 中会尝试运行此函数来重新安装钩子
         __dnf5_command_not_found_setup() { :; }
         __dnf5_command_not_found_handler() { :; }
 
-        # 3. 重置并清洗 PROMPT_COMMAND (核心：直接赋值，彻底洗掉系统钩子)
-        export PROMPT_COMMAND="history -a; history -n"
-
-        # 4. 定义纯净报错函数 (去掉 readonly，彻底解决 source 报错)
+        # 4. 定义纯净报错函数 (不使用 readonly，避免 source 报错)
+        # 我们通过第 5 步的 PROMPT_COMMAND 重置来确保它不会被系统改回去
         command_not_found_handle() {
           printf "bash: %s: command not found\n" "$1" >&2
           return 127
@@ -160,8 +165,10 @@ in {
           command_not_found_handle "$@"
         }
 
-        # 5. 清理信号捕捉器
-        trap - ERR
+        # 5. 关键：彻底清洗并重置 PROMPT_COMMAND
+        # 必须直接赋值 (=)，绝对不能包含旧的 $PROMPT_COMMAND
+        # 这样就彻底切断了系统脚本在每次命令结束后“重新修复”DNF 钩子的机会
+        export PROMPT_COMMAND="history -a; history -n"
 
         # 使用“历史扩展”符号（如 !!、!$、!n 等）时，系统不会立即执行该命令，而是先将扩展后的完整命令展示在你的输入行中;
         # 允许你预览、修改，再次按下回车后才会真正执行。它是防止误操作、提升终端操作确定性的关键配置。
