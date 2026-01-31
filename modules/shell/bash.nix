@@ -139,23 +139,28 @@ in {
       initExtra = ''
         # --- 彻底屏蔽 Rocky 10 / DNF5 命令搜索建议 ---
 
-        # 1. 禁用 DNF5 插件官方开关
+        # 1. 禁用 DNF5 插件的全局环境变量
         export DNF5_COMMAND_NOT_FOUND_DISABLE=1
         export DNF5_COMMAND_NOT_FOUND_NO_PROMPT=1
         export COMMAND_NOT_FOUND_AUTO_INSTALL=never
         export CONF_SW_NO_PROMPT=1
 
-        # 2. 清除并重定义钩子函数
+        # 2. 强力卸载所有可能的钩子函数（包括 DNF5 私有函数）
         unset -f command_not_found_handle 2>/dev/null
         unset -f command_not_found_handler 2>/dev/null
         unset -f __dnf5_command_not_found_handler 2>/dev/null
+        unset -f __dnf5_command_not_found_setup 2>/dev/null
 
+        # 3. 定义我们自己的纯净报错函数
         command_not_found_handle() {
           printf "bash: %s: command not found\n" "$1" >&2
           return 127
         }
+        command_not_found_handler() {
+          command_not_found_handle "$@"
+        }
 
-        # 3. 重置 PROMPT_COMMAND (不再追加旧的系统变量)
+        # 4. 重置 PROMPT_COMMAND (不再追加旧的系统变量)
         # 如果你使用了 Starship，它会自动在此之后接管并添加自己的逻辑
         export PROMPT_COMMAND="history -a; history -n"
 
