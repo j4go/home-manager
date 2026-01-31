@@ -17,7 +17,8 @@
         # background 指的是对比度 (Contrast)，接受 "hard", "medium", "soft"
         background = "medium";
         enable_italic = 1; # 开启斜体
-        better_performance = 1; # 性能优化
+        # 关闭性能优化模式以消除底部提示
+        better_performance = 0;
       };
     };
 
