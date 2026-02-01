@@ -14,7 +14,7 @@
       # 鼠标支持
       mouse_mode = true;
       # 简写模式：不显示底部提示栏 (熟练后开启)
-      # pane_frames = false;
+      pane_frames = false;
 
       everforest-light = {
         fg = "#5c6a72";
