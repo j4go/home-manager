@@ -118,7 +118,6 @@ in {
         la = "ll";
         lt = "eza --tree --level=2 --icons=auto --git --ignore-glob='.git|node_modules'";
         m = "tldr";
-        cat = "bat";
         man = "batman";
         bgrep = "batgrep";
         bdiff = "batdiff";
