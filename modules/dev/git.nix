@@ -46,24 +46,80 @@ in {
   };
 
   # =================================================================
-  # 3. Git 核心配置
+  # 3. Git 核心配置 (严格遵循 settings 格式)
   # =================================================================
   programs.git = {
     enable = true;
-    # [严格保留] settings 格式原封不动
+
+    # 启用 LFS 支持
+    lfs.enable = true;
+
     settings = {
+      # 用户身份
       user = {
         name = "j4go";
         email = "yianny@163.com";
       };
+
+      # 核心行为
+      core = {
+        autocrlf = false;
+        quotepath = false;
+        ignorecase = false;
+        conflictstyle = "zdiff3";
+      };
+
+      # 初始化
+      init = {
+        defaultBranch = "main";
+      };
+
+      # 颜色
+      color = {
+        ui = true;
+      };
+
+      # 拉取与推送
+      pull = {
+        rebase = true;
+      };
       push = {
+        default = "current";
+        followTags = true;
         autoSetupRemote = true;
       };
-      # 🚀 动态代理注入逻辑 (保留)
-      # 仅当全局 proxy.enable 为 true 时，以下属性才会被写入 .config/git/config
-      http = lib.mkIf proxy.enable {
-        proxy = "http://${proxy.address}";
+
+      # 获取与清理
+      fetch = {
+        prune = true;
       };
+
+      # 辅助功能
+      help = {
+        autocorrect = "prompt";
+      };
+
+      # 别名系统 (Alias)
+      alias = {
+        st = "status";
+        co = "checkout";
+        ci = "commit";
+        br = "branch";
+        unstage = "reset HEAD --";
+        last = "log -1 HEAD";
+        lg = "log --graph --pretty=format:'%C(bold yellow)%h%Creset %C(magenta)-%Creset %s %C(auto)%d%Creset %C(dim white)(%cr)%Creset %C(bold blue)<%an>%Creset' --abbrev-commit";
+      };
+
+      # 网络与缓冲区 (合并静态设置与动态代理)
+      http =
+        {
+          sslVerify = false;
+          postBuffer = 957286400;
+        }
+        // (lib.optionalAttrs proxy.enable {
+          proxy = "http://${proxy.address}";
+        });
+
       https = lib.mkIf proxy.enable {
         proxy = "http://${proxy.address}";
       };
