@@ -154,9 +154,9 @@ in {
           if command -v zellij &> /dev/null; then
             # attach: 尝试连接
             # -c w: 如果名为 "w" 的会话不存在，则以 "w" 为名创建它
-            zellij attach -c w
+            # zellij attach -c w
             # exec: 让 Zellij 替换当前的 bash 进程，退出时直接关闭终端窗口
-            # exec zellij attach -c w
+            exec zellij attach -c w
           fi
         fi
 
