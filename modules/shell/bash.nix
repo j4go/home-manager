@@ -160,7 +160,7 @@ in {
 
         # Bat 增强别名 (仅当启用 bat 时生效)
         (lib.mkIf hasBat {
-          cat = "bat";
+          # cat = "bat";
           man = "batman";
           bgrep = "batgrep";
           bdiff = "batdiff";
