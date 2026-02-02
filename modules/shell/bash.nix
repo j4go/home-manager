@@ -28,10 +28,6 @@
 in {
   config = {
     programs = {
-      command-not-found = {
-        enable = false;
-      };
-
       # 命令纠错工具
       pay-respects = {
         enable = false;
