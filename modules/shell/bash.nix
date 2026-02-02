@@ -167,15 +167,28 @@ in {
         })
       ];
 
-      # --- 额外初始化脚本 (函数与逻辑) ---
-      initExtra = lib.mkAfter ''
-        # --- Nix 环境初始化 (必须放在最前面) ---
-        # 检查多用户模式的路径
+      # 处理“Login Shell”的环境变量
+      # Login Shell (如：SSH 登录、或是某些终端模拟器的默认设置):
+      # 只加载 ~/.bash_profile 或 ~/.profile。它不会主动看 .bashrc
+      # profileExtra确保了无论是通过 SSH 还是本地终端，PATH 都能正确包含 Nix
+      profileExtra = ''
+        # 加载 Nix 环境
         if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
           . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
-        # 兼容单用户模式的路径 (作为后备)
-        elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-          . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+        fi
+
+        # 确保登录时也能引入 .bashrc (如果系统没有自动引入的话)
+        if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
+          . "$HOME/.bashrc"
+        fi
+      '';
+
+      # --- 额外初始化脚本 (函数与逻辑) ---
+      initExtra = lib.mkAfter ''
+        # Interactive Non-login Shell (如：在已打开的终端里输入 bash) 才会加载 ~/.bashrc。
+        # 这里也保留一份 Nix 环境检查，防止某些特殊情况下 PATH 丢失
+        if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+          . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
         fi
 
         # --- 实用函数：快速创建并进入目录 ---
