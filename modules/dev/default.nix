@@ -8,5 +8,6 @@
     ./ssh.nix
     ./git.nix
     ./zellij.nix
+    ./yazi.nix
   ];
 }
