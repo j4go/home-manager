@@ -10,7 +10,6 @@
   hasBat = config.programs.bat.enable;
   hasEza = config.programs.eza.enable;
 
-  # 提取常用命令路径，避免 PATH 依赖
   ezaExe = lib.getExe pkgs.eza;
   batExe = lib.getExe pkgs.bat;
   fdExe = lib.getExe pkgs.fd;
@@ -22,6 +21,25 @@
   fzfPreviewDir = "${ezaExe} --tree --color=always --icons=auto --level=2 {}";
   fzfPreviewFile = "${batExe} --style=numbers --color=always --line-range=:500 {}";
   smartPreview = "[[ -d {} ]] && ${fzfPreviewDir} || [[ -f {} ]] && ${fzfPreviewFile} || echo 'No preview available'";
+
+  # --- [核心：物理引导脚本] ---
+  # 定义一段不依赖软链接、直接加载 Nix 环境的引导代码
+  nixBootstrap = ''
+    # 1. 强制注入基础路径 (防止 which nix 失败)
+    export PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
+
+    # 2. 加载 Nix 守护进程环境
+    if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+        . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+    elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+    fi
+
+    # 3. 加载 Home Manager 会话变量
+    if [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+    fi
+  '';
 in {
   config = {
     home.packages = with pkgs; [
@@ -34,6 +52,27 @@ in {
       lolcat
       fd
     ];
+
+    # --- [关键整改：物理文件覆盖] ---
+    # 强制 .bash_profile 和 .profile 为真实文件，绕过软链接解析问题
+    home.file.".bash_profile" = {
+      text = ''
+        ${nixBootstrap}
+        [[ -f ~/.profile ]] && . ~/.profile
+        [[ -f ~/.bashrc ]] && . ~/.bashrc
+      '';
+      executable = true;
+    };
+
+    home.file.".profile" = {
+      text = ''
+        ${nixBootstrap}
+        export EDITOR="nvim"
+        export LANG="en_US.UTF-8"
+        export LC_ALL="en_US.UTF-8"
+      '';
+      executable = true;
+    };
 
     programs = {
       zoxide = {
@@ -73,30 +112,9 @@ in {
       historyFileSize = 1000000;
       historyControl = ["ignoreboth" "erasedups"];
 
-      shellOptions = [
-        "histappend"
-        "checkwinsize"
-        "globstar"
-        "cdspell"
-        "dirspell"
-        "checkjobs"
-        "histverify"
-      ];
+      shellOptions = ["histappend" "checkwinsize" "globstar" "cdspell" "dirspell" "checkjobs" "histverify"];
 
-      sessionVariables = {
-        EDITOR = "nvim";
-        LANG = "en_US.UTF-8";
-        LC_ALL = "en_US.UTF-8";
-        PYTHONPYCACHEPREFIX = "/tmp/python-cache";
-        MANPAGER =
-          if hasBat
-          then "sh -c 'col -bx | ${batExe} -l man -p'"
-          else "less";
-        MANROFFOPT = "-c";
-        NO_PROXY = noProxyStr;
-        no_proxy = noProxyStr;
-      };
-
+      # 保持 Alias
       shellAliases = lib.mkMerge [
         {
           os = "fastfetch";
@@ -134,31 +152,19 @@ in {
         })
       ];
 
-      # 放在 bashrcExtra 会被放在 .bashrc 的较前位置
-      bashrcExtra = ''
-        if [ -z "$NIX_PROFILES" ]; then
-            if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
-                . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
-            elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-                . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-            fi
-        fi
-      '';
-
-      profileExtra = ''
-        # 确保 .profile 运行时也能找到基本的 Nix 命令
-        # 这样后续的 sessionVariables 才能正确处理
-        export PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
-      '';
-
+      # 交互式 Shell 初始化
       initExtra = ''
-        # 这里的逻辑只在交互式终端运行
+        # 确保交互式 Shell 即使没走 login 流程也能拿到 Nix 环境
+        if [ -z "$NIX_PROFILES" ]; then
+            ${nixBootstrap}
+        fi
+
         [[ $- == *i* ]] || return
 
-        # 2. 实用函数
+        # 实用函数
         mkcd() { mkdir -p "$1" && cd "$1"; }
 
-        # 3. Micromamba 懒加载 (使用绝对路径避免 Hash 失效)
+        # Micromamba 懒加载
         micromamba() {
           local bin="${lib.getExe pkgs.micromamba}"
           if [ -f "$bin" ]; then
@@ -172,13 +178,12 @@ in {
         alias mamba='micromamba'
         alias conda='micromamba'
 
-        # 4. HM 维护函数
+        # HM 维护函数 (对齐 flake.nix 中的 alejandra)
         hm-save() {
           local msg="Update: $(date '+%Y-%m-%d %H:%M:%S')"
           if [ -n "$1" ]; then msg="Update: $1"; fi
           (
             cd ~/.config/home-manager || return
-            # 它会自动调用你 flake.nix 里定义的 alejandra
             if command -v nix >/dev/null; then
               nix fmt . &>/dev/null
             fi
@@ -191,13 +196,13 @@ in {
           )
         }
 
-        # 5. 历史同步优化
+        # 历史同步
         _sync_history() { history -a; history -n; }
         if [[ ";$PROMPT_COMMAND;" != *";_sync_history;"* ]]; then
           PROMPT_COMMAND="_sync_history''${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
         fi
 
-        # 6. 自动代理注入 (交互式提示)
+        # 代理注入
         ${lib.optionalString proxy.enable ''
           export http_proxy="http://${proxy.address}"
           export https_proxy="http://${proxy.address}"
