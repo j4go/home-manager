@@ -37,7 +37,7 @@
 
     overlay-unstable = final: prev: {
       unstable = import nixpkgs-unstable {
-        system = prev.system;
+        system = prev.stdenv.hostPlatform.system;
         config.allowUnfree = true;
       };
     };
@@ -50,8 +50,8 @@
           config.allowUnfree = true;
         };
 
-        # 将 system 显式传递给所有模块
-        extraSpecialArgs = {inherit inputs hostName system;};
+        # 将 hostName 显式传递给所有模块
+        extraSpecialArgs = {inherit inputs hostName;};
         modules = [
           ./home.nix # 基础通用配置
           ./hosts/${hostName} # 加载对应的 host 文件夹

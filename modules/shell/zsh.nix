@@ -45,7 +45,7 @@ in {
 
       shellAliases = {
         # Bat 现代化替代方案
-        cat = "bat";
+        # cat = "bat";
         man = "batman";
         bgrep = "batgrep";
         bdiff = "batdiff";
