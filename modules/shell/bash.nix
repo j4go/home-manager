@@ -5,7 +5,7 @@
   hostName,
   ...
 }: let
-  # --- 1. 变量提取与逻辑判断 ---
+  # --- 变量提取与逻辑判断 ---
   proxy = config.myOptions.proxy;
 
   # 感知其他模块状态：用于动态生成别名和变量
@@ -31,19 +31,19 @@
   smartPreview = "[[ -d {} ]] && ${fzfPreviewDir} || [[ -f {} ]] && ${fzfPreviewFile} || echo No-preview-available";
 in {
   config = {
-    # --- 2. 核心软件包安装 ---
+    # --- 软件包安装 ---
     home.packages = with pkgs; [
       trash-cli # 支撑 rm 别名
       fastfetch # 支撑 os/neo/fetch 别名
       micromamba # 支撑 Python 环境管理与懒加载逻辑
-      # 终端输出
+      # --- 终端输出 ---
       figlet # 经典 ASCII 艺术字生成器
       toilet # FIGlet 的增强版，支持彩色输出和更多过滤器
       chafa # 现代终端图形预览器（支持图像转 ASCII/六角单元）
       lolcat # 为任何文本输出添加彩虹渐变效果
     ];
 
-    # --- 3. 终端增强程序 (插件系统) ---
+    # --- 终端增强程序 (插件系统) ---
     programs = {
       # 智能路径跳转
       zoxide = {
@@ -80,7 +80,7 @@ in {
       };
     };
 
-    # --- 4. Bash 核心配置 ---
+    # --- Bash 核心配置 ---
     programs.bash = {
       enable = true;
       enableCompletion = true;
@@ -117,9 +117,9 @@ in {
         no_proxy = noProxyStr;
       };
 
-      # 🚀 别名系统：基于模块感知进行合并
+      # 别名系统：基于模块感知进行合并
       shellAliases = lib.mkMerge [
-        # (1) 基础通用别名 (你的完整列表)
+        # 基础通用别名 (你的完整列表)
         {
           os = "fastfetch";
           neo = "fastfetch";
@@ -150,7 +150,7 @@ in {
           gitup = "git add . && git commit -m \"update: $(date +%Y-%m-%d)\" && git push";
         }
 
-        # (2) Eza 增强别名 (仅当启用 eza 时生效)
+        # Eza 增强别名 (仅当启用 eza 时生效)
         (lib.mkIf hasEza {
           ls = "eza --icons=auto --git";
           ll = "eza -l -a --icons=auto --git --time-style=relative";
@@ -158,7 +158,7 @@ in {
           lt = "eza --tree --level=2 --icons=auto --git --ignore-glob='.git|node_modules'";
         })
 
-        # (3) Bat 增强别名 (仅当启用 bat 时生效)
+        # Bat 增强别名 (仅当启用 bat 时生效)
         (lib.mkIf hasBat {
           cat = "bat";
           man = "batman";
@@ -167,12 +167,21 @@ in {
         })
       ];
 
-      # --- 5. 额外初始化脚本 (函数与逻辑) ---
+      # --- 额外初始化脚本 (函数与逻辑) ---
       initExtra = lib.mkAfter ''
-        # 实用函数：快速创建并进入目录
+        # --- Nix 环境初始化 (必须放在最前面) ---
+        # 检查多用户模式的路径
+        if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+          . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+        # 兼容单用户模式的路径 (作为后备)
+        elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+          . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+        fi
+
+        # --- 实用函数：快速创建并进入目录 ---
         mkcd() { mkdir -p "$1" && cd "$1"; }
 
-        # 🚀 Micromamba 懒加载函数包装器
+        # --- Micromamba 懒加载函数包装器 ---
         # 原理：第一次调用时注入 Shell Hook 并自毁函数，随后交由二进制执行
         micromamba() {
           if [ -f "${pkgs.micromamba}/bin/micromamba" ]; then
@@ -186,7 +195,7 @@ in {
         alias mamba='micromamba'
         alias conda='micromamba'
 
-        # 🛠️ Home-Manager 维护函数
+        # --- Home-Manager 维护函数 ---
         # 逻辑：格式化 -> Git 暂存 -> 构建 -> 若成功则提交变动
         hm-save() {
           local msg="Update: $(date '+%Y-%m-%d %H:%M:%S')"
@@ -211,7 +220,7 @@ in {
           )
         }
 
-        # 系统一键更新与垃圾清理
+        # --- 系统一键更新与垃圾清理 ---
         hm-fix() {
           (
             cd ~/.config/home-manager || return
@@ -222,7 +231,7 @@ in {
           )
         }
 
-        # 多终端历史实时同步
+        # --- 多终端历史实时同步 ---
         # 运行历史同步，再运行之前已存在的（Starship/Zoxide 等）钩子
         _sync_history() {
           history -a
@@ -233,7 +242,7 @@ in {
           PROMPT_COMMAND="_sync_history''${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
         fi
 
-        # 自动注入网络代理 (若 myOptions.proxy.enable 为 true)
+        # --- 自动注入网络代理 (若 myOptions.proxy.enable 为 true) ---
         ${lib.optionalString proxy.enable ''
           export http_proxy="http://${proxy.address}"
           export https_proxy="http://${proxy.address}"
