@@ -127,6 +127,7 @@ in {
 
         # zellij 常用
         ze = "zellij";
+        zew = "zellij attach w -c";
         zels = "zellij list-sessions";
 
         # 代理手动控制
@@ -144,15 +145,15 @@ in {
         # 1. 检查当前是否已在 Zellij 会话中 ($ZELLIJ 变量为空)
         # 2. 检查当前是否为交互式 Shell ($- 包含 i)
         # 3. 排除 SSH 远程连接或特定的 IDE 终端 (可选)
-        if [[ -z "$ZELLIJ" && $- == *i* ]]; then
-          if command -v zellij &> /dev/null; then
-            # attach: 尝试连接
-            # -c w: 如果名为 "w" 的会话不存在，则以 "w" 为名创建它
-            # zellij attach -c w
-            # exec: 让 Zellij 替换当前的 bash 进程，退出时直接关闭终端窗口
-            exec zellij attach -c w
-          fi
-        fi
+        #if [[ -z "$ZELLIJ" && $- == *i* ]]; then
+        #  if command -v zellij &> /dev/null; then
+        #    # attach: 尝试连接
+        #    # -c w: 如果名为 "w" 的会话不存在，则以 "w" 为名创建它
+        #    # zellij attach -c w
+        #    # exec: 让 Zellij 替换当前的 bash 进程，退出时直接关闭终端窗口
+        #    exec zellij attach -c w
+        #  fi
+        #fi
 
         # 注入补全脚本 (即便不自动启动，补全也是必要的)
         if command -v zellij &> /dev/null; then
