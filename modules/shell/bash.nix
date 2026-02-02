@@ -134,15 +134,21 @@ in {
         })
       ];
 
+      # 放在 bashrcExtra 会被放在 .bashrc 的较前位置
+      bashrcExtra = ''
+        if [ -z "$NIX_PROFILES" ]; then
+            if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+                . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+            elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+                . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+            fi
+        fi
+      '';
+
       profileExtra = ''
-        if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
-          . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
-        elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-          . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-        fi
-        if [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
-          . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
-        fi
+        # 确保 .profile 运行时也能找到基本的 Nix 命令
+        # 这样后续的 sessionVariables 才能正确处理
+        export PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
       '';
 
       initExtra = ''
