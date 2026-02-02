@@ -134,20 +134,20 @@ in {
         })
       ];
 
-      # --- 优化后的环境加载 ---
-      # 移除冗余的手动 source，利用 HM 原生能力
       profileExtra = ''
-        # 确保在登录时加载交互式配置
-        if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
-          . "$HOME/.bashrc"
+        if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+          . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+        elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+          . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+        fi
+        if [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+          . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
         fi
       '';
 
       initExtra = ''
-        # 1. 确保 Nix 环境在交互式 Shell 中始终可用 (针对非 NixOS)
-        if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
-            . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
-        fi
+        # 这里的逻辑只在交互式终端运行
+        [[ $- == *i* ]] || return
 
         # 2. 实用函数
         mkcd() { mkdir -p "$1" && cd "$1"; }
