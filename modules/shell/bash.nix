@@ -12,7 +12,7 @@
   hasBat = config.programs.bat.enable;
   hasEza = config.programs.eza.enable;
 
-  # 网络代理白名单
+  # 网络代理白名单：避免本地与私有流量走代理
   noProxyList = [
     "localhost"
     "127.0.0.1"
@@ -25,7 +25,7 @@
   ];
   noProxyStr = builtins.concatStringsSep "," noProxyList;
 
-  # FZF 核心预览逻辑
+  # FZF 核心预览逻辑：目录使用 eza，文件使用 bat
   fzfPreviewDir = "eza --tree --color=always --icons=auto --level=2 {}";
   fzfPreviewFile = "bat --style=numbers --color=always --line-range=:500 {}";
   smartPreview = "[[ -d {} ]] && ${fzfPreviewDir} || [[ -f {} ]] && ${fzfPreviewFile} || echo No-preview-available";
@@ -36,10 +36,10 @@ in {
       trash-cli # 支撑 rm 别名
       fastfetch # 支撑 os/neo/fetch 别名
       micromamba # 支撑 Python 环境管理与懒加载逻辑
-      # --- 终端输出 ---
+      # --- 终端视觉输出增强 ---
       figlet # 经典 ASCII 艺术字生成器
-      toilet # FIGlet 的增强版，支持彩色输出和更多过滤器
-      chafa # 现代终端图形预览器（支持图像转 ASCII/六角单元）
+      toilet # FIGlet 的增强版，支持彩色输出
+      chafa # 现代终端图形预览器
       lolcat # 为任何文本输出添加彩虹渐变效果
     ];
 
@@ -60,7 +60,7 @@ in {
         extraOptions = ["--group-directories-first" "--header"];
       };
 
-      # 模糊搜索神器
+      # 模糊搜索神器：原生集成配置
       fzf = {
         enable = true;
         enableBashIntegration = true;
@@ -90,7 +90,7 @@ in {
       historyFileSize = 1000000;
       historyControl = ["ignoreboth" "erasedups"];
 
-      # Shell 行为微调
+      # Shell 行为微调：自动更正路径拼写、检查窗口大小、并发作业检查
       shellOptions = [
         "histappend" # 退出时追加历史而非覆盖
         "checkwinsize" # 每次命令后检查窗口大小
@@ -117,9 +117,9 @@ in {
         no_proxy = noProxyStr;
       };
 
-      # 别名系统：基于模块感知进行合并
+      # 别名系统：基于模块感知进行分类管理
       shellAliases = lib.mkMerge [
-        # 基础通用别名 (你的完整列表)
+        # 基础通用别名
         {
           os = "fastfetch";
           neo = "fastfetch";
@@ -136,16 +136,16 @@ in {
           dig = "doggo";
           print = "figlet";
 
-          # Zellij
+          # Zellij 常用会话管理
           ze = "zellij";
           zew = "zellij attach w -c";
           zels = "zellij list-sessions";
 
-          # 手动代理控制
+          # 代理手动控制
           setproxy = "export all_proxy=http://${proxy.address} http_proxy=http://${proxy.address} https_proxy=http://${proxy.address} no_proxy=${noProxyStr} NO_PROXY=${noProxyStr}";
           unproxy = "unset all_proxy http_proxy https_proxy no_proxy NO_PROXY";
 
-          # 工作流
+          # Nix/Home-Manager 工作流
           hm = "cd ~/.config/home-manager/";
           gitup = "git add . && git commit -m \"update: $(date +%Y-%m-%d)\" && git push";
         }
@@ -154,48 +154,49 @@ in {
         (lib.mkIf hasEza {
           ls = "eza --icons=auto --git";
           ll = "eza -l -a --icons=auto --git --time-style=relative";
-          la = "eza -l -a --icons=auto --git --time-style=relative"; # 显式展开引用
+          la = "eza -l -a --icons=auto --git --time-style=relative";
           lt = "eza --tree --level=2 --icons=auto --git --ignore-glob='.git|node_modules'";
         })
 
         # Bat 增强别名 (仅当启用 bat 时生效)
         (lib.mkIf hasBat {
-          # cat = "bat";
           man = "batman";
           bgrep = "batgrep";
           bdiff = "batdiff";
         })
       ];
 
-      # 处理“Login Shell”的环境变量
-      # Login Shell (如：SSH 登录、或是某些终端模拟器的默认设置):
-      # 只加载 ~/.bash_profile 或 ~/.profile。它不会主动看 .bashrc
-      # profileExtra确保了无论是通过 SSH 还是本地终端，PATH 都能正确包含 Nix
+      # --- [NIX BOOTSTRAP] ---
+      # ⚠️ 关键修正：将 Nix 环境加载放在 bashrcExtra，确保其在 Alias 之前加载。
+      # 解决 Non-login Shell（普通终端窗口）启动时不加载 Nix PATH 的问题。
+      bashrcExtra = ''
+        if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+          . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+        fi
+      '';
+
+      # --- [LOGIN SHELL LOGIC] ---
+      # 处理“Login Shell”（如 SSH 登录）的环境变量。
+      # 确保路径传递与 .bashrc 的自动引入。
       profileExtra = ''
         # 加载 Nix 环境
         if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
           . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
         fi
 
-        # 确保登录时也能引入 .bashrc (如果系统没有自动引入的话)
+        # 确保登录时也能引入 .bashrc
         if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
           . "$HOME/.bashrc"
         fi
       '';
 
-      # --- 额外初始化脚本 (函数与逻辑) ---
-      initExtra = lib.mkAfter ''
-        # Interactive Non-login Shell (如：在已打开的终端里输入 bash) 才会加载 ~/.bashrc。
-        # 这里也保留一份 Nix 环境检查，防止某些特殊情况下 PATH 丢失
-        if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
-          . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
-        fi
-
+      # --- [INTERACTIVE SHELL EXTRA] ---
+      initExtra = ''
         # --- 实用函数：快速创建并进入目录 ---
         mkcd() { mkdir -p "$1" && cd "$1"; }
 
         # --- Micromamba 懒加载函数包装器 ---
-        # 原理：第一次调用时注入 Shell Hook 并自毁函数，随后交由二进制执行
+        # 原理：仅在调用时注入 Shell Hook，优化 Shell 启动速度。
         micromamba() {
           if [ -f "${pkgs.micromamba}/bin/micromamba" ]; then
              eval "$(${pkgs.micromamba}/bin/micromamba shell hook -s bash)"
@@ -208,8 +209,7 @@ in {
         alias mamba='micromamba'
         alias conda='micromamba'
 
-        # --- Home-Manager 维护函数 ---
-        # 逻辑：格式化 -> Git 暂存 -> 构建 -> 若成功则提交变动
+        # --- Home-Manager 维护函数：集成格式化、构建与自动提交 ---
         hm-save() {
           local msg="Update: $(date '+%Y-%m-%d %H:%M:%S')"
           if [ -n "$1" ]; then msg="Update: $1"; fi
@@ -244,13 +244,12 @@ in {
           )
         }
 
-        # --- 多终端历史实时同步 ---
-        # 运行历史同步，再运行之前已存在的（Starship/Zoxide 等）钩子
+        # --- 多终端历史实时同步 (非破坏性追加) ---
         _sync_history() {
           history -a
           history -n
         }
-        # 将函数加入 PROMPT_COMMAND 队列，而不是覆盖它
+        # 将历史同步加入 PROMPT_COMMAND，同时保护 Starship 等工具的钩子
         if [[ ";$PROMPT_COMMAND;" != *";_sync_history;"* ]]; then
           PROMPT_COMMAND="_sync_history''${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
         fi
@@ -260,6 +259,7 @@ in {
           export http_proxy="http://${proxy.address}"
           export https_proxy="http://${proxy.address}"
           export all_proxy="http://${proxy.address}"
+          echo "🌐 System proxy enabled: ${proxy.address}"
         ''}
       '';
     };
