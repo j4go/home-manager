@@ -9,7 +9,8 @@
     # 1. 基础配置 (主题与行为)
     config = {
       pager = "less -FR"; # 保持类似 less 的翻页体验
-      theme = "Dracula"; # 设置你喜欢的主题
+      # theme = "Dracula"; # 设置你喜欢的主题
+      theme = "OneHalfDark"; # 设置你喜欢的主题
       # style = "numbers,changes";  # 可选：简约风格
       style = "header,grid,numbers";
     };
