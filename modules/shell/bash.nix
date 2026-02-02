@@ -18,7 +18,7 @@
   noProxyList = ["localhost" "127.0.0.1" "::1" "192.168.0.0/16" "172.16.0.0/12" "10.0.0.0/8" "*.local" ".lan"];
   noProxyStr = builtins.concatStringsSep "," noProxyList;
 
-  # 优化后的预览逻辑
+  # 预览逻辑
   fzfPreviewDir = "${ezaExe} --tree --color=always --icons=auto --level=2 {}";
   fzfPreviewFile = "${batExe} --style=numbers --color=always --line-range=:500 {}";
   smartPreview = "[[ -d {} ]] && ${fzfPreviewDir} || [[ -f {} ]] && ${fzfPreviewFile} || echo 'No preview available'";
@@ -196,8 +196,7 @@ in {
           export http_proxy="http://${proxy.address}"
           export https_proxy="http://${proxy.address}"
           export all_proxy="http://${proxy.address}"
-          # 仅在交互式 Shell 且非哑终端显示
-          [[ $- == *i* ]] && echo "🌐 System proxy enabled: ${proxy.address}"
+          echo "🌐 System proxy enabled: ${proxy.address}"
         ''}
       '';
     };
