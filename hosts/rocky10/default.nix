@@ -9,7 +9,6 @@
       enable = true;
       address = "192.168.3.248:10808";
     };
-    shell.zsh.enable = false;
     shell.starship.enable = true;
   };
 
