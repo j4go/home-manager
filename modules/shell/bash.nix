@@ -168,21 +168,21 @@ in {
         # --- 彻底粉碎 DNF 搜索建议 ---
 
         # 清理信号捕捉（切断二进制钩子）
-        trap - ERR
-        trap - DEBUG
+        # trap - ERR
+        # trap - DEBUG
 
         # 影子函数：劫持系统自愈逻辑，使其失效
-        __dnf5_command_not_found_setup() { :; }
-        __dnf5_command_not_found_handler() { :; }
+        # __dnf5_command_not_found_setup() { :; }
+        # __dnf5_command_not_found_handler() { :; }
 
         # 定义纯净报错函数，覆盖系统默认行为
-        command_not_found_handle() {
-          printf "bash: %s: command not found\n" "$1" >&2
-          return 127
-        }
-        command_not_found_handler() {
-          command_not_found_handle "$@"
-        }
+        # command_not_found_handle() {
+        #   printf "bash: %s: command not found\n" "$1" >&2
+        #   return 127
+        # }
+        # command_not_found_handler() {
+        #   command_not_found_handle "$@"
+        # }
 
         # 同步终端历史
         export PROMPT_COMMAND="history -a; history -n"
