@@ -33,8 +33,8 @@
     # ⚙️ 基础选项 (Opts)
     # ==========================================
     opts = {
-      # 浅色模式核心设置
-      background = "light";
+      #background = "light";
+      background = "dark";
       termguicolors = true;
 
       # 界面显示优化
