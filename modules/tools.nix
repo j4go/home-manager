@@ -2,14 +2,14 @@
   # 允许 Home Manager 管理字体配置文件
   # 这步如果不做，即使安装了包，终端也找不到字体
   fonts.fontconfig.enable = true;
-
   home.packages =
     # 主体包：using stable pkgs
     (with pkgs; [
+      fd # 极速查找
+      ripgrep # 极速搜索
+      scooter # 交互式查找替换
       jq # JSON 处理
       yq-go # JSON & YAML & XML
-      ripgrep # 极速搜索
-      fd # 极速查找
       duf # 磁盘空间查看
       dust # 目录占用分析
       gping # 图形化 Ping
@@ -20,13 +20,11 @@
       procs # 进程查看
       xclip # 剪贴板 (X11)
       wl-clipboard # 剪贴板 (Wayland)
-
       # --- 压缩解压工具套装 ---
       zip
       unzip
       _7zz # 现代 7zip
       ouch # 自动识别所有的后缀名 使用参数一致
-
       # --- 字体安装区域 ---
       nerd-fonts.jetbrains-mono
     ])
@@ -35,7 +33,6 @@
       pkgs.unstable.hyperfine # 基准测试工具
       pkgs.unstable.bottom # 类似btop htop
     ];
-
   # tealdeer -> tldr
   programs.tealdeer = {
     enable = true;
