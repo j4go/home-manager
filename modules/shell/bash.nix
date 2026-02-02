@@ -27,6 +27,8 @@
   smartPreview = "[[ -d {} ]] && eza --tree --color=always --icons=auto --level=2 {} || [[ -f {} ]] && bat --style=numbers --color=always --line-range=:500 {} || echo No-preview-available";
 in {
   config = {
+    programs.command-not-found.enable = false;
+
     programs = {
       # 智能目录跳转
       zoxide = {
