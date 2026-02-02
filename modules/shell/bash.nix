@@ -170,8 +170,20 @@ in {
       # ⚠️ 关键修正：将 Nix 环境加载放在 bashrcExtra，确保其在 Alias 之前加载。
       # 解决 Non-login Shell（普通终端窗口）启动时不加载 Nix PATH 的问题。
       bashrcExtra = ''
+        # 1. 🚀 [ROCKY/FEDORA 必备] 引入系统全局 Bash 配置
+        # 缺少这段代码会导致 Non-login Shell 在某些环境下加载行为异常
+        if [ -f /etc/bashrc ]; then
+          . /etc/bashrc
+        fi
+
+        # 2. 🚀 [NIX 核心] 强制在文件最开头加载 Nix 环境
         if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
           . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+        fi
+
+        # 3. 🚀 [USER PROFILE] 确保用户安装的包路径生效
+        if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+          . "$HOME/.nix-profile/etc/profile.d/nix.sh"
         fi
       '';
 
