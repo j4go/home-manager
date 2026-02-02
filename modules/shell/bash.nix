@@ -223,7 +223,15 @@ in {
         }
 
         # 多终端历史实时同步
-        export PROMPT_COMMAND="history -a; history -n"
+        # 运行历史同步，再运行之前已存在的（Starship/Zoxide 等）钩子
+        _sync_history() {
+          history -a
+          history -n
+        }
+        # 将函数加入 PROMPT_COMMAND 队列，而不是覆盖它
+        if [[ ";$PROMPT_COMMAND;" != *";_sync_history;"* ]]; then
+          PROMPT_COMMAND="_sync_history''${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+        fi
 
         # 自动注入网络代理 (若 myOptions.proxy.enable 为 true)
         ${lib.optionalString proxy.enable ''
