@@ -10,38 +10,12 @@
   hasBat = config.programs.bat.enable;
   hasEza = config.programs.eza.enable;
 
-  ezaExe = lib.getExe pkgs.eza;
-  batExe = lib.getExe pkgs.bat;
-  fdExe = lib.getExe pkgs.fd;
-
+  # 代理白名单配置
   noProxyList = ["localhost" "127.0.0.1" "::1" "192.168.0.0/16" "172.16.0.0/12" "10.0.0.0/8" "*.local" ".lan"];
   noProxyStr = builtins.concatStringsSep "," noProxyList;
-
-  # 预览逻辑
-  fzfPreviewDir = "${ezaExe} --tree --color=always --icons=auto --level=2 {}";
-  fzfPreviewFile = "${batExe} --style=numbers --color=always --line-range=:500 {}";
-  smartPreview = "[[ -d {} ]] && ${fzfPreviewDir} || [[ -f {} ]] && ${fzfPreviewFile} || echo 'No preview available'";
-
-  # --- [核心：物理引导脚本] ---
-  # 定义一段不依赖软链接、直接加载 Nix 环境的引导代码
-  nixBootstrap = ''
-    # 1. 强制注入基础路径 (防止 which nix 失败)
-    export PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
-
-    # 2. 加载 Nix 守护进程环境
-    if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
-        . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
-    elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-    fi
-
-    # 3. 加载 Home Manager 会话变量
-    if [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
-        . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
-    fi
-  '';
 in {
   config = {
+    # --- 软件包管理 ---
     home.packages = with pkgs; [
       trash-cli
       fastfetch
@@ -53,43 +27,44 @@ in {
       fd
     ];
 
-    # --- [关键整改：物理文件覆盖] ---
-    # 强制 .bash_profile 和 .profile 为真实文件，绕过软链接解析问题
-    home.file.".bash_profile" = {
-      text = ''
-        ${nixBootstrap}
-        [[ -f ~/.profile ]] && . ~/.profile
-        [[ -f ~/.bashrc ]] && . ~/.bashrc
-      '';
-      executable = true;
+    # --- 声明式全局环境变量 ---
+    # 业界标准：在 home.sessionVariables 定义，确保变量在全局环境生效
+    home.sessionVariables = {
+      EDITOR = "nvim";
+      LANG = "en_US.UTF-8";
+      LC_ALL = "en_US.UTF-8";
+      PYTHONPYCACHEPREFIX = "/tmp/python-cache";
+      MANPAGER =
+        if hasBat
+        then "sh -c 'col -bx | ${lib.getExe pkgs.bat} -l man -p'"
+        else "less";
+      MANROFFOPT = "-c";
+      NO_PROXY = noProxyStr;
+      no_proxy = noProxyStr;
     };
 
-    home.file.".profile" = {
-      text = ''
-        ${nixBootstrap}
-        export EDITOR="nvim"
-        export LANG="en_US.UTF-8"
-        export LC_ALL="en_US.UTF-8"
-      '';
-      executable = true;
-    };
-
+    # --- 程序集成配置 ---
     programs = {
+      # zoxide：自动接管 cd
       zoxide = {
         enable = true;
         enableBashIntegration = true;
         options = ["--cmd cd"];
       };
+
+      # eza：现代化的 ls 替代品
       eza = {
         enable = true;
         enableBashIntegration = true;
         git = true;
         extraOptions = ["--group-directories-first" "--header"];
       };
+
+      # fzf：模糊搜索集成
       fzf = {
         enable = true;
         enableBashIntegration = true;
-        defaultCommand = "${fdExe} --type f --strip-cwd-prefix --hidden --follow --exclude .git";
+        defaultCommand = "${lib.getExe pkgs.fd} --type f --strip-cwd-prefix --hidden --follow --exclude .git";
         defaultOptions = [
           "--height 40%"
           "--layout=reverse"
@@ -98,20 +73,22 @@ in {
           "--color='header:italic'"
           "--bind 'ctrl-/:toggle-preview'"
         ];
-        fileWidgetCommand = "${fdExe} --type f --strip-cwd-prefix --hidden --follow --exclude .git";
-        fileWidgetOptions = ["--preview '${smartPreview}'"];
-        changeDirWidgetCommand = "${fdExe} --type d --strip-cwd-prefix --hidden --follow --exclude .git";
-        changeDirWidgetOptions = ["--preview '${fzfPreviewDir}'"];
+        fileWidgetCommand = "${lib.getExe pkgs.fd} --type f --strip-cwd-prefix --hidden --follow --exclude .git";
+        fileWidgetOptions = [
+          "--preview '[[ -d {} ]] && ${lib.getExe pkgs.eza} --tree --color=always --level=2 {} || ${lib.getExe pkgs.bat} --style=numbers --color=always --line-range=:500 {}'"
+        ];
+        changeDirWidgetCommand = "${lib.getExe pkgs.fd} --type d --strip-cwd-prefix --hidden --follow --exclude .git";
+        changeDirWidgetOptions = ["--preview '${lib.getExe pkgs.eza} --tree --color=always --icons=auto --level=2 {}'"];
       };
     };
 
+    # --- Bash 核心配置 ---
     programs.bash = {
       enable = true;
       enableCompletion = true;
       historySize = 1000000;
       historyFileSize = 1000000;
       historyControl = ["ignoreboth" "erasedups"];
-
       shellOptions = ["histappend" "checkwinsize" "globstar" "cdspell" "dirspell" "checkjobs" "histverify"];
 
       # 保持 Alias
@@ -135,15 +112,19 @@ in {
           zew = "zellij attach w -c";
           zels = "zellij list-sessions";
           hm = "cd ~/.config/home-manager/";
+
+          # 代理控制别名
           setproxy = "export all_proxy=http://${proxy.address} http_proxy=http://${proxy.address} https_proxy=http://${proxy.address} no_proxy=${noProxyStr} NO_PROXY=${noProxyStr}";
           unproxy = "unset all_proxy http_proxy https_proxy no_proxy NO_PROXY";
+
+          # Git 快捷提交
           gitup = "git add . && git commit -m \"update: $(date +%Y-%m-%d)\" && git push";
         }
         (lib.mkIf hasEza {
-          ls = "${ezaExe} --icons=auto --git";
-          ll = "${ezaExe} -l -a --icons=auto --git --time-style=relative";
-          la = "${ezaExe} -l -a --icons=auto --git --time-style=relative";
-          lt = "${ezaExe} --tree --level=2 --icons=auto --git --ignore-glob='.git|node_modules'";
+          ls = "${lib.getExe pkgs.eza} --icons=auto --git";
+          ll = "${lib.getExe pkgs.eza} -l -a --icons=auto --git --time-style=relative";
+          la = "${lib.getExe pkgs.eza} -l -a --icons=auto --git --time-style=relative";
+          lt = "${lib.getExe pkgs.eza} --tree --level=2 --icons=auto --git --ignore-glob='.git|node_modules'";
         })
         (lib.mkIf hasBat {
           man = "batman";
@@ -154,11 +135,7 @@ in {
 
       # 交互式 Shell 初始化
       initExtra = ''
-        # 确保交互式 Shell 即使没走 login 流程也能拿到 Nix 环境
-        if [ -z "$NIX_PROFILES" ]; then
-            ${nixBootstrap}
-        fi
-
+        # 非交互式 Shell 提前返回
         [[ $- == *i* ]] || return
 
         # 实用函数
@@ -207,7 +184,7 @@ in {
           export http_proxy="http://${proxy.address}"
           export https_proxy="http://${proxy.address}"
           export all_proxy="http://${proxy.address}"
-          echo "🌐 System proxy enabled: ${proxy.address}"
+          echo "🌐 Proxy enabled: ${proxy.address}"
         ''}
       '';
     };
