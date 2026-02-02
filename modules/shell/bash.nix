@@ -172,7 +172,10 @@ in {
           if [ -n "$1" ]; then msg="Update: $1"; fi
           (
             cd ~/.config/home-manager || return
-            ${lib.getExe pkgs.nixpkgs-fmt} . &>/dev/null
+            # 它会自动调用你 flake.nix 里定义的 alejandra
+            if command -v nix >/dev/null; then
+              nix fmt . &>/dev/null
+            fi
             git add .
             if home-manager switch --flake ".#${hostName}" -b backup; then
               [[ -n $(git diff --cached) ]] && git commit -m "$msg" && echo "🎉 Successful!" || echo "ℹ️ No changes."
