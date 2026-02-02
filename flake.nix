@@ -2,22 +2,22 @@
   description = "Multi-Host Configuration";
 
   inputs = {
-    # 1. 核心稳定化：锁定到最新的稳定分支
+    # 锁定到最新的稳定分支
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
 
-    # 2. home-manager 依赖主 nixpkgs
+    # home-manager 依赖主 nixpkgs
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # 3. nixvim 依赖主 nixpkgs
+    # nixvim 依赖主 nixpkgs
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # 4. 引入 unstable 源作为备用
+    # 引入 unstable 源作为备用
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
@@ -54,12 +54,12 @@
         extraSpecialArgs = {inherit inputs hostName system;};
         modules = [
           ./home.nix # 基础通用配置
-          nixvim.homeModules.nixvim # 注入 nixvim 模块
-          ./hosts/${hostName} # 自动加载对应的 host 文件夹
+          ./hosts/${hostName} # 加载对应的 host 文件夹
+          nixvim.homeModules.nixvim # nixvim 模块
         ];
       };
   in {
-    # ✅ 启用格式化工具 (运行 nix fmt 时调用)
+    # 格式化工具 (运行 nix fmt 时调用)
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
     homeConfigurations = {
