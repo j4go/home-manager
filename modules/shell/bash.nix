@@ -27,9 +27,17 @@
   smartPreview = "[[ -d {} ]] && eza --tree --color=always --icons=auto --level=2 {} || [[ -f {} ]] && bat --style=numbers --color=always --line-range=:500 {} || echo No-preview-available";
 in {
   config = {
-    programs.command-not-found.enable = false;
-
     programs = {
+      command-not-found = {
+        enable = false;
+      };
+
+      # 命令纠错工具
+      pay-respects = {
+        enable = false;
+        enableBashIntegration = true;
+      };
+
       # 智能目录跳转
       zoxide = {
         enable = true;
@@ -62,12 +70,6 @@ in {
         fileWidgetOptions = ["--preview '${smartPreview}'"];
         changeDirWidgetCommand = "fd --type d --strip-cwd-prefix --hidden --follow --exclude .git";
         changeDirWidgetOptions = ["--preview 'eza --tree --color=always --icons=auto --level=2 {}'"];
-      };
-
-      # 命令纠错工具
-      pay-respects = {
-        enable = true;
-        enableBashIntegration = true;
       };
     };
 
@@ -122,7 +124,7 @@ in {
         rm = "trash-put";
         h = "history";
         lg = "lazygit";
-        f = "pay-respects";
+        #f = "pay-respects";
         ping = "gping";
         dig = "doggo";
         print = "figlet";
