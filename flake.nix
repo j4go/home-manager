@@ -63,10 +63,10 @@
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
     homeConfigurations = {
-      "rocky" = mkHome "rocky" "x86_64-linux";
       "mint" = mkHome "mint" "x86_64-linux";
-      "rocky10" = mkHome "rocky10" "aarch64-linux";
+      "alma" = mkHome "rocky" "x86_64-linux";
       "fedora" = mkHome "fedora" "aarch64-linux";
+      "rocky10" = mkHome "rocky10" "aarch64-linux";
     };
   };
 }
