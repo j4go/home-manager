@@ -64,7 +64,7 @@
 
     homeConfigurations = {
       "mint" = mkHome "mint" "x86_64-linux";
-      "alma" = mkHome "rocky" "x86_64-linux";
+      "alma" = mkHome "alma" "x86_64-linux";
       "fedora" = mkHome "fedora" "aarch64-linux";
       "rocky10" = mkHome "rocky10" "aarch64-linux";
     };
