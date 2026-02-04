@@ -166,7 +166,7 @@ in {
           git -C "$FLAKE" add .
 
           # 3. 使用 nh 切换并根据结果提交 Git 使用 git diff --quiet 检查是否有实际更改，避免生成空提交
-          nh home switch "$FLAKE" -- --backup-extension backup && \
+          nh home switch "$FLAKE" && \
           (git -C "$FLAKE" diff --cached --quiet || git -C "$FLAKE" commit -m "''${1:-Update: $(date +'%F %T')}")
         }
 

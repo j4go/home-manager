@@ -1,7 +1,7 @@
 {pkgs, ...}: {
   programs.kitty = {
     enable = true;
-    theme = "Everforest Dark Medium"; # 主题
+    themeFile = "everforest_dark_medium"; # 主题
 
     # 1. 字体配置 (建议确保字体已在系统安装，如 Maple Mono NF CN)
     font = {
