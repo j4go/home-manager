@@ -95,7 +95,7 @@ in {
       # 保持 Alias
       shellAliases = lib.mkMerge [
         {
-          os = "fastfetch";
+          os = "macchina";
           neo = "fastfetch";
           fetch = "fastfetch";
           su = "su -";
