@@ -32,7 +32,8 @@
       _7zz # 现代 7zip
       ouch # 自动识别所有的后缀名 使用参数一致
       # --- 字体安装区域 ---
-      nerd-fonts.jetbrains-mono
+      # nerd-fonts.jetbrains-mono
+      # maple-mono.NF-CN
     ])
     # 2. 增量包 using unstable pkgs
     ++ [
