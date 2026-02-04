@@ -69,6 +69,10 @@ in {
         conflictstyle = "zdiff3";
       };
 
+      safe = {
+        directory = "*";
+      };
+
       # 初始化
       init = {
         defaultBranch = "main";
