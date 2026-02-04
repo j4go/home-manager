@@ -17,6 +17,7 @@
       doggo # 现代 DNS 查询
       procs # 进程查看
       httpie # http cli client
+      macchina # 类似fastfetch
 
       lazygit # Git 终端 UI
       delta # Git Diff 增强
