@@ -26,6 +26,9 @@
         enable_italic = 1; # 开启斜体
         # 关闭性能优化模式以消除底部提示
         better_performance = 0;
+        # 开启 Everforest 原生透明背景支持
+        # 这会告诉主题不要绘制 Normal 层的背景色
+        transparent_background = 1;
       };
     };
 
@@ -194,6 +197,22 @@
             function()
               vim.cmd("highlight link markdownError Normal")
               vim.cmd("highlight markdownError term=NONE cterm=NONE guifg=NONE")
+            end
+          '';
+        };
+      }
+
+      # 有时候主题设置了 transparent 依然会有残留 (如行号栏)，这个自动命令会在加载后再次清除
+      {
+        event = ["VimEnter" "ColorScheme"];
+        callback = {
+          __raw = ''
+            function()
+              vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+              vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+              vim.api.nvim_set_hl(0, "LineNr", { bg = "none" })
+              vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
+              vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = "none" })
             end
           '';
         };
