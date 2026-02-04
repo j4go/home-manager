@@ -9,5 +9,6 @@
     ./git.nix
     ./zellij.nix
     ./yazi.nix
+    ./snitch.nix
   ];
 }

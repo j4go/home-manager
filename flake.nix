@@ -63,6 +63,14 @@
           ./home.nix # 基础通用配置
           ./hosts/${hostName} # 加载对应的 host 文件夹
           nixvim.homeModules.nixvim # nixvim 模块
+
+          # 添加 Snitch 的 Home Manager 模块
+          snitch.homeManagerModules.default
+
+          # 可选：如果你想确保使用 flake 里的最新版而不是 nixpkgs 里的
+          {
+            programs.snitch.package = snitch.packages.${system}.default;
+          }
         ];
       };
   in {
