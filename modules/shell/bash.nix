@@ -30,6 +30,7 @@ in {
     # --- 声明式全局环境变量 ---
     # 业界标准：在 home.sessionVariables 定义，确保变量在全局环境生效
     home.sessionVariables = {
+      FLAKE = "/home/w/.config/home-manager";
       EDITOR = "nvim";
       LANG = "en_US.UTF-8";
       LC_ALL = "en_US.UTF-8";
@@ -156,22 +157,17 @@ in {
         alias mamba='micromamba'
         alias conda='micromamba'
 
-        # HM 维护函数 (对齐 flake.nix 中的 alejandra)
+        # HM 维护函数
         hm-save() {
-          local msg="Update: $(date '+%Y-%m-%d %H:%M:%S')"
-          if [ -n "$1" ]; then msg="Update: $1"; fi
-          (
-            cd ~/.config/home-manager || return
-            if command -v nix >/dev/null; then
-              nix fmt . &>/dev/null
-            fi
-            git add .
-            if home-manager switch --flake ".#${hostName}" -b backup; then
-              [[ -n $(git diff --cached) ]] && git commit -m "$msg" && echo "🎉 Successful!" || echo "ℹ️ No changes."
-            else
-              return 1
-            fi
-          )
+          # 1. 格式化代码 对齐flake.nix中的alejandra
+          nix fmt "$FLAKE" &>/dev/null
+
+          # 2. 暂存所有更改 (Flake 必须)
+          git -C "$FLAKE" add .
+
+          # 3. 使用 nh 切换并根据结果提交 Git 使用 git diff --quiet 检查是否有实际更改，避免生成空提交
+          nh home switch "$FLAKE" -- --backup-extension backup && \
+          (git -C "$FLAKE" diff --cached --quiet || git -C "$FLAKE" commit -m "''${1:-Update: $(date +'%F %T')}")
         }
 
         # 历史同步
