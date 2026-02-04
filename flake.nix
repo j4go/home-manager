@@ -17,6 +17,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # snitch
+    snitch = {
+      url = "github:karol-broda/snitch";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # 引入 unstable 源作为备用
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
   };
@@ -26,6 +32,7 @@
     nixpkgs,
     home-manager,
     nixvim,
+    snitch,
     nixpkgs-unstable,
     ...
   } @ inputs: let
