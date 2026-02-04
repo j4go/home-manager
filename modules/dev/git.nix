@@ -111,7 +111,7 @@ in {
         br = "branch";
         unstage = "reset HEAD --";
         last = "log -1 HEAD";
-        lg = "log --graph --pretty=format:'%C(bold yellow)%h%Creset %C(magenta)-%Creset %s %C(auto)%d%Creset %C(dim white)(%cr)%Creset %C(bold blue)<%an>%Creset' --abbrev-commit";
+        lg = "log --graph --pretty=format:'%C(bold yellow)%h%Creset %C(magenta)-%Creset %s %C(auto)%d%Creset %C(dim white)(%cr)%Creset %C(bold blue)<%an>%Creset' --abbrev-commit -n 20";
       };
 
       # 网络与缓冲区 (合并静态设置与动态代理)
