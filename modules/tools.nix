@@ -13,11 +13,14 @@
       duf # 磁盘空间查看
       dust # 目录占用分析
       gping # 图形化 Ping
-      lazygit # Git 终端 UI
-      delta # Git Diff 增强
       sd # 极速文本替换
       doggo # 现代 DNS 查询
       procs # 进程查看
+      httpie # http cli client
+
+      lazygit # Git 终端 UI
+      delta # Git Diff 增强
+      gitnr # A CLI / TUI to generate .gitignore files using templates.
 
       xclip # 剪贴板 (X11)
       wl-clipboard # 剪贴板 (Wayland)
