@@ -117,7 +117,8 @@ in {
           setproxy = "export all_proxy=http://${proxy.address} http_proxy=http://${proxy.address} https_proxy=http://${proxy.address} no_proxy=${noProxyStr} NO_PROXY=${noProxyStr}";
           unproxy = "unset all_proxy http_proxy https_proxy no_proxy NO_PROXY";
 
-          # Git 快捷提交
+          # Git
+          gitls = "git ls-remote origin -h refs/heads/main";
           gitup = "git add . && git commit -m \"update: $(date +%Y-%m-%d)\" && git push";
         }
         (lib.mkIf hasEza {
