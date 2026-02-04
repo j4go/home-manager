@@ -18,8 +18,14 @@
       sd # 极速文本替换
       doggo # 现代 DNS 查询
       procs # 进程查看
+
       xclip # 剪贴板 (X11)
       wl-clipboard # 剪贴板 (Wayland)
+
+      imagemagick # 处理图片
+      ffmpegthumbnailer # 处理视频
+      poppler # 处理pdf 如pdf转图片预览等
+
       # --- 压缩解压工具套装 ---
       zip
       unzip
