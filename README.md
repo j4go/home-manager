@@ -1,6 +1,6 @@
 # DOC
 
-## Nix
+## Nix Resource
 
 [nh](https://github.com/nix-community/nh)
 
@@ -9,5 +9,7 @@
 [awesome-nix](https://github.com/nix-community/awesome-nix)
 
 [nix pkgs search](https://search.nixos.org/packages)
+
+
 
 
