@@ -34,8 +34,7 @@ with lib; {
 
     # 添加别名配置
     home.shellAliases = {
-      se = "sudo -E systemctl edit";
-      n = "hm-save";
+      sedit = "sudo -E systemctl edit";
     };
   };
 }
