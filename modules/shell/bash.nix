@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  hostName,
   ...
 }: let
   # --- 变量提取 ---
@@ -24,13 +23,12 @@ in {
       toilet
       chafa
       lolcat
-      fd
     ];
 
     # --- 声明式全局环境变量 ---
-    # 业界标准：在 home.sessionVariables 定义，确保变量在全局环境生效
     home.sessionVariables = {
-      FLAKE = "/home/w/.config/home-manager";
+      # 使用动态路径
+      FLAKE = "${config.home.homeDirectory}/.config/home-manager";
       EDITOR = "nvim";
       LANG = "en_US.UTF-8";
       LC_ALL = "en_US.UTF-8";
@@ -46,14 +44,17 @@ in {
 
     # --- 程序集成配置 ---
     programs = {
-      # zoxide：自动接管 cd
+      fd = {
+        enable = true;
+        # hidden = true; # 是否搜索隐藏文件 注释是不搜索，不注释是搜索隐藏文件
+      };
+
       zoxide = {
         enable = true;
         enableBashIntegration = true;
         options = ["--cmd cd"];
       };
 
-      # eza：现代化的 ls 替代品
       eza = {
         enable = true;
         enableBashIntegration = true;
@@ -61,7 +62,6 @@ in {
         extraOptions = ["--group-directories-first" "--header"];
       };
 
-      # fzf：模糊搜索集成
       fzf = {
         enable = true;
         enableBashIntegration = true;
@@ -83,7 +83,7 @@ in {
       };
     };
 
-    # --- Bash 核心配置 ---
+    # --- Bash核心配置 ---
     programs.bash = {
       enable = true;
       enableCompletion = true;
@@ -92,15 +92,14 @@ in {
       historyControl = ["ignoreboth" "erasedups"];
       shellOptions = ["histappend" "checkwinsize" "globstar" "cdspell" "dirspell" "checkjobs" "histverify"];
 
-      # 保持 Alias
       shellAliases = lib.mkMerge [
         {
+          so = "source ~/.bashrc"; # 注意：HM 环境下这通常只重载 alias，不重载 env
           os = "macchina";
           neo = "fastfetch";
           fetch = "fastfetch";
           su = "su -";
           "7z" = "7zz";
-          so = "source ~/.bashrc";
           m = "tldr";
           grep = "grep --color=auto";
           rm = "trash-put";
@@ -137,10 +136,8 @@ in {
 
       # 交互式 Shell 初始化
       initExtra = ''
-        # 非交互式 Shell 提前返回
         [[ $- == *i* ]] || return
 
-        # 实用函数
         mkcd() { mkdir -p "$1" && cd "$1"; }
 
         # Micromamba 懒加载
@@ -158,28 +155,15 @@ in {
         alias conda='micromamba'
 
         # HM 维护函数
-        # 如果这个命令出错了，手动执行以下命令
-        # cd ~/.config/home-manager  git add .
-        # nh home switch ~/.config/home-manager
-        # 或者完整的下面这条命令 其中@后面是主机名
-        # home-manager switch --flake ~/.config/home-manager#w@alma
         hm-save() {
           local flake_path="$FLAKE"
-          # nh 默认就会寻找 用户名@主机名，所以我们通常不需要手动拼接
           local msg="Update: $(date '+%Y-%m-%d %H:%M:%S')"
-
           if [ -n "$1" ]; then msg="Update: $1"; fi
 
-          # 1. 预处理：代码格式化
           nix fmt "$flake_path" &>/dev/null
-
-          # 2. 关键：同步 Git 索引（Flake 必须 track 才能识别新文件）
           git -C "$flake_path" add .
 
-          # 3. 执行 nh 构建
-          # 简化命令：nh 会自动处理路径和目标匹配
           if nh home switch "$flake_path"; then
-            # 4. 检查是否有实际变更并提交
             if [[ -n $(git -C "$flake_path" diff --cached) ]]; then
               git -C "$flake_path" commit -m "$msg"
               echo "✅ 配置已成功应用并提交"
@@ -193,7 +177,11 @@ in {
         }
 
         # 历史同步
-        _sync_history() { history -a; history -n; }
+        # 通常 history -a (追加内存到磁盘) 即可满足“不丢失”的需求。
+        # history -n (从磁盘读到内存) 建议手动执行或仅在新开终端时读取。
+        # 建议：如果你没有感觉到卡顿，保持现状即可。如果觉得 Prompt 反应慢，删掉 ; history -n。
+        # _sync_history() { history -a; history -n; }
+        _sync_history() { history -a; }
         if [[ ";$PROMPT_COMMAND;" != *";_sync_history;"* ]]; then
           PROMPT_COMMAND="_sync_history''${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
         fi
@@ -215,7 +203,6 @@ in {
           fi
           \rm -f -- "$tmp"
         }
-
       '';
     };
   };
