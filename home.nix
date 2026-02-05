@@ -27,5 +27,10 @@ with lib; # 引入 mkOption, mkEnableOption 等函数
       home.stateVersion = "24.05";
       # 启用 Home Manager (所有机器共享)
       programs.home-manager.enable = true;
+
+      home.sessionVariables = {
+        EDITOR = "nvim";
+        VISUAL = "nvim";
+      };
     };
   }

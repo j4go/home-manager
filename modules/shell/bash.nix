@@ -159,15 +159,32 @@ in {
 
         # HM 维护函数
         hm-save() {
-          # 1. 格式化代码 对齐flake.nix中的alejandra
-          nix fmt "$FLAKE" &>/dev/null
+          local flake_path="$FLAKE"
+          local current_target="$USER@$(hostname)"
+          local msg="Update: $(date '+%Y-%m-%d %H:%M:%S')"
 
-          # 2. 暂存所有更改 (Flake 必须)
-          git -C "$FLAKE" add .
+          if [ -n "$1" ]; then msg="Update: $1"; fi
 
-          # 3. 使用 nh 切换并根据结果提交 Git 使用 git diff --quiet 检查是否有实际更改，避免生成空提交
-          nh home switch "$FLAKE" && \
-          (git -C "$FLAKE" diff --cached --quiet || git -C "$FLAKE" commit -m "''${1:-Update: $(date +'%F %T')}")
+          # 1. 预处理：代码格式化
+          nix fmt "$flake_path" &>/dev/null
+
+          # 2. 关键：同步 Git 索引 (Flake 仅识别 Git 追踪的文件)
+          git -C "$flake_path" add .
+
+          # 3. 执行 nh 构建
+          # 显式传递目标以规避自动寻址失败的风险
+          if nh home switch "$flake_path" -- --flake "$flake_path#$current_target"; then
+            # 4. 提交变更
+            if [[ -n $(git -C "$flake_path" diff --cached) ]]; then
+              git -C "$flake_path" commit -m "$msg"
+              echo "✅ 配置已成功应用并提交"
+            else
+              echo "ℹ 没有任何配置变更"
+            fi
+          else
+            echo "❌ 构建终止：请检查错误日志"
+            return 1
+          fi
         }
 
         # 历史同步
