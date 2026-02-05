@@ -10,5 +10,6 @@
     ./zellij.nix
     ./yazi.nix
     ./snitch.nix
+    ./broot.nix
   ];
 }
