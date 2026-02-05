@@ -158,9 +158,14 @@ in {
         alias conda='micromamba'
 
         # HM 维护函数
+        # 如果这个命令出错了，手动执行以下命令
+        # cd ~/.config/home-manager  git add .
+        # nh home switch ~/.config/home-manager
+        # 或者完整的下面这条命令 其中@后面是主机名
+        # home-manager switch --flake ~/.config/home-manager#w@alma
         hm-save() {
           local flake_path="$FLAKE"
-          local current_target="$USER@$(hostname)"
+          # nh 默认就会寻找 用户名@主机名，所以我们通常不需要手动拼接
           local msg="Update: $(date '+%Y-%m-%d %H:%M:%S')"
 
           if [ -n "$1" ]; then msg="Update: $1"; fi
@@ -168,13 +173,13 @@ in {
           # 1. 预处理：代码格式化
           nix fmt "$flake_path" &>/dev/null
 
-          # 2. 关键：同步 Git 索引 (Flake 仅识别 Git 追踪的文件)
+          # 2. 关键：同步 Git 索引（Flake 必须 track 才能识别新文件）
           git -C "$flake_path" add .
 
           # 3. 执行 nh 构建
-          # 显式传递目标以规避自动寻址失败的风险
-          if nh home switch "$flake_path" -- --flake "$flake_path#$current_target"; then
-            # 4. 提交变更
+          # 简化命令：nh 会自动处理路径和目标匹配
+          if nh home switch "$flake_path"; then
+            # 4. 检查是否有实际变更并提交
             if [[ -n $(git -C "$flake_path" diff --cached) ]]; then
               git -C "$flake_path" commit -m "$msg"
               echo "✅ 配置已成功应用并提交"
@@ -182,7 +187,7 @@ in {
               echo "ℹ 没有任何配置变更"
             fi
           else
-            echo "❌ 构建终止：请检查错误日志"
+            echo "❌ 构建终止：请检查上述错误日志"
             return 1
           fi
         }
