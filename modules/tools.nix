@@ -5,11 +5,12 @@
   home.packages =
     # 主体包：using stable pkgs
     (with pkgs; [
+      jq # JSON 处理的标准库
+      fx # 交互式JSON查看与调试神器
+      yq-go # JSON & YAML & XML
       fd # 极速查找
       ripgrep # 极速搜索
       scooter # 交互式查找替换
-      jq # JSON 处理
-      yq-go # JSON & YAML & XML
       duf # 磁盘空间查看
       dust # 目录占用分析
       gping # 图形化 Ping
