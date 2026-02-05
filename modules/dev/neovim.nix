@@ -217,6 +217,22 @@
           '';
         };
       }
+
+      {
+        event = ["FocusGained" "BufEnter" "CursorHold"];
+        pattern = ["*"];
+        callback = {
+          __raw = ''
+            function()
+              -- 使用 vim.fn.getcmdwintype() 检测是否在命令行窗口
+              -- 返回空字符串 "" 表示是普通窗口，安全可行
+              if vim.fn.getcmdwintype() == "" then
+                vim.cmd("checktime")
+              end
+            end
+          '';
+        };
+      }
     ];
 
     # ==========================================
