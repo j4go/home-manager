@@ -17,9 +17,11 @@
       sd # 极速文本替换
       doggo # 现代 DNS 查询
       procs # 进程查看
-      httpie # http cli client
       macchina # 类似fastfetch
       lnav # 替换less的日志查看工具
+
+      httpie # http cli client
+      xh # httpie的rust重新实现
 
       lazygit # Git 终端 UI
       delta # Git Diff 增强
