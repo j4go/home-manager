@@ -1,10 +1,10 @@
 {pkgs, ...}: {
   programs.nh = {
     enable = true;
-    # 自动清理设置：保留最近 5 天的生成版本，且最多保留 5 个
+    # 自动清理设置：保留最近 3 天的生成版本，且最多保留 3 个
     clean = {
       enable = true;
-      extraArgs = "--keep-since 5d --keep 5";
+      extraArgs = "--keep-since 3d --keep 3";
     };
     # 核心：定义你的 Flake 配置路径，nh 会自动识别
     # 建议使用绝对路径
