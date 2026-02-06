@@ -1,33 +1,29 @@
-{...}: {
+{pkgs, ...}: {
   programs.nixvim = {
     enable = true;
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
 
+    # ==========================================
+    # 📦 外部依赖注入
+    # ==========================================
+    # 确保 figlet 在 Neovim 的 PATH 中可用，
+    # 这样无论系统层是否安装，插件都能正常工作。
+    extraPackages = [pkgs.figlet];
+
     # 取消版本检查，加快构建速度
     version.enableNixpkgsReleaseCheck = false;
 
     # ==========================================
     # 🎨 主题配置：Everforest Light (与 Mac 保持一致)
-    # "Everforest Light 的三种“口味”对比
-    # Everforest 的魅力在于它不提供单一的白色，而是通过调节背景的“有机感”来适应不同的环境光线。
-
-    # 对比度等级    背景色特征         视觉感受                              适用场景
-    # Hard          较冷的象牙白       清晰度最高；文字跳跃感强              强光环境；需要极高辨识度时
-    # Medium        温暖的米黄色       最平衡的视觉体验；经典Everforest感    日常办公；全天候使用
-    # Soft          带有绿色调的暗白   极度柔和；几乎没有视觉刺激            眼睛易疲劳者；长时间逻辑思考
     # ==========================================
     colorschemes.everforest = {
       enable = true;
       settings = {
-        # background 指的是对比度 (Contrast)，接受 "hard", "medium", "soft"
         background = "medium";
-        enable_italic = 1; # 开启斜体
-        # 关闭性能优化模式以消除底部提示
+        enable_italic = 1;
         better_performance = 0;
-        # 开启 Everforest 原生透明背景支持
-        # 这会告诉主题不要绘制 Normal 层的背景色
         transparent_background = 1;
       };
     };
@@ -36,16 +32,15 @@
     # ⚙️ 基础选项 (Opts)
     # ==========================================
     opts = {
-      #background = "light";
-      background = "dark";
+      background = "dark"; # 您配置中显式覆盖为 dark
       termguicolors = true;
 
       # 界面显示优化
-      showmode = false; # 隐藏原生 -- INSERT -- (交给 Lightline)
-      showtabline = 1; # 只有多个标签页时才显示顶部标签栏 (解决 No Name 烦恼)
-      laststatus = 2; # 始终显示状态栏
+      showmode = false;
+      showtabline = 1;
+      laststatus = 2;
 
-      # 剪切板策略：Linux 下显式交互防止卡顿
+      # 剪切板策略
       clipboard = "";
 
       # 缩进与排版
@@ -148,13 +143,12 @@
     ];
 
     # ==========================================
-    # 4. 📦 插件配置 (新增 Lightline)
+    # 4. 📦 插件配置
     # ==========================================
     plugins = {
       nix.enable = true;
       treesitter.enable = true;
 
-      # 状态栏插件：Lightline
       lightline = {
         enable = true;
         settings = {
@@ -170,7 +164,7 @@
     };
 
     # ==========================================
-    # ⚡ 自动命令 (与 Mac 逻辑一致)
+    # ⚡ 自动命令
     # ==========================================
     autoCmd = [
       # 智能 Cursorline
@@ -201,8 +195,7 @@
           '';
         };
       }
-
-      # 有时候主题设置了 transparent 依然会有残留 (如行号栏)，这个自动命令会在加载后再次清除
+      # 透明背景残留清除
       {
         event = ["VimEnter" "ColorScheme"];
         callback = {
@@ -217,15 +210,13 @@
           '';
         };
       }
-
+      # 命令行窗口检测
       {
         event = ["FocusGained" "BufEnter" "CursorHold"];
         pattern = ["*"];
         callback = {
           __raw = ''
             function()
-              -- 使用 vim.fn.getcmdwintype() 检测是否在命令行窗口
-              -- 返回空字符串 "" 表示是普通窗口，安全可行
               if vim.fn.getcmdwintype() == "" then
                 vim.cmd("checktime")
               end
@@ -233,20 +224,14 @@
           '';
         };
       }
-
-      # ==========================================
-      # 💻 终端体验优化
-      # ==========================================
+      # 终端体验优化
       {
         event = ["TermOpen"];
         pattern = ["*"];
         callback = {
           __raw = ''
             function()
-              -- 1. 打开终端时自动进入插入模式 (直接可以打字)
               vim.cmd("startinsert")
-
-              -- 2. 关闭行号和侧边栏 (终端里不需要这些，看起来更干净)
               vim.opt_local.number = false
               vim.opt_local.relativenumber = false
               vim.opt_local.signcolumn = "no"
@@ -257,21 +242,71 @@
     ];
 
     # ==========================================
-    # 🛠️ Lua 专项优化
+    # 🛠️ Lua 专项优化 & 自定义函数
     # ==========================================
     extraConfigLua = ''
-      -- Markdown 全局变量
+      -- 1. Markdown 全局变量
       vim.g.markdown_disable_html = 1
       vim.g.markdown_exclude_embed = 1
       vim.g.markdown_disable_flow = 1
 
-      -- 自动创建持久化目录
+      -- 2. 自动创建持久化目录
       local function ensure_dir(path)
         if vim.fn.isdirectory(path) == 0 then
           vim.fn.mkdir(path, "p", 448)
         end
       end
       ensure_dir(vim.fn.stdpath("state") .. "/undo")
+
+      -- ==========================================
+      -- 🎨 Figlet 自动化 ASCII 标题系统
+      -- ==========================================
+      local function insert_figlet(opts)
+          local text = opts.args
+          if text == "" then return end
+
+          -- 获取当前 buffer 的注释符 (默认 # %s)
+          local cms = vim.bo.commentstring
+          if cms == "" then cms = "# %s" end
+
+          -- 调用外部命令
+          -- [修复] 使用 vim.fn.shellescape 替代错误的 quote() 方法
+          local handle = io.popen("figlet " .. vim.fn.shellescape(text))
+          local result = handle:read("*a")
+          handle:close()
+
+          -- 转换为行表并添加注释
+          local lines = {}
+          for line in result:gmatch("[^\r\n]+") do
+              -- Lua 的 string.gsub 处理 %s 占位符
+              table.insert(lines, cms:gsub("%%s", line))
+          end
+
+          -- 在当前光标处插入
+          local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+          vim.api.nvim_buf_set_lines(0, row, row, false, lines)
+      end
+
+      -- figlet默认大字体
+      vim.api.nvim_create_user_command("print_big", function(opts)
+          insert_figlet(opts, "") -- 传空字符串表示默认
+      end, { nargs = 1 })
+
+      -- 斜体命令 :FigletSlant (使用 slant)
+      vim.api.nvim_create_user_command("print", function(opts)
+          insert_figlet(opts, "-f slant")
+      end, { nargs = 1 })
+
+      -- figlet小字体
+      vim.api.nvim_create_user_command("print_small", function(opts)
+          insert_figlet(opts, "-f small")
+      end, { nargs = 1 })
+
+      -- 注册命令 :Figlet
+      vim.api.nvim_create_user_command("print", insert_figlet, { nargs = 1 })
+
+      -- 绑定快捷键 <leader>fg (即 ;fg)
+      vim.keymap.set("n", "<leader>fg", ":print", { desc = "Generate ASCII Title" })
     '';
   };
 }
