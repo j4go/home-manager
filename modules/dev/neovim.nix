@@ -285,7 +285,7 @@
           -- 转换为行表并添加注释
           local lines = {}
           for line in result:gmatch("[^\r\n]+") do
-              table.insert(lines, cms:gsub("%%s", line))
+              table.insert(lines, (cms:gsub("%%s", line)))
           end
 
           -- 在当前光标处插入
