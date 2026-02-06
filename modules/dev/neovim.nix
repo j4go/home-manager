@@ -1,3 +1,9 @@
+#                        _                              __ _
+#  _ __   ___  _____   _(_)_ __ ___     ___ ___  _ __  / _(_) __ _
+# | '_ \ / _ \/ _ \ \ / / | '_ ` _ \   / __/ _ \| '_ \| |_| |/ _` |
+# | | | |  __/ (_) \ V /| | | | | | | | (_| (_) | | | |  _| | (_| |
+# |_| |_|\___|\___/ \_/ |_|_| |_| |_|  \___\___/|_| |_|_| |_|\__, |
+#                                                            |___/
 {pkgs, ...}: {
   programs.nixvim = {
     enable = true;
@@ -275,7 +281,7 @@
           -- 构造命令: figlet [字体参数] "文本"
           -- 注意：font_arg 默认为空字符串
           font_arg = font_arg or ""
-          local cmd = string.format("figlet %s %s", font_arg, vim.fn.shellescape(text))
+          local cmd = string.format("figlet -w 1000 %s %s", font_arg, vim.fn.shellescape(text))
 
           -- 执行命令
           local handle = io.popen(cmd)
@@ -285,7 +291,8 @@
           -- 转换为行表并添加注释
           local lines = {}
           for line in result:gmatch("[^\r\n]+") do
-              table.insert(lines, (cms:gsub("%%s", line)))
+              local cleaned_line = line:gsub("%s+$", "")
+              table.insert(lines, (cms:gsub("%%s", cleaned_line)))
           end
 
           -- 在当前光标处插入
