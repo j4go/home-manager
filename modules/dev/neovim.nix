@@ -245,6 +245,7 @@
     # 🛠️ Lua 专项优化 & 自定义函数
     # ==========================================
     extraConfigLua = ''
+
       -- 1. Markdown 全局变量
       vim.g.markdown_disable_html = 1
       vim.g.markdown_exclude_embed = 1
@@ -258,27 +259,32 @@
       end
       ensure_dir(vim.fn.stdpath("state") .. "/undo")
 
+
       -- ==========================================
       -- 🎨 Figlet 自动化 ASCII 标题系统
       -- ==========================================
-      local function insert_figlet(opts)
-          local text = opts.args
+
+      -- 1. 定义核心处理函数 (接收 文本 和 字体参数)
+      local function generate_figlet(text, font_arg)
           if text == "" then return end
 
           -- 获取当前 buffer 的注释符 (默认 # %s)
           local cms = vim.bo.commentstring
           if cms == "" then cms = "# %s" end
 
-          -- 调用外部命令
-          -- [修复] 使用 vim.fn.shellescape 替代错误的 quote() 方法
-          local handle = io.popen("figlet " .. vim.fn.shellescape(text))
+          -- 构造命令: figlet [字体参数] "文本"
+          -- 注意：font_arg 默认为空字符串
+          font_arg = font_arg or ""
+          local cmd = string.format("figlet %s %s", font_arg, vim.fn.shellescape(text))
+
+          -- 执行命令
+          local handle = io.popen(cmd)
           local result = handle:read("*a")
           handle:close()
 
           -- 转换为行表并添加注释
           local lines = {}
           for line in result:gmatch("[^\r\n]+") do
-              -- Lua 的 string.gsub 处理 %s 占位符
               table.insert(lines, cms:gsub("%%s", line))
           end
 
@@ -287,26 +293,35 @@
           vim.api.nvim_buf_set_lines(0, row, row, false, lines)
       end
 
-      -- figlet默认大字体
-      vim.api.nvim_create_user_command("print_big", function(opts)
-          insert_figlet(opts, "") -- 传空字符串表示默认
+      -- ==========================================
+      -- 注册命令 (必须大写开头！)
+      -- ==========================================
+
+      -- 1. 标准字体 (对应原来的 print_big)
+      -- 使用: :Figlet Hello
+      vim.api.nvim_create_user_command("Figlet", function(opts)
+          generate_figlet(opts.args, "")
       end, { nargs = 1 })
 
-      -- 斜体命令 :FigletSlant (使用 slant)
-      vim.api.nvim_create_user_command("print", function(opts)
-          insert_figlet(opts, "-f slant")
+      -- 2. 斜体字 (对应原来的 print / slant)
+      -- 使用: :FigletSlant Hello
+      vim.api.nvim_create_user_command("FigletSlant", function(opts)
+          generate_figlet(opts.args, "-f slant")
       end, { nargs = 1 })
 
-      -- figlet小字体
-      vim.api.nvim_create_user_command("print_small", function(opts)
-          insert_figlet(opts, "-f small")
+      -- 3. 小字体 (对应原来的 print_small)
+      -- 使用: :FigletSmall Hello
+      vim.api.nvim_create_user_command("FigletSmall", function(opts)
+          generate_figlet(opts.args, "-f small")
       end, { nargs = 1 })
 
-      -- 注册命令 :Figlet
-      vim.api.nvim_create_user_command("print", insert_figlet, { nargs = 1 })
+      -- ==========================================
+      -- 快捷键绑定
+      -- ==========================================
 
-      -- 绑定快捷键 <leader>fg (即 ;fg)
-      vim.keymap.set("n", "<leader>fg", ":print", { desc = "Generate ASCII Title" })
+      -- <leader>fg 默认使用斜体 (你可以根据喜好改成 :Figlet 或 :FigletSmall)
+      vim.keymap.set("n", "<leader>fg", ":FigletSlant ", { desc = "ASCII Title (Slant)" })
+
     '';
   };
 }
