@@ -127,6 +127,9 @@ in {
           # Git
           gitls = "git ls-remote origin -h refs/heads/main";
           gitup = "git add . && git commit -m \"update: $(date +%Y-%m-%d)\" && git push";
+
+          # nginx
+          ng-reload = "sudo nginx -t && sudo systemctl reload nginx";
         }
         (lib.mkIf hasEza {
           ls = "${lib.getExe pkgs.eza} --icons=auto --git";
