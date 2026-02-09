@@ -40,9 +40,9 @@ in {
 
     # 5. Lua 初始化 (保持不变，require 引用名不需要 .yazi)
     initLua = ''
-      require("full-border"):setup {
-          type = ui.Border.ROUNDED,
-      }
+      -- require("full-border"):setup {
+      --     type = ui.Border.ROUNDED,
+      -- }
 
       function Status:owner()
         local h = cx.active.current.hovered
