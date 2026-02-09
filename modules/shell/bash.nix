@@ -100,8 +100,9 @@ in {
 
       shellAliases = lib.mkMerge [
         {
+          ya = "yazi";
           so = "source ~/.bashrc"; # 注意：HM 环境下这通常只重载 alias，不重载 env
-          os = "macchina";
+          os = "fastfetch";
           neo = "fastfetch";
           fetch = "fastfetch";
           su = "su -";
@@ -202,7 +203,7 @@ in {
 
         # yazi y function
         function y() {
-          local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+          local tmp="$(mktemp -t yazi-cwd.XXXXXX)"
           yazi "$@" --cwd-file="$tmp"
           if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
               builtin cd -- "$cwd"
