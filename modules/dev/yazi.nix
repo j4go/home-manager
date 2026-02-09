@@ -26,9 +26,12 @@ in {
 
   programs.yazi = {
     enable = true;
+    # 这会自动在 .bashrc 中注入一个 `y` 函数
+    # 使用 `y` 命令启动 yazi，退出时会自动 cd 到当前目录
+    # 尝试过设置为true 但y函数没有被识别 改成false 然后手动注入y函数
     enableBashIntegration = false;
 
-    # 4. 挂载插件 (Git/Chmod 等在服务器上依然非常有用)
+    # 4. 挂载插件
     plugins = {
       "full-border" = "${yazi-plugins-src}/full-border.yazi";
       "git" = "${yazi-plugins-src}/git.yazi";
@@ -36,7 +39,7 @@ in {
       "chmod" = "${yazi-plugins-src}/chmod.yazi";
     };
 
-    # 5. Lua 初始化 (纯 UI 逻辑，不依赖外部命令)
+    # 5. Lua 初始化
     initLua = ''
       require("full-border"):setup {
           type = ui.Border.ROUNDED,
@@ -88,25 +91,14 @@ in {
             for = "unix";
           }
         ];
-
-        # 🐢 服务器模式：注释掉 GUI 打开器 (mpv/xdg-open)
-        # play = [
-        #   { run = ''mpv "$@"''; orphan = true; for = "unix"; }
-        # ];
-        # open = [
-        #   { run = ''xdg-open "$@"''; desc = "Open"; for = "linux"; }
-        # ];
       };
 
       open = {
         prepend_rules = [
-          # 仅保留文本编辑，注释掉媒体打开规则
-          # { name = "*/"; use = [ "edit" "open" ]; }
           {
             name = "*/";
             use = ["edit"];
           }
-
           {
             mime = "text/*";
             use = "edit";
@@ -115,9 +107,6 @@ in {
             name = "*.json";
             use = "edit";
           }
-
-          # { mime = "image/*"; use = "open"; }
-          # { mime = "video/*"; use = "play"; }
         ];
       };
 
@@ -141,43 +130,38 @@ in {
       };
     };
 
+    # 1. 使用 'mgr' 而非 'manager' 以匹配新版 Yazi 规范 (消除警告)
+    # 2. 必须嵌套在 'prepend_keymap' 下，否则会生成错误的 TOML 结构 (消除 invalid type 报错)
     keymap = {
-      manager = [
-        {
-          on = ["F"];
-          run = "plugin smart-filter";
-          desc = "Smart filter";
-        }
-        {
-          on = ["c" "m"];
-          run = "plugin chmod";
-          desc = "Chmod";
-        }
-        {
-          on = ["g" "s"];
-          run = "plugin git";
-          desc = "Git status";
-        }
-
-        # 🐢 服务器模式：注释掉系统剪贴板操作
-        # 服务器通常没有 clipboard provider，强行运行会报错
-        # {
-        #   on = [ "y" "c" ];
-        #   run = ''shell 'cat "$0" | wl-copy' --confirm'';
-        #   desc = "Copy file content";
-        # }
-
-        {
-          on = ["g" "d"];
-          run = "cd ~/.config/yazi";
-          desc = "Go to config";
-        }
-        {
-          on = ["!"];
-          run = ''shell "$SHELL" --block'';
-          desc = "Open shell here";
-        }
-      ];
+      mgr = {
+        prepend_keymap = [
+          {
+            on = ["F"];
+            run = "plugin smart-filter";
+            desc = "Smart filter";
+          }
+          {
+            on = ["c" "m"];
+            run = "plugin chmod";
+            desc = "Chmod";
+          }
+          {
+            on = ["g" "s"];
+            run = "plugin git";
+            desc = "Git status";
+          }
+          {
+            on = ["g" "d"];
+            run = "cd ~/.config/yazi";
+            desc = "Go to config";
+          }
+          {
+            on = ["!"];
+            run = ''shell "$SHELL" --block'';
+            desc = "Open shell here";
+          }
+        ];
+      };
     };
   };
 }
