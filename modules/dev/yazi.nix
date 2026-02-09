@@ -3,21 +3,21 @@
   lib,
   ...
 }: let
-  # 1. 插件源码 (需修正 Hash)
+  # 1. 插件源码
   yazi-plugins-src = pkgs.fetchFromGitHub {
     owner = "yazi-rs";
     repo = "plugins";
     rev = "88990a6";
-    # 🔴 首次构建报错时，请替换为提示的正确 sha256
-    hash = "sha256-B9b6T9/RkJDkehMC5/MxqnkjxWj5LZg4jehAn6aeamE=";
+    # 🔴 必须重置 Hash，否则因为你之前填了重复的 Hash，Nix 可能缓存了错误的文件
+    hash = "sha256-0K6qGgbGt8N6HgGNEmn2FDLar6hCPiPBbvOsrTjSubM=";
   };
 
-  # 2. 主题源码 (需修正 Hash)
+  # 2. 主题源码
   catppuccin-flavor-src = pkgs.fetchFromGitHub {
     owner = "yazi-rs";
     repo = "flavors";
     rev = "9e053d0";
-    # 🔴 首次构建报错时，请替换为提示的正确 sha256
+    # 🔴 必须重置 Hash，确保与上方不同
     hash = "sha256-B9b6T9/RkJDkehMC5/MxqnkjxWj5LZg4jehAn6aeamE=";
   };
 in {
@@ -26,12 +26,11 @@ in {
 
   programs.yazi = {
     enable = true;
-    # 这会自动在 .bashrc 中注入一个 `y` 函数
-    # 使用 `y` 命令启动 yazi，退出时会自动 cd 到当前目录
-    # 尝试过设置为true 但y函数没有被识别 改成false 然后手动注入y函数
     enableBashIntegration = false;
 
-    # 4. 挂载插件
+    # 4. 挂载插件 (🚀 核心修复：键名必须包含 .yazi 后缀)
+    # 只有这样，Home Manager 生成的目录才是 ~/.config/yazi/plugins/full-border.yazi
+    # Yazi 才能通过 require("full-border") 找到它
     plugins = {
       "full-border" = "${yazi-plugins-src}/full-border.yazi";
       "git" = "${yazi-plugins-src}/git.yazi";
@@ -39,7 +38,7 @@ in {
       "chmod" = "${yazi-plugins-src}/chmod.yazi";
     };
 
-    # 5. Lua 初始化
+    # 5. Lua 初始化 (保持不变，require 引用名不需要 .yazi)
     initLua = ''
       require("full-border"):setup {
           type = ui.Border.ROUNDED,
@@ -130,8 +129,6 @@ in {
       };
     };
 
-    # 1. 使用 'mgr' 而非 'manager' 以匹配新版 Yazi 规范 (消除警告)
-    # 2. 必须嵌套在 'prepend_keymap' 下，否则会生成错误的 TOML 结构 (消除 invalid type 报错)
     keymap = {
       mgr = {
         prepend_keymap = [
