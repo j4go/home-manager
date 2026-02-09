@@ -25,6 +25,7 @@
       procs # 进程查看
       macchina # 类似fastfetch
       lnav # 替换less的日志查看工具
+      ncdu # 查看目录大小
 
       httpie # http cli client
       xh # httpie的rust重新实现
