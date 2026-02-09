@@ -8,7 +8,6 @@
     owner = "yazi-rs";
     repo = "plugins";
     rev = "88990a6";
-    # 🔴 必须重置 Hash，否则因为你之前填了重复的 Hash，Nix 可能缓存了错误的文件
     hash = "sha256-0K6qGgbGt8N6HgGNEmn2FDLar6hCPiPBbvOsrTjSubM=";
   };
 
@@ -17,32 +16,27 @@
     owner = "yazi-rs";
     repo = "flavors";
     rev = "9e053d0";
-    # 🔴 必须重置 Hash，确保与上方不同
     hash = "sha256-B9b6T9/RkJDkehMC5/MxqnkjxWj5LZg4jehAn6aeamE=";
   };
 in {
-  # 3. 链接主题文件
   xdg.configFile."yazi/flavors/catppuccin-mocha.yazi".source = "${catppuccin-flavor-src}/catppuccin-mocha.yazi";
 
   programs.yazi = {
     enable = true;
     enableBashIntegration = false;
 
-    # 4. 挂载插件 (🚀 核心修复：键名必须包含 .yazi 后缀)
-    # 只有这样，Home Manager 生成的目录才是 ~/.config/yazi/plugins/full-border.yazi
-    # Yazi 才能通过 require("full-border") 找到它
     plugins = {
       "full-border" = "${yazi-plugins-src}/full-border.yazi";
-      "git" = "${yazi-plugins-src}/git.yazi";
-      "smart-filter" = "${yazi-plugins-src}/smart-filter.yazi";
-      "chmod" = "${yazi-plugins-src}/chmod.yazi";
+      # "git" = "${yazi-plugins-src}/git.yazi";
+      # "smart-filter" = "${yazi-plugins-src}/smart-filter.yazi";
+      # "chmod" = "${yazi-plugins-src}/chmod.yazi";
     };
 
     # 5. Lua 初始化 (保持不变，require 引用名不需要 .yazi)
     initLua = ''
-      -- require("full-border"):setup {
-      --     type = ui.Border.ROUNDED,
-      -- }
+      require("full-border"):setup {
+          type = ui.Border.ROUNDED,
+      }
 
       function Status:owner()
         local h = cx.active.current.hovered
@@ -109,56 +103,56 @@ in {
         ];
       };
 
-      plugin = {
-        prepend_fetchers = [
-          {
-            id = "git";
-            name = "*";
-            run = "git";
-          }
-          {
-            id = "git";
-            name = "*/";
-            run = "git";
-          }
-        ];
-      };
+      ## plugin = {
+      ##   prepend_fetchers = [
+      ##     {
+      ##       id = "git";
+      ##       name = "*";
+      ##       run = "git";
+      ##     }
+      ##     {
+      ##       id = "git";
+      ##       name = "*/";
+      ##       run = "git";
+      ##     }
+      ##   ];
+      ## };
 
       theme = {
         flavor = {use = "catppuccin-mocha";};
       };
     };
 
-    keymap = {
-      mgr = {
-        prepend_keymap = [
-          {
-            on = ["F"];
-            run = "plugin smart-filter";
-            desc = "Smart filter";
-          }
-          {
-            on = ["c" "m"];
-            run = "plugin chmod";
-            desc = "Chmod";
-          }
-          {
-            on = ["g" "s"];
-            run = "plugin git";
-            desc = "Git status";
-          }
-          {
-            on = ["g" "d"];
-            run = "cd ~/.config/yazi";
-            desc = "Go to config";
-          }
-          {
-            on = ["!"];
-            run = ''shell "$SHELL" --block'';
-            desc = "Open shell here";
-          }
-        ];
-      };
-    };
+    ## keymap = {
+    ##   mgr = {
+    ##     prepend_keymap = [
+    ##       {
+    ##         on = ["F"];
+    ##         run = "plugin smart-filter";
+    ##         desc = "Smart filter";
+    ##       }
+    ##       {
+    ##         on = ["c" "m"];
+    ##         run = "plugin chmod";
+    ##         desc = "Chmod";
+    ##       }
+    ##       {
+    ##         on = ["g" "s"];
+    ##         run = "plugin git";
+    ##         desc = "Git status";
+    ##       }
+    ##       {
+    ##         on = ["g" "d"];
+    ##         run = "cd ~/.config/yazi";
+    ##         desc = "Go to config";
+    ##       }
+    ##       {
+    ##         on = ["!"];
+    ##         run = ''shell "$SHELL" --block'';
+    ##         desc = "Open shell here";
+    ##       }
+    ##     ];
+    ##   };
+    ## };
   };
 }
