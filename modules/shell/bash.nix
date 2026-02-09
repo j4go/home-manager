@@ -209,6 +209,7 @@ in {
               builtin cd -- "$cwd"
           fi
           \rm -f -- "$tmp"
+          tput cnorm
         }
       '';
     };
