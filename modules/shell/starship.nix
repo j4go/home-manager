@@ -1,88 +1,16 @@
-#          __                  __    _
-#    _____/ /_____ ___________/ /_  (_)___
-#   / ___/ __/ __ `/ ___/ ___/ __ \/ / __ \
-#  (__  ) /_/ /_/ / /  (__  ) / / / / /_/ /
-# /____/\__/\__,_/_/  /____/_/ /_/_/ .___/
-#                                 /_/
 {
   config,
   lib,
   ...
 }: let
   cfg = config.myOptions.shell.starship;
-  settings = {
-    # -------------------------------------------------------------------------
-    # 1. 核心格式控制 (Format)
-    # -------------------------------------------------------------------------
-    # 顺序：用户名 -> 主机名(仅SSH) -> 目录 -> Git -> NixShell -> 换行 -> 提示符
-    format = "$username$hostname$directory$git_branch$git_state$git_status$nix_shell$cmd_duration$character";
-
-    # 基础设置
-    add_newline = false;
-    command_timeout = 1000;
-
-    # -------------------------------------------------------------------------
-    # 2. SSH 主机名 (Hostname)
-    # -------------------------------------------------------------------------
-    hostname = {
-      ssh_only = true; # ✅ 关键：只有 SSH 时才显示
-      format = "[$ssh_symbol$hostname]($style) ";
-      style = "bold #ffaf00"; # 🎃 亮橙色，高辨识度
-      ssh_symbol = " ";
-      disabled = false;
-    };
-
-    # -------------------------------------------------------------------------
-    # 3. 用户名 (Username)
-    # -------------------------------------------------------------------------
-    username = {
-      style_user = "white dim";
-      show_always = false; # 本地不显示，SSH 时配合 hostname 自动出现
-      format = "[$user]($style) @";
-      disabled = false;
-    };
-
-    # -------------------------------------------------------------------------
-    # 4. 其他模块配置
-    # -------------------------------------------------------------------------
-
-    # 提示符符号
-    character = {
-      success_symbol = "[➜](bold green)";
-      error_symbol = "[✖](bold red)";
-    };
-
-    # 目录
-    directory = {
-      style = "bold cyan";
-      truncation_length = 2;
-      format = "[$path]($style) ";
-    };
-
-    # Git 分支
-    git_branch = {
-      symbol = " ";
-      style = "bold purple";
-      format = "[$symbol$branch]($style) ";
-    };
-
-    # Git 状态
-    git_status = {
-      format = "[$all]($style) ";
-      style = "bold red";
-      up_to_date = "[✓](bold green)";
-    };
-
-    # Nix Shell
-    nix_shell = {
-      symbol = "❄️ ";
-      style = "bold blue";
-      format = "[$symbol(nix-shell)]($style) ";
-    };
-
-    # 禁用不需要的模块
-    package.disabled = true;
-    time.disabled = true;
+  # 定义颜色变量，方便统一修改
+  colors = {
+    bg0 = "#3B4252"; # 深灰蓝 (Nord风格)
+    bg1 = "#81A1C1"; # 浅蓝
+    bg2 = "#88C0D0"; # 青蓝
+    bg3 = "#4C566A"; # 中灰
+    fg0 = "#ECEFF4"; # 近白
   };
 in {
   config = lib.mkIf cfg.enable {
@@ -90,7 +18,80 @@ in {
       enable = true;
       enableBashIntegration = true;
       enableZshIntegration = true;
-      settings = settings;
+      settings = {
+        # 核心格式：使用 [内容](style) 语法来实现背景色块
+        # 注意模块间的 [](bg:next_color fg:this_color) 是实现平滑过渡的关键
+        format = lib.concatStrings [
+          "[](${colors.bg1})"
+          "$username"
+          "$hostname"
+          "[](bg:${colors.bg2} fg:${colors.bg1})"
+          "$directory"
+          "[](bg:${colors.bg0} fg:${colors.bg2})"
+          "$git_branch"
+          "$git_status"
+          "[](bg:${colors.bg3} fg:${colors.bg0})"
+          "$nix_shell"
+          "[](fg:${colors.bg3})"
+          "$line_break"
+          "$character"
+        ];
+
+        # 将耗时放在右侧，保持主行清爽
+        right_format = ''[](fg:${colors.bg3})$cmd_duration[](fg:${colors.bg3})'';
+
+        directory = {
+          style = "bg:${colors.bg2} fg:${colors.bg0} bold";
+          format = "[$path]($style)";
+          truncation_length = 3;
+          fish_style_pwd_dir_length = 1;
+        };
+
+        username = {
+          show_always = true;
+          style_user = "bg:${colors.bg1} fg:${colors.bg0} bold";
+          style_root = "bg:${colors.bg1} fg:red bold";
+          format = "[$user]($style)";
+        };
+
+        hostname = {
+          ssh_only = true;
+          style = "bg:${colors.bg1} fg:${colors.bg0} bold";
+          format = "[@$hostname]($style)";
+        };
+
+        git_branch = {
+          symbol = " ";
+          style = "bg:${colors.bg0} fg:${colors.bg2} bold";
+          format = "[[ $symbol$branch ]($style)]($style)";
+        };
+
+        git_status = {
+          style = "bg:${colors.bg0} fg:${colors.bg2}";
+          format = "[($all_status$ahead_behind )($style)]($style)";
+        };
+
+        nix_shell = {
+          symbol = "❄️ ";
+          style = "bg:${colors.bg3} fg:${colors.bg2} bold";
+          format = "[[ $symbol$state ]($style)]($style)";
+        };
+
+        cmd_duration = {
+          min_time = 500;
+          style = "bg:${colors.bg3} fg:${colors.fg0}";
+          format = "[  $duration ]($style)";
+        };
+
+        character = {
+          success_symbol = "[ ➜](bold green)";
+          error_symbol = "[ ✖](bold red)";
+        };
+
+        # 辅助设置
+        add_newline = true;
+        line_break.disabled = false;
+      };
     };
   };
 }
