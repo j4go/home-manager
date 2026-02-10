@@ -100,6 +100,7 @@ in {
 
       shellAliases = lib.mkMerge [
         {
+          rga = "rg -uuL";
           ya = "yazi";
           so = "source ~/.bashrc";
           os = "fastfetch";
