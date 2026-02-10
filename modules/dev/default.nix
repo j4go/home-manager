@@ -11,5 +11,6 @@
     ./yazi.nix
     ./snitch.nix
     ./broot.nix
+    ./python.nix
   ];
 }

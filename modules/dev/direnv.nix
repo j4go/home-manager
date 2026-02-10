@@ -13,7 +13,6 @@
   programs.direnv = {
     enable = true;
     enableBashIntegration = true; # 自动挂载到 Bash
-    enableZshIntegration = true; # 自动挂载到 Zsh
 
     # 🚀 核心优化：使用 nix-direnv 实现缓存
     # 这能极大加快 shell 加载速度，避免每次 cd 都重新计算 Nix 表达式
