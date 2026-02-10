@@ -38,14 +38,14 @@
         format = "[$symbol]($style)";
       };
 
-      # 6. 命令耗时：色条末尾
+      # 修正：cmd_duration 不再自带圆角，交给 format 统一处理
       cmd_duration = {
         min_time = 2000;
         style = "bg:yellow fg:black bold";
         format = "[ 󱎫 $duration ]($style)";
       };
 
-      # 7. 输入符号
+      # 修正：输入符号的视觉引导
       character = {
         success_symbol = "[╰─󱞩](bold green) ";
         error_symbol = "[╰─󱞩](bold red) ";
