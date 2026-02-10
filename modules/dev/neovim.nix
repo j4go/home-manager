@@ -158,9 +158,6 @@
       end
       ensure_dir(vim.fn.stdpath("state") .. "/undo")
 
-      -- 针对 Tabby/SSH 的粘贴优化：
-      -- 虽然 Neovim 自动处理，但在某些环境下显式关闭 paste 模式是一种保险
-      vim.opt.paste = false
     '';
   };
 }
