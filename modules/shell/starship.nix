@@ -11,9 +11,7 @@
     settings = {
       os.disabled = true;
 
-      # 1️⃣ 重新排版 format：
-      # 注意：我们将末尾圆弧直接挂载在模块的 format 结尾，而不是放在全局 format 末尾，
-      # 这样无论哪个模块是最后一个，它都能自带正确的圆弧颜色。
+      # 核心逻辑：移除全局末尾圆弧，由各模块自行收尾
       format = lib.concatStrings [
         "$username"
         "$hostname"
@@ -25,51 +23,58 @@
         "$character"
       ];
 
+      # --- 颜色定义 (Catppuccin Mocha) ---
+      # Lavender: #b4befe (User/Host)
+      # Sapphire: #74c7ec (Dir)
+      # Mauve:    #cba6f7 (Git)
+      # Peach:    #fab387 (Duration)
+      # Surface0: #313244 (Alt Background)
+
       username = {
         show_always = true;
-        style_user = "bg:#4C566A fg:#ECEFF4 bold";
-        format = "[](fg:#4C566A)[$user]($style)";
+        style_user = "bg:#b4befe fg:#11111b bold";
+        format = "[](fg:#b4befe)[$user]($style)";
       };
 
       hostname = {
         ssh_only = true;
-        style = "bg:#4C566A fg:#ECEFF4 bold";
+        style = "bg:#b4befe fg:#11111b bold";
         format = "[@$hostname]($style)";
       };
 
       directory = {
-        style = "bg:#88C0D0 fg:#2E3440 bold";
-        # 这里的 [](fg:#88C0D0) 是“保险丝”，如果后面没接 Git，它就负责收尾
-        format = "[](fg:#4C566A bg:#88C0D0)[ $path ]($style)[](fg:#88C0D0)";
+        style = "bg:#74c7ec fg:#11111b bold";
+        # 衔接：用 Lavender(#b4befe) 背景转到 Sapphire(#74c7ec)
+        # 结尾：自带圆弧，如果后面没模块，它就是完美的结尾
+        format = "[](fg:#b4befe bg:#74c7ec)[ $path ]($style)[](fg:#74c7ec)";
         truncation_length = 0;
-        truncate_to_repo = false; # 设为 false，确保进入 git 仓库也不缩减路径
-        truncation_symbol = ""; # 彻底禁用缩减标识
+        truncate_to_repo = false;
+        truncation_symbol = "";
       };
 
       git_branch = {
         symbol = " ";
-        style = "bg:#D08770 fg:#2E3440 bold";
-        # 重点：前面的  背景色要接 directory 的 bg (#88C0D0)
-        # 末尾带上圆弧 [](fg:#D08770)
-        format = "[](fg:#88C0D0 bg:#D08770)[ $symbol$branch]($style)";
+        style = "bg:#cba6f7 fg:#11111b bold";
+        # 覆盖：用  覆盖 directory 的圆弧
+        format = "[](fg:#74c7ec bg:#cba6f7)[ $symbol$branch]($style)";
       };
 
       git_status = {
-        style = "bg:#D08770 fg:#2E3440 bold";
-        # 在 status 后面收尾
-        format = "[$all_status$ahead_behind]($style)[](fg:#D08770)";
+        style = "bg:#cba6f7 fg:#11111b bold";
+        # 结尾：自带圆弧
+        format = "[$all_status$ahead_behind]($style)[](fg:#cba6f7)";
       };
 
       cmd_duration = {
         min_time = 500;
-        style = "bg:#EBCB8B fg:#2E3440 bold";
-        # 如果耗时模块显示，它会接在 git 的  后面，所以这里要用  覆盖掉前面的圆弧
-        format = "[](fg:#D08770 bg:#EBCB8B)[  $duration ]($style)[](fg:#EBCB8B)";
+        style = "bg:#fab387 fg:#11111b bold";
+        # 覆盖：用  覆盖 git 的圆弧
+        format = "[](fg:#cba6f7 bg:#fab387)[  $duration ]($style)[](fg:#fab387)";
       };
 
       character = {
-        success_symbol = "[❯](bold green)";
-        error_symbol = "[❯](bold red)";
+        success_symbol = "[❯](bold #a6e3a1)"; # Catppuccin Green
+        error_symbol = "[❯](bold #f38ba8)"; # Catppuccin Red
       };
     };
   };
