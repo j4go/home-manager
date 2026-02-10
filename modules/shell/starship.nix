@@ -9,90 +9,82 @@
     enableBashIntegration = true;
 
     settings = {
-      # 1. 布局：全模块胶囊化
-      # [左半圆][内容][右半圆] 是关键逻辑
+      # 核心布局：每一个模块都是独立的 [内容]
+      # 这种“间断式胶囊”是目前 Hyprland 社区最硬核的审美，比连在一起的更高级
       format = lib.concatStrings [
         "$os"
         "$username"
-        "$hostname"
-        "[](fg:#a6e3a1)"
         "$directory"
-        "[](fg:#a6e3a1) "
-        "[](fg:#89b4fa)"
         "$git_branch"
         "$git_status"
-        "[](fg:#89b4fa) "
-        "[](fg:#fab387)"
         "$nix_shell"
-        "[](fg:#fab387) "
         "$line_break"
         "$character"
       ];
 
-      # 2. 右侧配置：将执行耗时独立出来，放在右侧并加上紫色胶囊
-      right_format = "[](fg:#cba6f7)$cmd_duration[](fg:#cba6f7)";
+      # 右侧显示：将耗时放在最右边，紫色醒目胶囊
+      right_format = "$cmd_duration";
 
-      # 3. 目录配置：大佬级完整路径，不缩写，黑字绿底
+      # -------------------------------------------------------------------------
+      # 模块细节
+      # -------------------------------------------------------------------------
+
+      # OS 标识：修正 AlmaLinux 的报错
+      os = {
+        disabled = false;
+        style = "fg:#89b4fa"; # 浅蓝色
+        symbols = {
+          AlmaLinux = " "; # 注意：A 和 L 都要大写
+        };
+      };
+
+      username = {
+        show_always = true;
+        style_user = "fg:#89dceb bold"; # 青色文字
+        format = "[$user]($style) [at](fg:#7f849c) ";
+      };
+
+      # 目录：绿色胶囊，黑字，显示完整路径
       directory = {
-        style = "bg:#a6e3a1 fg:#1e1e2e bold";
-        format = "[$path]($style)";
-        truncation_length = 0; # 禁用缩写
-        truncate_to_repo = false;
+        style = "bg:#a6e3a1 fg:#11111b bold"; # 猫粮绿
+        format = "[](fg:#a6e3a1)[$path]($style)[](fg:#a6e3a1) ";
+        truncation_length = 0;
         fish_style_pwd_dir_length = 0;
       };
 
-      # 4. Git 模块：蓝底黑字
+      # Git：蓝色胶囊
       git_branch = {
         symbol = " ";
-        style = "bg:#89b4fa fg:#1e1e2e bold";
-        format = "[ $symbol$branch ]($style)";
+        style = "bg:#89b4fa fg:#11111b bold";
+        format = "[](fg:#89b4fa)[$symbol$branch]($style)[](fg:#89b4fa) ";
       };
 
       git_status = {
-        style = "bg:#89b4fa fg:#1e1e2e bold";
-        format = "[($all_status$ahead_behind)]($style)";
+        style = "bg:#89b4fa fg:#11111b bold";
+        format = "[[($all_status$ahead_behind)]($style)[](fg:#89b4fa) ]($style)";
       };
 
-      # 5. Nix Shell：橙底黑字
+      # Nix Shell：橙色胶囊
       nix_shell = {
         symbol = " ";
-        style = "bg:#fab387 fg:#1e1e2e bold";
-        format = "[ $symbol$state ]($style)";
+        style = "bg:#fab387 fg:#11111b bold";
+        format = "[](fg:#fab387)[$symbol$state]($style)[](fg:#fab387) ";
       };
 
-      # 6. 命令耗时：只有长任务才显示
+      # 命令执行耗时：紫色胶囊
       cmd_duration = {
         min_time = 500;
-        style = "bg:#cba6f7 fg:#1e1e2e bold";
-        format = "[  $duration ]($style)";
+        style = "bg:#cba6f7 fg:#11111b bold";
+        format = "[](fg:#cba6f7)[ $duration]($style)[](fg:#cba6f7)";
       };
 
-      # 7. 用户名/主机名：淡蓝色调
-      username = {
-        show_always = true;
-        style_user = "fg:#89dceb bold";
-        format = "[$user]($style) ";
-      };
-
-      hostname = {
-        ssh_only = true;
-        style = "fg:#89dceb bold";
-        format = "at [$hostname]($style) ";
-      };
-
-      # 8. 提示符：Pure 风格符号
+      # 提示符：大佬标配 Pure 风格
       character = {
         success_symbol = "[❯](bold green) ";
         error_symbol = "[❯](bold red) ";
       };
 
-      # 额外美化
-      os = {
-        disabled = false;
-        format = "[$symbol ](fg:#89b4fa)";
-        symbols.Almalinux = ""; # 自动识别你的 AlmaLinux
-      };
-
+      # 全局美化
       add_newline = true;
     };
   };
