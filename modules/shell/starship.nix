@@ -6,16 +6,31 @@
   programs.starship = {
     enable = true;
     enableBashIntegration = true;
-    enableZshIntegration = true;
 
-    # 官方默认配置其实非常精简，大部分模块默认就是开启且配置好的
     settings = {
-      # 官方默认的 format 顺序
-      format = lib.concatStrings [
-        "$all" # 包含所有默认模块
-      ];
+      # 1. 彻底禁用 OS 模块（这个图标通常来自这里）
+      os = {
+        disabled = true;
+      };
 
-      # 如果你之前改乱了，这里可以显式重置关键模块到官方风格：
+      # 2. 检查 hostname 模块
+      # 确保 format 里面没有包含默认的图标变量
+      hostname = {
+        ssh_only = true; # 建议仅在 SSH 远程连接时显示
+        format = "[$hostname]($style) "; # 去掉任何可能的图标前缀
+        style = "bold green"; # 匹配你图中 mint 的颜色
+      };
+
+      # 3. 如果你使用了官方默认配置 (programs.starship.settings = { ... })
+      # 确保全局 format 中没有意外插入 $os
+      format = lib.concatStrings [
+        "$username"
+        "$hostname" # 刚才修改的部分
+        "$directory"
+        "$git_branch"
+        "$git_status"
+        "$character"
+      ];
 
       directory = {
         truncation_length = 0; # 官方默认只保留最后 3 层路径
