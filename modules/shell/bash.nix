@@ -15,7 +15,7 @@
   hasBat = config.programs.bat.enable;
   hasEza = config.programs.eza.enable;
 
-  # 代理白名单配置
+  # 代理白名单
   noProxyList = ["localhost" "127.0.0.1" "::1" "192.168.0.0/16" "172.16.0.0/12" "10.0.0.0/8" "*.local" ".lan"];
   noProxyStr = builtins.concatStringsSep "," noProxyList;
 in {
@@ -52,7 +52,7 @@ in {
     programs = {
       fd = {
         enable = true;
-        # hidden = true; # 是否搜索隐藏文件 注释是不搜索，不注释是搜索隐藏文件
+        hidden = true; # 是否搜索隐藏文件 注释是不搜索，不注释是搜索隐藏文件
       };
 
       zoxide = {
@@ -101,7 +101,7 @@ in {
       shellAliases = lib.mkMerge [
         {
           ya = "yazi";
-          so = "source ~/.bashrc"; # 注意：HM 环境下这通常只重载 alias，不重载 env
+          so = "source ~/.bashrc";
           os = "fastfetch";
           neo = "fastfetch";
           fetch = "fastfetch";
