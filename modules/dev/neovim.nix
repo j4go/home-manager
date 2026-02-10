@@ -5,8 +5,6 @@
     viAlias = true;
     vimAlias = true;
 
-    # 📦 外部依赖
-    extraPackages = [pkgs.figlet];
     version.enableNixpkgsReleaseCheck = false;
 
     # ==========================================
@@ -17,7 +15,7 @@
       settings = {
         # 这里的 background 指对比度，不是全局选项，不会报错
         background = "hard";
-        enable_italic = 1; # Nixvim 要求使用 0/1
+        enable_italic = 1;
         better_performance = 1;
         transparent_background = 1;
       };
@@ -29,10 +27,10 @@
     opts = {
       termguicolors = true;
 
-      # --- 核心：解决 Tabby 粘贴变形 ---
-      # 禁用 smartindent 是防止粘贴出现“阶梯效应”的关键
+      # 禁用 smartindent 防止粘贴出现“阶梯效应”
       smartindent = false;
-      autoindent = true; # 保持基础自动缩进即可
+      # 保持基础自动缩进即可
+      autoindent = true;
 
       # 界面显示
       showmode = false;
@@ -65,7 +63,7 @@
     globals.mapleader = ";";
 
     keymaps = [
-      # 系统剪贴板交互 (保留原生 y 动作)
+      # 系统剪贴板交互
       {
         mode = "n";
         key = "<leader>y";
@@ -79,6 +77,15 @@
         options.desc = "Copy Line to System";
       }
       {
+        mode = "n";
+        key = "<leader>ya";
+        action = ":%y+<CR>";
+        options = {
+          desc = "Copy whole file to System Clipboard";
+          silent = true;
+        };
+      }
+      {
         mode = "v";
         key = "<leader>y";
         action = "\"+y";
@@ -90,7 +97,6 @@
         action = "\"+p";
         options.desc = "Paste from System";
       }
-      # UI 增强
       {
         mode = "n";
         key = "<Esc>";
