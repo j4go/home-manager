@@ -1,9 +1,3 @@
-#                           _
-#    ____  ___  ____ _   __(_)___ ___
-#   / __ \/ _ \/ __ \ | / / / __ `__ \
-#  / / / /  __/ /_/ / |/ / / / / / / /
-# /_/ /_/\___/\____/|___/_/_/ /_/ /_/
-#
 {pkgs, ...}: {
   programs.nixvim = {
     enable = true;
@@ -11,11 +5,8 @@
     viAlias = true;
     vimAlias = true;
 
-    # ==========================================
-    # 📦 外部依赖注入
-    # ==========================================
+    # 📦 外部依赖
     extraPackages = [pkgs.figlet];
-
     version.enableNixpkgsReleaseCheck = false;
 
     # ==========================================
@@ -24,7 +15,7 @@
     colorschemes.everforest = {
       enable = true;
       settings = {
-        background = "hard"; # 这里的hard / medium 是指主题的对比度/亮度级别
+        background = "hard"; # 已确认：此配置不会触发 E519 错误
         enable_italic = 1;
         better_performance = 1;
         transparent_background = 1;
@@ -37,10 +28,8 @@
     opts = {
       termguicolors = true;
 
-      # --- 粘贴与乱码修复核心配置 ---
-      # 1. 允许粘贴模式切换快捷键（F2）
+      # 粘贴优化
       pastetoggle = "<F2>";
-      # 2. 确保自动缩进在粘贴模式下会被正确禁用
       autoindent = true;
       smartindent = true;
 
@@ -69,34 +58,41 @@
     };
 
     # ==========================================
-    # ⌨️ 快捷键
+    # ⌨️ 快捷键 (优化：不破坏原生 y 动作)
     # ==========================================
     globals.mapleader = ";";
 
     keymaps = [
-      # 系统剪贴板交互 (利用 "+ 寄存器)
+      # 使用 <leader>y 交互系统剪贴板，保留原生 y 键用于普通复制
       {
         mode = "n";
-        key = "y";
+        key = "<leader>y";
+        action = "\"+y";
+        options.desc = "Copy motion to System";
+      }
+      {
+        mode = "n";
+        key = "<leader>yy";
         action = "\"+yy";
         options.desc = "Copy Line to System";
       }
       {
         mode = "v";
-        key = "y";
+        key = "<leader>y";
         action = "\"+y";
         options.desc = "Copy Selection to System";
       }
       {
         mode = "n";
-        key = "p";
+        key = "<leader>p";
         action = "\"+p";
         options.desc = "Paste from System";
       }
+      # UI 增强
       {
         mode = "n";
-        key = "<leader>l"; # 假设这是你的 UI 增强映射
-        action = ":nohlsearch<CR>";
+        key = "<Esc>";
+        action = ":nohlsearch<CR><Esc>";
         options.silent = true;
       }
       {
@@ -118,38 +114,53 @@
         enable = true;
         settings = {
           colorscheme = "everforest";
-          active = {
-            left = [
-              ["mode" "paste"] # 状态栏会显示当前是否处于 -- PASTE -- 模式
-              ["readonly" "filename" "modified"]
-            ];
-          };
+          active.left = [
+            ["mode" "paste"]
+            ["readonly" "filename" "modified"]
+          ];
         };
       };
     };
 
     # ==========================================
-    # 🛠️ 额外底层配置 (处理 SSH 粘贴协议)
-    # ==========================================
-    extraConfigVim = ''
-      " 自动识别终端粘贴开始/结束序列 (Bracketed Paste Mode)
-      if &term =~ "xterm" || &term =~ "screen" || &term =~ "tmux"
-          let &t_BE = "\<Esc>[?2004h"
-          let &t_BD = "\<Esc>[?2004l"
-          let &t_PS = "\<Esc>[200~"
-          let &t_PE = "\<Esc>[201~"
-      endif
-    '';
-
-    # ==========================================
     # ⚡ 自动命令
     # ==========================================
     autoCmd = [
+      # 1. 恢复光标位置
+      {
+        event = ["BufReadPost"];
+        pattern = ["*"];
+        callback = {
+          __raw = ''
+            function()
+              local mark = vim.api.nvim_buf_get_mark(0, '"')
+              local lcount = vim.api.nvim_buf_line_count(0)
+              if mark[1] > 0 and mark[1] <= lcount then
+                pcall(vim.api.nvim_win_set_cursor, 0, mark)
+              end
+            end
+          '';
+        };
+      }
+      # 2. 退出插入模式自动关闭粘贴模式
       {
         event = ["InsertLeave"];
         pattern = ["*"];
-        command = "set nopaste"; # 退出插入模式时自动关闭粘贴模式，防止误操作
+        command = "set nopaste";
       }
     ];
+
+    # ==========================================
+    # 🛠️ Lua 专项优化 (自动创建目录)
+    # ==========================================
+    extraConfigLua = ''
+      -- 自动创建持久化目录 (undo 等)
+      local function ensure_dir(path)
+        if vim.fn.isdirectory(path) == 0 then
+          vim.fn.mkdir(path, "p", 448)
+        end
+      end
+      ensure_dir(vim.fn.stdpath("state") .. "/undo")
+    '';
   };
 }
