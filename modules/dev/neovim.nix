@@ -15,8 +15,9 @@
     colorschemes.everforest = {
       enable = true;
       settings = {
+        # 这里的 background 指对比度，不是全局选项，不会报错
         background = "hard";
-        enable_italic = 1;
+        enable_italic = 1; # Nixvim 要求使用 0/1
         better_performance = 1;
         transparent_background = 1;
       };
@@ -28,9 +29,10 @@
     opts = {
       termguicolors = true;
 
-      # 修正：Neovim 自动处理粘贴，不再需要 pastetoggle
-      autoindent = true;
-      smartindent = true;
+      # --- 核心：解决 Tabby 粘贴变形 ---
+      # 禁用 smartindent 是防止粘贴出现“阶梯效应”的关键
+      smartindent = false;
+      autoindent = true; # 保持基础自动缩进即可
 
       # 界面显示
       showmode = false;
@@ -51,22 +53,24 @@
       ignorecase = true;
       smartcase = true;
 
-      # 持久化
+      # 持久化与体验
       undofile = true;
       timeoutlen = 600;
+      clipboard = "unnamedplus"; # 尝试与系统剪贴板同步
     };
 
     # ==========================================
-    # ⌨️ 快捷键 (保留系统剪贴板映射)
+    # ⌨️ 快捷键 (Leader = ;)
     # ==========================================
     globals.mapleader = ";";
 
     keymaps = [
+      # 系统剪贴板交互 (保留原生 y 动作)
       {
         mode = "n";
         key = "<leader>y";
         action = "\"+y";
-        options.desc = "Copy to System";
+        options.desc = "Copy motion to System";
       }
       {
         mode = "n";
@@ -86,6 +90,7 @@
         action = "\"+p";
         options.desc = "Paste from System";
       }
+      # UI 增强
       {
         mode = "n";
         key = "<Esc>";
@@ -96,6 +101,7 @@
         mode = "n";
         key = "x";
         action = "\"_x";
+        options.desc = "Delete char without copying";
       }
     ];
 
@@ -118,14 +124,11 @@
       };
     };
 
-    # 修正：彻底删除 extraConfigVim 块中的 t_BE 等终端代码
-    # Neovim 不支持这些选项，且会自动处理这些逻辑。
-
     # ==========================================
     # ⚡ 自动命令
     # ==========================================
     autoCmd = [
-      # 1. 恢复光标位置
+      # 1. 恢复上次退出时的光标位置
       {
         event = ["BufReadPost"];
         pattern = ["*"];
@@ -141,20 +144,23 @@
           '';
         };
       }
-      # 修正：删除了 InsertLeave 里的 set nopaste，因为不再使用 paste 模式
     ];
 
     # ==========================================
     # 🛠️ Lua 专项优化
     # ==========================================
     extraConfigLua = ''
-      -- 自动创建持久化目录
+      -- 自动创建持久化目录 (undo 等)
       local function ensure_dir(path)
         if vim.fn.isdirectory(path) == 0 then
           vim.fn.mkdir(path, "p", 448)
         end
       end
       ensure_dir(vim.fn.stdpath("state") .. "/undo")
+
+      -- 针对 Tabby/SSH 的粘贴优化：
+      -- 虽然 Neovim 自动处理，但在某些环境下显式关闭 paste 模式是一种保险
+      vim.opt.paste = false
     '';
   };
 }
