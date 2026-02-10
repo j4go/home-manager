@@ -15,7 +15,7 @@
     colorschemes.everforest = {
       enable = true;
       settings = {
-        background = "hard"; # 已确认：此配置不会触发 E519 错误
+        background = "hard";
         enable_italic = 1;
         better_performance = 1;
         transparent_background = 1;
@@ -28,8 +28,7 @@
     opts = {
       termguicolors = true;
 
-      # 粘贴优化
-      pastetoggle = "<F2>";
+      # 修正：Neovim 自动处理粘贴，不再需要 pastetoggle
       autoindent = true;
       smartindent = true;
 
@@ -58,17 +57,16 @@
     };
 
     # ==========================================
-    # ⌨️ 快捷键 (优化：不破坏原生 y 动作)
+    # ⌨️ 快捷键 (保留系统剪贴板映射)
     # ==========================================
     globals.mapleader = ";";
 
     keymaps = [
-      # 使用 <leader>y 交互系统剪贴板，保留原生 y 键用于普通复制
       {
         mode = "n";
         key = "<leader>y";
         action = "\"+y";
-        options.desc = "Copy motion to System";
+        options.desc = "Copy to System";
       }
       {
         mode = "n";
@@ -88,7 +86,6 @@
         action = "\"+p";
         options.desc = "Paste from System";
       }
-      # UI 增强
       {
         mode = "n";
         key = "<Esc>";
@@ -99,7 +96,6 @@
         mode = "n";
         key = "x";
         action = "\"_x";
-        options.desc = "Delete char without copying";
       }
     ];
 
@@ -122,6 +118,9 @@
       };
     };
 
+    # 修正：彻底删除 extraConfigVim 块中的 t_BE 等终端代码
+    # Neovim 不支持这些选项，且会自动处理这些逻辑。
+
     # ==========================================
     # ⚡ 自动命令
     # ==========================================
@@ -142,19 +141,14 @@
           '';
         };
       }
-      # 2. 退出插入模式自动关闭粘贴模式
-      {
-        event = ["InsertLeave"];
-        pattern = ["*"];
-        command = "set nopaste";
-      }
+      # 修正：删除了 InsertLeave 里的 set nopaste，因为不再使用 paste 模式
     ];
 
     # ==========================================
-    # 🛠️ Lua 专项优化 (自动创建目录)
+    # 🛠️ Lua 专项优化
     # ==========================================
     extraConfigLua = ''
-      -- 自动创建持久化目录 (undo 等)
+      -- 自动创建持久化目录
       local function ensure_dir(path)
         if vim.fn.isdirectory(path) == 0 then
           vim.fn.mkdir(path, "p", 448)
