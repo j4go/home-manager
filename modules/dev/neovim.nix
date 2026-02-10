@@ -24,8 +24,9 @@
     colorschemes.everforest = {
       enable = true;
       settings = {
-        background = "medium";
+        background = "hard"; # 这里的hard / medium 是指主题的对比度/亮度级别
         enable_italic = 1;
+        better_performance = 1;
         transparent_background = 1;
       };
     };
@@ -34,7 +35,6 @@
     # ⚙️ 基础选项 (Opts)
     # ==========================================
     opts = {
-      background = "dark";
       termguicolors = true;
 
       # --- 粘贴与乱码修复核心配置 ---
