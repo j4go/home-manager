@@ -5,96 +5,95 @@
 }: {
   programs.starship = {
     enable = true;
-    # 建议开启整合，大佬通常追求全平台一致
-    enableBashIntegration = false;
+    enableZshIntegration = true;
+    enableBashIntegration = true;
 
     settings = {
-      # 1. 布局：信息第一行，提示符第二行
-      # 这种两行式设计是业界公认最能兼顾“路径完整性”和“输入区固定”的方案
+      # 1. 布局：全模块胶囊化
+      # [左半圆][内容][右半圆] 是关键逻辑
       format = lib.concatStrings [
-        "$nix_shell"
+        "$os"
         "$username"
         "$hostname"
+        "[](fg:#a6e3a1)"
         "$directory"
+        "[](fg:#a6e3a1) "
+        "[](fg:#89b4fa)"
         "$git_branch"
-        "$git_state"
         "$git_status"
-        "$cmd_duration"
+        "[](fg:#89b4fa) "
+        "[](fg:#fab387)"
+        "$nix_shell"
+        "[](fg:#fab387) "
         "$line_break"
         "$character"
       ];
 
-      # 2. 符号：Pure 风格精髓
-      character = {
-        success_symbol = "[❯](bold green) ";
-        error_symbol = "[❯](bold red) ";
-        vimcmd_symbol = "[❮](bold blue) ";
-      };
+      # 2. 右侧配置：将执行耗时独立出来，放在右侧并加上紫色胶囊
+      right_format = "[](fg:#cba6f7)$cmd_duration[](fg:#cba6f7)";
 
-      # 3. 目录：简洁明了，不使用截断（既然是双行显示，就该看清路径）
+      # 3. 目录配置：大佬级完整路径，不缩写，黑字绿底
       directory = {
-        style = "bold blue";
-        format = "[$path]($style)[$read_only]($read_only_style) ";
-        truncation_length = 0;
-        truncate_to_repo = true; # 进入仓库后以仓库根目录为起点
+        style = "bg:#a6e3a1 fg:#1e1e2e bold";
+        format = "[$path]($style)";
+        truncation_length = 0; # 禁用缩写
+        truncate_to_repo = false;
+        fish_style_pwd_dir_length = 0;
       };
 
-      # 4. Git：大佬级精简配置
+      # 4. Git 模块：蓝底黑字
       git_branch = {
         symbol = " ";
-        style = "bold #ff5fd7"; # 经典的“猛男粉/暗紫色”分支标识
-        format = "on [$symbol$branch]($style) ";
+        style = "bg:#89b4fa fg:#1e1e2e bold";
+        format = "[ $symbol$branch ]($style)";
       };
 
       git_status = {
-        style = "bold red";
-        format = "([\[$all_status$ahead_behind\]]($style) )";
-        # 更加直观的状态符号
-        conflicted = "=";
-        ahead = "⇡";
-        behind = "⇣";
-        diverged = "⇕";
-        untracked = "?";
-        stashed = "$";
-        modified = "!";
-        staged = "+";
-        renamed = "»";
-        deleted = "✘";
+        style = "bg:#89b4fa fg:#1e1e2e bold";
+        format = "[($all_status$ahead_behind)]($style)";
       };
 
-      # 5. 执行耗时：仅在超过 2 秒时出现，不干扰普通操作
-      cmd_duration = {
-        min_time = 2000;
-        style = "italic yellow";
-        format = "took [󱎫 $duration]($style) ";
-      };
-
-      # 6. Nix Shell
+      # 5. Nix Shell：橙底黑字
       nix_shell = {
         symbol = " ";
-        style = "bold blue";
-        format = "via [$symbol]($style) ";
+        style = "bg:#fab387 fg:#1e1e2e bold";
+        format = "[ $symbol$state ]($style)";
       };
 
-      # 7. 用户与主机 (仅在 SSH 时显示)
+      # 6. 命令耗时：只有长任务才显示
+      cmd_duration = {
+        min_time = 500;
+        style = "bg:#cba6f7 fg:#1e1e2e bold";
+        format = "[  $duration ]($style)";
+      };
+
+      # 7. 用户名/主机名：淡蓝色调
       username = {
-        style_user = "white bold";
-        style_root = "black bold";
+        show_always = true;
+        style_user = "fg:#89dceb bold";
         format = "[$user]($style) ";
-        disabled = false;
-        show_always = false;
       };
 
       hostname = {
         ssh_only = true;
-        format = "on [$hostname](bold #ffaf00) ";
-        disabled = false;
+        style = "fg:#89dceb bold";
+        format = "at [$hostname]($style) ";
       };
 
-      # 禁用繁杂模块
-      package.disabled = true;
-      python.disabled = true;
-      cmake.disabled = true;
+      # 8. 提示符：Pure 风格符号
+      character = {
+        success_symbol = "[❯](bold green) ";
+        error_symbol = "[❯](bold red) ";
+      };
+
+      # 额外美化
+      os = {
+        disabled = false;
+        format = "[$symbol ](fg:#89b4fa)";
+        symbols.Almalinux = ""; # 自动识别你的 AlmaLinux
+      };
+
+      add_newline = true;
     };
   };
 }
