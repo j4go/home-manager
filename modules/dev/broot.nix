@@ -1,4 +1,4 @@
-{...}: {
+{pkgs, ...}: {
   programs.broot = {
     enable = true;
     enableBashIntegration = true;
@@ -20,8 +20,7 @@
         {
           invocation = "edit";
           shortcut = "e";
-          # 确保Shell环境变量里有EDITOR，或者这里直接写 "${pkgs.neovim}/bin/nvim {file}"
-          execution = "$EDITOR {file}";
+          execution = "${pkgs.neovim}/bin/nvim {file}";
         }
       ];
     };
