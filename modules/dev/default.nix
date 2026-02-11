@@ -11,6 +11,6 @@
     ./snitch.nix
     ./broot.nix
     ./python.nix
-    ./lazyvim.nix
+    ./neovim.nix
   ];
 }
