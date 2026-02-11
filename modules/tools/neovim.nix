@@ -10,6 +10,37 @@
     # 主题配置：everforest gruvbox tokyonight
     # ==========================================
 
+    colorschemes.catppuccin = {
+      enable = true;
+      settings = {
+        # 核心设置：指定为浅色风味
+        # 深色  catppuccin-frappe, catppuccin-macchiato, catppuccin-mocha
+        flavour = "latte";
+
+        # 建议：浅色模式下关闭透明背景，确保对比度
+        transparent_background = false;
+
+        # catppuccin 会为 lualine 提供专门的配色方案
+        lualine = true;
+        treesitter = true;
+
+        # # 增强 UI 组件的颜色表现
+        # term_colors = true;
+        # integrations = {
+        #   treesitter = true;
+        #   native_lsp = {
+        #     enabled = true;
+        #     underlines = {
+        #       errors = [ "undercurl" ];
+        #       hints = [ "undercurl" ];
+        #       warnings = [ "undercurl" ];
+        #       information = [ "undercurl" ];
+        #     };
+        #   };
+        # };
+      };
+    };
+
     # colorschemes.everforest = {
     #   enable = true;
     #   settings = {
@@ -48,21 +79,6 @@
     #     # };
     #   };
     # };
-
-    # Nord 主题
-    colorschemes.nord = {
-      enable = true;
-      settings = {
-        # 是否开启边框（建议开启，视觉更清晰）
-        borders = true;
-        # 注释是否使用斜体
-        italic_comments = true;
-        # 是否禁用背景（如果你希望终端壁纸透出来，设为 true）
-        disable_background = false;
-        # 更加现代的样式
-        cursorline_transparent = false;
-      };
-    };
 
     # ==========================================
     # 基础选项 (Opts)
@@ -177,10 +193,7 @@
       # 替换 lightline 为更现代的 lualine
       lualine = {
         enable = true;
-        # settings.options.theme = "everforest";
-        # settings.options.theme = "gruvbox";
-        # settings.options.theme = "tokyonight";
-        settings.options.theme = "nord";
+        settings.options.theme = "catppuccin";
       };
 
       # 模糊搜索核心
