@@ -5,7 +5,11 @@
     viAlias = true;
     vimAlias = true;
 
-    version.enableNixpkgsReleaseCheck = false;
+    # 显式注入系统剪贴板驱动
+    extraPackages = with pkgs; [
+      wl-clipboard # Wayland
+      xclip # X11
+    ];
 
     # ==========================================
     # 主题配置：Everforest
@@ -13,7 +17,6 @@
     colorschemes.everforest = {
       enable = true;
       settings = {
-        # 这里的 background 指对比度，不是全局选项，不会报错
         background = "hard";
         enable_italic = 1;
         better_performance = 1;
@@ -27,23 +30,19 @@
     opts = {
       termguicolors = true;
 
-      # 禁用 smartindent 防止粘贴出现“阶梯效应”
-      smartindent = false;
-      # 保持基础自动缩进即可
-      autoindent = true;
-
-      # 界面显示
-      showmode = false;
-      showtabline = 1;
-      laststatus = 2;
+      # 混合行号：当前行显示绝对行号，其他行显示相对行号，极大提升跳转效率
       number = true;
+      relativenumber = true;
+
       cursorline = true;
+      showmode = false; # Lualine 已显示模式，原生状态栏模式可禁用
 
       # 缩进与排版
       tabstop = 4;
       softtabstop = 4;
       shiftwidth = 4;
       expandtab = true;
+      autoindent = true;
 
       # 搜索
       hlsearch = true;
@@ -53,14 +52,13 @@
 
       # 持久化与体验
       undofile = true;
-      timeoutlen = 600;
-      clipboard = "unnamedplus"; # 尝试与系统剪贴板同步
+
+      # 缩短延迟，提升快捷键响应感
+      timeoutlen = 300;
     };
 
-    # ==========================================
-    # 快捷键 (Leader = ;)
-    # ==========================================
-    globals.mapleader = ";";
+    # 业界标准已转向使用 <Space> 作为 Leader
+    globals.mapleader = " ";
 
     keymaps = [
       # 系统剪贴板交互
@@ -68,22 +66,7 @@
         mode = "n";
         key = "<leader>y";
         action = "\"+y";
-        options.desc = "Copy motion to System";
-      }
-      {
-        mode = "n";
-        key = "<leader>yy";
-        action = "\"+yy";
-        options.desc = "Copy Line to System";
-      }
-      {
-        mode = "n";
-        key = "<leader>ya";
-        action = ":%y+<CR>";
-        options = {
-          desc = "Copy whole file to System Clipboard";
-          silent = true;
-        };
+        options.desc = "Copy to System";
       }
       {
         mode = "v";
@@ -99,42 +82,96 @@
       }
       {
         mode = "n";
+        key = "<leader>ya";
+        action = ":%y+<CR>";
+        options = {
+          desc = "Copy whole file to System Clipboard";
+          silent = true;
+        };
+      }
+
+      # Telescope 快捷键
+      {
+        mode = "n";
+        key = "<leader>ff";
+        action = "<cmd>Telescope find_files<CR>";
+        options.desc = "Find Files";
+      }
+      {
+        mode = "n";
+        key = "<leader>fg";
+        action = "<cmd>Telescope live_grep<CR>";
+        options.desc = "Live Grep";
+      }
+      {
+        mode = "n";
+        key = "<leader>fb";
+        action = "<cmd>Telescope buffers<CR>";
+        options.desc = "Find Buffers";
+      }
+
+      # 辅助操作 按ESC清除当前的搜索高亮
+      {
+        mode = "n";
         key = "<Esc>";
         action = ":nohlsearch<CR><Esc>";
         options.silent = true;
       }
-      {
-        mode = "n";
-        key = "x";
-        action = "\"_x";
-        options.desc = "Delete char without copying";
-      }
     ];
 
     # ==========================================
-    # 插件配置
+    # 插件配置 (Plugins)
     # ==========================================
     plugins = {
-      nix.enable = true;
-      treesitter.enable = true;
-
-      lightline = {
+      # 语法高亮引擎增强
+      treesitter = {
         enable = true;
+        settings.highlight.enable = true;
+        settings.indent.enable = true;
+      };
+
+      # 替换 lightline 为更现代的 lualine
+      lualine = {
+        enable = true;
+        settings.options.theme = "everforest";
+      };
+
+      # 模糊搜索核心
+      telescope.enable = true;
+
+      # LSP 语言服务
+      lsp = {
+        enable = true;
+        servers = {
+          nil_ls.enable = true; # Nix 语言支持
+          bashls.enable = true; # Bash 支持
+        };
+      };
+
+      # 自动补全引擎
+      cmp = {
+        enable = true;
+        autoEnableSources = true;
         settings = {
-          colorscheme = "everforest";
-          active.left = [
-            ["mode" "paste"]
-            ["readonly" "filename" "modified"]
+          sources = [
+            {name = "nvim_lsp";}
+            {name = "path";}
+            {name = "buffer";}
           ];
+          mapping = {
+            "<Tab>" = "cmp.mapping.select_next_item()";
+            "<S-Tab>" = "cmp.mapping.select_prev_item()";
+            "<CR>" = "cmp.mapping.confirm({ select = true })";
+          };
         };
       };
     };
 
     # ==========================================
-    # 自动命令
+    # 自动命令 (AutoCmd)
     # ==========================================
     autoCmd = [
-      # 恢复上次退出时的光标位置
+      # 恢复上次退出位置
       {
         event = ["BufReadPost"];
         pattern = ["*"];
@@ -151,20 +188,5 @@
         };
       }
     ];
-
-    # ==========================================
-    # Lua 专项优化
-    # ==========================================
-    extraConfigLua = ''
-
-      -- 自动创建持久化目录 (undo 等)
-      local function ensure_dir(path)
-        if vim.fn.isdirectory(path) == 0 then
-          vim.fn.mkdir(path, "p", 448)
-        end
-      end
-      ensure_dir(vim.fn.stdpath("state") .. "/undo")
-
-    '';
   };
 }

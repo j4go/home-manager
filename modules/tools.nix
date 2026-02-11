@@ -35,9 +35,6 @@
       delta # Git Diff 增强
       gitnr # A CLI / TUI to generate .gitignore files using templates.
 
-      xclip # 剪贴板 (X11)
-      wl-clipboard # 剪贴板 (Wayland)
-
       imagemagick # 处理图片
       ffmpegthumbnailer # 处理视频
       poppler # 处理pdf 如pdf转图片预览等
