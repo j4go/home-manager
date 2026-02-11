@@ -13,8 +13,9 @@
     ];
 
     # ==========================================
-    # 主题配置：Everforest gruvbox tokyonight
+    # 主题配置：everforest gruvbox tokyonight
     # ==========================================
+
     # colorschemes.everforest = {
     #   enable = true;
     #   settings = {
@@ -39,6 +40,7 @@
         # 风格选择：'storm', 'moon', 'night', 'day'
         # 推荐使用 'moon' 或 'night'
         style = "night";
+
         # 透明背景
         # transparent = true;
 

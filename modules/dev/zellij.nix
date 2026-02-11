@@ -1,23 +1,17 @@
-#              _____   _
-#  ____  ___  / / (_) (_)
-# /_  / / _ \/ / / / / /
-#  / /_/  __/ / / / / /
-# /___/\___/_/_/_/_/ /
-#               /___/
-{pkgs, ...}: {
+{...}: {
   programs.zellij = {
     enable = true;
     enableBashIntegration = false;
 
     settings = {
-      # 1. 更改选用的主题名称
+      # 主题名称
       theme = "everforest-dark";
 
       default_layout = "compact";
       mouse_mode = true;
       pane_frames = false;
 
-      # 2. 定义深色主题色值 (Medium 对比度)
+      # 定义深色主题色值 (Medium对比度)
       everforest-dark = {
         fg = "#d3c6aa"; # 浅灰色文字
         bg = "#2d353b"; # 深绿色背景

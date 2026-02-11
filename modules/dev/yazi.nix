@@ -64,6 +64,9 @@ in {
         cache_dir = "";
         image_filter = "lanczos3";
         image_quality = 90;
+        # 尝试改为 iterm2（Tabby 对此支持较好）或直接禁用
+        # 如果报错持续，尝试将下行设为 "ueberzug" 或 "noop"
+        preview_protocol = "iterm2";
       };
 
       opener = {

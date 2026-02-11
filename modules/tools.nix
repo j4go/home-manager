@@ -1,13 +1,8 @@
-#    __              __
-#   / /_____  ____  / /____
-#  / __/ __ \/ __ \/ / ___/
-# / /_/ /_/ / /_/ / (__  )
-# \__/\____/\____/_/____/
-#
 {pkgs, ...}: {
   # 允许 Home Manager 管理字体配置文件
   # 这步如果不做，即使安装了包，终端也找不到字体
   fonts.fontconfig.enable = true;
+
   home.packages =
     # 主体包：using stable pkgs
     (with pkgs; [
@@ -51,6 +46,7 @@
       pkgs.unstable.hyperfine # 基准测试工具
       pkgs.unstable.bottom # 类似btop htop
     ];
+
   # tealdeer -> tldr
   programs.tealdeer = {
     enable = true;

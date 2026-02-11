@@ -9,7 +9,6 @@
       enable = true;
       address = "192.168.3.248:10808";
     };
-    # shell.starship.enable = true;
   };
 
   # 机器特定的基本信息

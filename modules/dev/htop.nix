@@ -1,14 +1,4 @@
-#     __    __
-#    / /_  / /_____  ____
-#   / __ \/ __/ __ \/ __ \
-#  / / / / /_/ /_/ / /_/ /
-# /_/ /_/\__/\____/ .___/
-#                /_/
-{
-  config,
-  lib,
-  ...
-}: let
+{config, ...}: let
   inherit (config.lib.htop) leftMeters rightMeters bar text graph led;
 in {
   programs.htop = {
