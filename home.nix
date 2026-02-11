@@ -20,9 +20,9 @@ with lib; {
         description = "代理服务器地址 (IP:Port)";
       };
     };
-    shell = {
-      starship.enable = mkEnableOption "Starship 提示符";
-    };
+    # shell = {
+    #   starship.enable = mkEnableOption "Starship 提示符";
+    # };
   };
 
   # 2. 具体的配置实现

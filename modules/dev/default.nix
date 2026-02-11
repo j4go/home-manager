@@ -1,6 +1,5 @@
 {...}: {
   imports = [
-    ./neovim.nix
     ./bat.nix
     ./btop.nix
     ./direnv.nix
@@ -12,5 +11,6 @@
     ./snitch.nix
     ./broot.nix
     ./python.nix
+    ./lazyvim.nix
   ];
 }

@@ -9,7 +9,7 @@
       enable = true;
       address = "10.255.126.1:10808";
     };
-    shell.starship.enable = true;
+    # shell.starship.enable = true;
   };
 
   # 机器特定的基本信息
