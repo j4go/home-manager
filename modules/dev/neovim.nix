@@ -4,13 +4,12 @@
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
-
+    version.enableNixpkgsReleaseCheck = false;
     # 显式注入系统剪贴板驱动
     extraPackages = with pkgs; [
       wl-clipboard # Wayland
       xclip # X11
     ];
-
     # ==========================================
     # 主题配置：Everforest
     # ==========================================
@@ -23,7 +22,6 @@
         transparent_background = 1;
       };
     };
-
     # ==========================================
     # 基础选项 (Opts)
     # ==========================================
@@ -59,7 +57,6 @@
 
     # 业界标准已转向使用 <Space> 作为 Leader
     globals.mapleader = " ";
-
     keymaps = [
       # 系统剪贴板交互
       {
