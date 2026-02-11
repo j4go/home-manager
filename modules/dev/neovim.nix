@@ -9,10 +9,11 @@
     extraPlugins = with pkgs.vimPlugins; [
       everforest
       gruvbox-nvim
+      tokyonight-nvim
     ];
 
     # ==========================================
-    # 主题配置：Everforest gruvbox
+    # 主题配置：Everforest gruvbox tokyonight
     # ==========================================
     # colorschemes.everforest = {
     #   enable = true;
@@ -23,11 +24,32 @@
     #     transparent_background = 1;
     #   };
     # };
-    colorschemes.gruvbox = {
+
+    # colorschemes.gruvbox = {
+    #   enable = true;
+    #   settings = {
+    #     contrast = "hard";
+    #     # transparent_mode = true;
+    #   };
+    # };
+
+    colorschemes.tokyonight = {
       enable = true;
       settings = {
-        contrast = "hard";
-        # transparent_mode = true;
+        # 风格选择：'storm', 'moon', 'night', 'day'
+        # 推荐使用 'moon' 或 'night'
+        style = "moon";
+        # 透明背景
+        transparent = true;
+
+        # 终端颜色支持
+        terminal_colors = true;
+
+        # 样式微调
+        styles = {
+          sidebars = "transparent";
+          floats = "transparent";
+        };
       };
     };
 
@@ -145,7 +167,8 @@
       lualine = {
         enable = true;
         # settings.options.theme = "everforest";
-        settings.options.theme = "gruvbox";
+        # settings.options.theme = "gruvbox";
+        settings.options.theme = "tokyonight";
       };
 
       # 模糊搜索核心
