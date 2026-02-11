@@ -40,6 +40,9 @@ with lib; {
 
     # 添加别名配置
     home.shellAliases = {
+      v = "nvim";
+      vi = "nvim";
+      vim = "nvim";
       sedit = "sudo -E systemctl edit";
     };
   };
