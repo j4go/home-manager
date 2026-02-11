@@ -1,9 +1,3 @@
-#     __          __
-#    / /_  ____ _/ /_
-#   / __ \/ __ `/ __/
-#  / /_/ / /_/ / /_
-# /_.___/\__,_/\__/
-#
 {
   config,
   pkgs,
@@ -12,7 +6,7 @@
   programs.bat = {
     enable = true;
 
-    # 1. 基础配置 (主题与行为)
+    # 基础配置 (主题与行为)
     config = {
       pager = "less -FR"; # 保持类似 less 的翻页体验
       #  其他深色主题 TwoDark Dracula
@@ -22,7 +16,7 @@
     };
   };
 
-  # 2. 额外插件
+  # 额外插件
   home.packages = with pkgs.bat-extras; [
     batman # 让 man 命令也带高亮
     batgrep # 配合 ripgrep 显示高亮

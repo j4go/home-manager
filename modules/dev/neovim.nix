@@ -6,18 +6,31 @@
     vimAlias = true;
     version.enableNixpkgsReleaseCheck = false;
 
+    extraPlugins = with pkgs.vimPlugins; [
+      everforest
+      gruvbox-nvim
+    ];
+
     # ==========================================
-    # 主题配置：Everforest
+    # 主题配置：Everforest gruvbox
     # ==========================================
-    colorschemes.everforest = {
+    # colorschemes.everforest = {
+    #   enable = true;
+    #   settings = {
+    #     background = "hard";
+    #     enable_italic = 1;
+    #     better_performance = 1;
+    #     transparent_background = 1;
+    #   };
+    # };
+    colorschemes.gruvbox = {
       enable = true;
       settings = {
-        background = "hard";
-        enable_italic = 1;
-        better_performance = 1;
-        transparent_background = 1;
+        contrast = "hard";
+        # transparent_mode = true;
       };
     };
+
     # ==========================================
     # 基础选项 (Opts)
     # ==========================================
@@ -131,7 +144,8 @@
       # 替换 lightline 为更现代的 lualine
       lualine = {
         enable = true;
-        settings.options.theme = "everforest";
+        # settings.options.theme = "everforest";
+        settings.options.theme = "gruvbox";
       };
 
       # 模糊搜索核心
