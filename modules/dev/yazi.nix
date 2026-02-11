@@ -1,9 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}: let
-  # 1. 插件源码
+{pkgs, ...}: let
   yazi-plugins-src = pkgs.fetchFromGitHub {
     owner = "yazi-rs";
     repo = "plugins";
@@ -11,7 +6,6 @@
     hash = "sha256-0K6qGgbGt8N6HgGNEmn2FDLar6hCPiPBbvOsrTjSubM=";
   };
 
-  # 2. 主题源码
   catppuccin-flavor-src = pkgs.fetchFromGitHub {
     owner = "yazi-rs";
     repo = "flavors";
@@ -27,12 +21,8 @@ in {
 
     plugins = {
       "full-border" = "${yazi-plugins-src}/full-border.yazi";
-      # "git" = "${yazi-plugins-src}/git.yazi";
-      # "smart-filter" = "${yazi-plugins-src}/smart-filter.yazi";
-      # "chmod" = "${yazi-plugins-src}/chmod.yazi";
     };
 
-    # 5. Lua 初始化 (保持不变，require 引用名不需要 .yazi)
     initLua = ''
       require("full-border"):setup {
           type = ui.Border.ROUNDED,
@@ -103,56 +93,9 @@ in {
         ];
       };
 
-      ## plugin = {
-      ##   prepend_fetchers = [
-      ##     {
-      ##       id = "git";
-      ##       name = "*";
-      ##       run = "git";
-      ##     }
-      ##     {
-      ##       id = "git";
-      ##       name = "*/";
-      ##       run = "git";
-      ##     }
-      ##   ];
-      ## };
-
       theme = {
         flavor = {use = "catppuccin-mocha";};
       };
     };
-
-    ## keymap = {
-    ##   mgr = {
-    ##     prepend_keymap = [
-    ##       {
-    ##         on = ["F"];
-    ##         run = "plugin smart-filter";
-    ##         desc = "Smart filter";
-    ##       }
-    ##       {
-    ##         on = ["c" "m"];
-    ##         run = "plugin chmod";
-    ##         desc = "Chmod";
-    ##       }
-    ##       {
-    ##         on = ["g" "s"];
-    ##         run = "plugin git";
-    ##         desc = "Git status";
-    ##       }
-    ##       {
-    ##         on = ["g" "d"];
-    ##         run = "cd ~/.config/yazi";
-    ##         desc = "Go to config";
-    ##       }
-    ##       {
-    ##         on = ["!"];
-    ##         run = ''shell "$SHELL" --block'';
-    ##         desc = "Open shell here";
-    ##       }
-    ##     ];
-    ##   };
-    ## };
   };
 }

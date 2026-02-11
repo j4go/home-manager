@@ -1,9 +1,3 @@
-#               __
-#    __________/ /_
-#   / ___/ ___/ __ \
-#  (__  |__  ) / / /
-# /____/____/_/ /_/
-#
 {
   config,
   lib,
@@ -16,11 +10,11 @@ in {
   programs.ssh = {
     enable = true;
 
-    # ✅ 1. 关闭隐式默认配置，改为完全声明式
+    # 关闭隐式默认配置，改为完全声明式
     enableDefaultConfig = false;
 
     matchBlocks = {
-      # ✅ 2. 将全局默认行为显式写在 "*" 匹配块中
+      # 将全局默认行为显式写在 "*" 匹配块中
       "*" = {
         # 自动将密钥添加到 SSH Agent
         addKeysToAgent = "yes";
@@ -29,13 +23,13 @@ in {
         serverAliveInterval = 60;
         serverAliveCountMax = 3;
 
-        # 允许通过控制套件复用连接 (提升多次连接同一主机的速度)
+        # 允许通过控制套件复用连接 提升多次连接同一主机的速度
         controlMaster = "auto";
         controlPath = "~/.ssh/master-%r@%h:%p";
         controlPersist = "10m";
       };
 
-      # ✅ 3. 特定主机的代理逻辑
+      # 特定主机的代理逻辑
       "github.com" = {
         hostname = "ssh.github.com";
         port = 443;

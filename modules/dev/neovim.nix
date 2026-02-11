@@ -41,6 +41,7 @@
       shiftwidth = 4;
       expandtab = true;
       autoindent = true;
+      smartindent = false;
 
       # 搜索
       hlsearch = true;
