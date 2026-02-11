@@ -6,12 +6,6 @@
     vimAlias = true;
     version.enableNixpkgsReleaseCheck = false;
 
-    extraPlugins = with pkgs.vimPlugins; [
-      everforest
-      gruvbox-nvim
-      tokyonight-nvim
-    ];
-
     # ==========================================
     # 主题配置：everforest gruvbox tokyonight
     # ==========================================
@@ -34,24 +28,39 @@
     #   };
     # };
 
-    colorschemes.tokyonight = {
+    # colorschemes.tokyonight = {
+    #   enable = true;
+    #   settings = {
+    #     # 风格选择：'storm', 'moon', 'night', 'day'
+    #     # 推荐使用 'moon' 或 'night'
+    #     style = "night";
+
+    #     # 透明背景
+    #     # transparent = true;
+
+    #     # 终端颜色支持
+    #     terminal_colors = true;
+
+    #     # 样式微调
+    #     # styles = {
+    #     #   sidebars = "transparent";
+    #     #   floats = "transparent";
+    #     # };
+    #   };
+    # };
+
+    # Nord 主题
+    colorschemes.nord = {
       enable = true;
       settings = {
-        # 风格选择：'storm', 'moon', 'night', 'day'
-        # 推荐使用 'moon' 或 'night'
-        style = "night";
-
-        # 透明背景
-        # transparent = true;
-
-        # 终端颜色支持
-        terminal_colors = true;
-
-        # 样式微调
-        # styles = {
-        #   sidebars = "transparent";
-        #   floats = "transparent";
-        # };
+        # 是否开启边框（建议开启，视觉更清晰）
+        borders = true;
+        # 注释是否使用斜体
+        italic_comments = true;
+        # 是否禁用背景（如果你希望终端壁纸透出来，设为 true）
+        disable_background = false;
+        # 更加现代的样式
+        cursorline_transparent = false;
       };
     };
 
@@ -170,7 +179,8 @@
         enable = true;
         # settings.options.theme = "everforest";
         # settings.options.theme = "gruvbox";
-        settings.options.theme = "tokyonight";
+        # settings.options.theme = "tokyonight";
+        settings.options.theme = "nord";
       };
 
       # 模糊搜索核心
