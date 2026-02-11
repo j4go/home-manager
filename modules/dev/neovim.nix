@@ -38,18 +38,18 @@
       settings = {
         # 风格选择：'storm', 'moon', 'night', 'day'
         # 推荐使用 'moon' 或 'night'
-        style = "moon";
+        style = "night";
         # 透明背景
-        transparent = true;
+        # transparent = true;
 
         # 终端颜色支持
         terminal_colors = true;
 
         # 样式微调
-        styles = {
-          sidebars = "transparent";
-          floats = "transparent";
-        };
+        # styles = {
+        #   sidebars = "transparent";
+        #   floats = "transparent";
+        # };
       };
     };
 
