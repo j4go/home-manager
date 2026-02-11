@@ -120,6 +120,9 @@
     # 插件配置 (Plugins)
     # ==========================================
     plugins = {
+      # 显式启用图标支持
+      web-devicons.enable = true;
+
       # 语法高亮引擎增强
       treesitter = {
         enable = true;
