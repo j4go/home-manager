@@ -225,5 +225,20 @@
         };
       }
     ];
+
+    extraConfigLua = ''
+      -- 解决 Caps Lock 开启时 Normal 模式指令失效的问题
+      -- 将 A-Z 的大写按键在 Normal 模式下全部映射为小写
+      local uppercase_letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      for i = 1, #uppercase_letters do
+        local char = uppercase_letters:sub(i, i)
+        local lower_char = char:lower()
+        -- 排除掉一些原本就需要大写的常用快捷键（如 G, V, C, R 等）
+        -- 如果你希望全部禁用，可以把这个 if 删掉
+        if not (char == "G" or char == "V" or char == "C" or char == "R") then
+          vim.keymap.set("n", char, lower_char, { noremap = true, silent = true })
+        end
+      end
+    '';
   };
 }
