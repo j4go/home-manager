@@ -27,18 +27,16 @@
       lnav # 替换less的日志查看工具
       ncdu # 查看目录大小
       rsync # 同步命令
-
+      wl-clipboard # Wayland
+      xclip # X11
       httpie # http cli client
       xh # httpie的rust重新实现
-
       lazygit # Git 终端 UI
       delta # Git Diff 增强
       gitnr # A CLI / TUI to generate .gitignore files using templates.
-
       imagemagick # 处理图片
       ffmpegthumbnailer # 处理视频
       poppler # 处理pdf 如pdf转图片预览等
-
       # --- 压缩解压工具套装 ---
       zip
       unzip

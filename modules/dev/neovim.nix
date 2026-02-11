@@ -5,11 +5,7 @@
     viAlias = true;
     vimAlias = true;
     version.enableNixpkgsReleaseCheck = false;
-    # 显式注入系统剪贴板驱动
-    extraPackages = with pkgs; [
-      wl-clipboard # Wayland
-      xclip # X11
-    ];
+
     # ==========================================
     # 主题配置：Everforest
     # ==========================================
@@ -40,8 +36,9 @@
       softtabstop = 4;
       shiftwidth = 4;
       expandtab = true;
-      autoindent = true;
       smartindent = false;
+      autoindent = true;
+      fileformats = "unix,dos";
 
       # 搜索
       hlsearch = true;
