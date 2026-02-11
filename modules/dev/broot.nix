@@ -18,9 +18,14 @@
           execution = ":parent"; # 快速回到上级目录
         }
         {
+          key = "enter";
+          execution = "$EDITOR {file}";
+          apply_to = "file"; # 仅对文件生效，文件夹依然保持“进入”动作
+        }
+        {
           invocation = "edit";
           shortcut = "e";
-          execution = "${pkgs.neovim}/bin/nvim {file}";
+          execution = "$EDITOR {file}";
         }
       ];
     };

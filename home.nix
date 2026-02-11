@@ -1,28 +1,15 @@
-#     __  ______  __  _________
-#    / / / / __ \/  |/  / ____/
-#   / /_/ / / / / /|_/ / __/
-#  / __  / /_/ / /  / / /___
-# /_/ /_/\____/_/  /_/_____/
-#
-{
-  lib,
-  pkgs,
-  ...
-}:
+{lib, ...}:
 with lib; {
-  # 1. 自定义开关定义 (保持不变)
+  # 1. 自定义开关定义
   options.myOptions = {
     proxy = {
-      enable = mkEnableOption "是否开启系统代理支持";
+      enable = mkEnableOption "是否开启代理";
       address = mkOption {
         type = types.str;
         default = "127.0.0.1:10808";
         description = "代理服务器地址 (IP:Port)";
       };
     };
-    # shell = {
-    #   starship.enable = mkEnableOption "Starship 提示符";
-    # };
   };
 
   # 2. 具体的配置实现
