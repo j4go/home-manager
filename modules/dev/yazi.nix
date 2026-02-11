@@ -62,11 +62,10 @@ in {
         max_width = 1600;
         max_height = 1200;
         cache_dir = "";
-        image_filter = "lanczos3";
-        image_quality = 90;
-        # 尝试改为 iterm2（Tabby 对此支持较好）或直接禁用
-        # 如果报错持续，尝试将下行设为 "ueberzug" 或 "noop"
-        preview_protocol = "iterm2";
+        image_quality = 60;
+        image_filter = "triangle"; # 使用更轻量的滤镜
+        # 如果报错持续，尝试将下行设为 "noop"
+        preview_protocol = "sixel";
       };
 
       opener = {
