@@ -1,16 +1,16 @@
 {...}: {
   imports = [
-    ./bat.nix
-    ./btop.nix
-    ./direnv.nix
-    ./htop.nix
+    ./neovim.nix
     ./ssh.nix
     ./git.nix
-    ./zellij.nix
-    ./yazi.nix
-    ./snitch.nix
-    ./broot.nix
+    ./bat.nix
+    ./btop.nix
+    ./htop.nix
+    ./direnv.nix
     ./python.nix
-    ./neovim.nix
+    ./yazi.nix
+    ./zellij.nix
+    # ./broot.nix
+    # ./snitch.nix
   ];
 }

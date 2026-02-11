@@ -94,26 +94,29 @@ in {
 
       shellAliases = lib.mkMerge [
         {
-          tree = "broot";
           rga = "rg -uuL";
+          grep = "grep --color=auto";
+
           ya = "yazi";
           so = "source ~/.bashrc";
+
           os = "fastfetch";
           neo = "fastfetch";
           fetch = "fastfetch";
           su = "su -";
           "7z" = "7zz";
           m = "tldr";
-          grep = "grep --color=auto";
           rm = "trash-put";
           h = "history";
           lg = "lazygit";
           ping = "gping";
           dig = "doggo";
           print = "figlet";
+
           ze = "zellij";
           zew = "zellij attach w -c";
           zels = "zellij list-sessions";
+
           hm = "cd ~/.config/home-manager/";
 
           # 代理控制别名
