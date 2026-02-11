@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{...}: {
   programs.nixvim = {
     enable = true;
     defaultEditor = true;
@@ -7,9 +7,8 @@
     version.enableNixpkgsReleaseCheck = false;
 
     # ==========================================
-    # 主题配置：everforest gruvbox tokyonight
+    # 主题配置
     # ==========================================
-
     colorschemes.catppuccin = {
       enable = true;
       settings = {
@@ -20,65 +19,28 @@
         # 建议：浅色模式下关闭透明背景，确保对比度
         transparent_background = false;
 
-        # catppuccin 会为 lualine 提供专门的配色方案
-        lualine = true;
-        treesitter = true;
-
-        # # 增强 UI 组件的颜色表现
-        # term_colors = true;
-        # integrations = {
-        #   treesitter = true;
-        #   native_lsp = {
-        #     enabled = true;
-        #     underlines = {
-        #       errors = [ "undercurl" ];
-        #       hints = [ "undercurl" ];
-        #       warnings = [ "undercurl" ];
-        #       information = [ "undercurl" ];
-        #     };
-        #   };
-        # };
+        # 增强 UI 组件的颜色表现
+        term_colors = true;
+        integrations = {
+          lualine = true;
+          treesitter = true;
+          cmp = true;
+          native_lsp = {
+            enabled = true;
+            underlines = {
+              errors = ["undercurl"];
+              hints = ["undercurl"];
+              warnings = ["undercurl"];
+              information = ["undercurl"];
+            };
+          };
+          telescope.enabled = true;
+          gitsigns = true; # Git 侧边栏状态
+          which_key = true; # 快捷键提示
+          indent_blankline.enabled = true; # 缩进线
+        };
       };
     };
-
-    # colorschemes.everforest = {
-    #   enable = true;
-    #   settings = {
-    #     background = "hard";
-    #     enable_italic = 1;
-    #     better_performance = 1;
-    #     transparent_background = 1;
-    #   };
-    # };
-
-    # colorschemes.gruvbox = {
-    #   enable = true;
-    #   settings = {
-    #     contrast = "hard";
-    #     # transparent_mode = true;
-    #   };
-    # };
-
-    # colorschemes.tokyonight = {
-    #   enable = true;
-    #   settings = {
-    #     # 风格选择：'storm', 'moon', 'night', 'day'
-    #     # 推荐使用 'moon' 或 'night'
-    #     style = "night";
-
-    #     # 透明背景
-    #     # transparent = true;
-
-    #     # 终端颜色支持
-    #     terminal_colors = true;
-
-    #     # 样式微调
-    #     # styles = {
-    #     #   sidebars = "transparent";
-    #     #   floats = "transparent";
-    #     # };
-    #   };
-    # };
 
     # ==========================================
     # 基础选项 (Opts)
@@ -223,6 +185,32 @@
             "<S-Tab>" = "cmp.mapping.select_prev_item()";
             "<CR>" = "cmp.mapping.confirm({ select = true })";
           };
+        };
+      };
+
+      # Git 状态显示
+      gitsigns = {
+        enable = true;
+        settings.signs = {
+          add.text = "+";
+          change.text = "~";
+          delete.text = "-";
+        };
+      };
+
+      # 快捷键提示面板
+      which-key = {
+        enable = true;
+        # 即使不写设置，默认也很好用
+      };
+
+      # 缩进可视化线
+      indent-blankline = {
+        enable = true;
+        # v3 版本的配置方式
+        settings = {
+          indent.char = "│"; # 使用细线
+          scope.enabled = true; # 高亮当前代码块的缩进线
         };
       };
     };
