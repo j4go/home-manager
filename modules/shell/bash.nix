@@ -1,9 +1,3 @@
-#     __               __
-#    / /_  ____ ______/ /_
-#   / __ \/ __ `/ ___/ __ \
-#  / /_/ / /_/ (__  ) / / /
-# /_.___/\__,_/____/_/ /_/
-#
 {
   config,
   lib,
@@ -100,6 +94,7 @@ in {
 
       shellAliases = lib.mkMerge [
         {
+          tree = "broot";
           rga = "rg -uuL";
           ya = "yazi";
           so = "source ~/.bashrc";

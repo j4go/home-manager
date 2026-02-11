@@ -9,7 +9,7 @@
 
       # 界面皮肤配置
       skin = {
-        default = "gray 238 / gray 235";
+        default = "ansi(238) / ansi(235)";
       };
 
       verbs = [
