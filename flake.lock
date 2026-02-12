@@ -101,28 +101,7 @@
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable",
-        "nixvim": "nixvim",
-        "snitch": "snitch"
-      }
-    },
-    "snitch": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1767297494,
-        "narHash": "sha256-Ylvs2bXDshwKA1O8dRFCOatXPGYg7yx17pLAj2o78mk=",
-        "owner": "karol-broda",
-        "repo": "snitch",
-        "rev": "57d592408de364bbbef3c89b85458e7cf61fd2e4",
-        "type": "github"
-      },
-      "original": {
-        "owner": "karol-broda",
-        "repo": "snitch",
-        "type": "github"
+        "nixvim": "nixvim"
       }
     },
     "systems": {
