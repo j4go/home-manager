@@ -1,3 +1,4 @@
+# 用户状态声明和配置实现
 {
   config,
   lib,
@@ -14,7 +15,9 @@
   noProxyStr = builtins.concatStringsSep "," noProxyList;
 in {
   imports = [
-    ./modules/common-import.nix
+    ./nh.nix
+    ./basic_tools.nix
+    ./modules/import.nix
   ];
 
   # --- 自定义选项 ---
@@ -30,7 +33,7 @@ in {
   };
 
   config = {
-    home.stateVersion = "24.05";
+    home.stateVersion = "25.11";
     programs.home-manager.enable = true;
 
     # --- 全局环境变量 ---
@@ -51,7 +54,7 @@ in {
     };
 
     # --- 深度集成程序 (需配置参数的工具) ---
-    # 注意：这里的程序会自动安装对应的包，无需在 basic_tools.nix 重复添加
+    # 除了安装软件包，Home Manager 还生成和管理对应的参数配置
     programs = {
       bat = {
         enable = true;

@@ -1,4 +1,4 @@
-# flake.nix
+# flake.nix 依赖管理和配置组装
 {
   description = "Multi-Host Configuration";
 

@@ -1,5 +1,7 @@
+# 存放简单独立的命令行工具
+# Home Manager 一般不需要为它们生成任何额外的配置文件
 {pkgs, ...}: {
-  # 字体配置 (必须启用，否则 Nerdfonts 无法被终端识别)
+  # 字体必须启用，否则 Nerdfonts 无法被终端识别
   fonts.fontconfig.enable = true;
 
   # Tldr 配置
@@ -34,7 +36,6 @@
 
       # --- 视觉与终端美化 ---
       fastfetch # 系统信息 (alias os/neo)
-      macchina # 另一种系统信息
       figlet # 字符画 (alias print)
       toilet # 字符画增强
       chafa # 终端图片预览
@@ -67,12 +68,10 @@
 
       # --- 字体 ---
       # nerd-fonts.jetbrains-mono
-      # maple-mono.NF-CN
     ]
     ++ [
       # --- Unstable 包 ---
       pkgs.unstable.hyperfine # 基准测试
       pkgs.unstable.bottom # 系统监控 (btm)
-      # pkgs.unstable.yazi    # 如果需要最新版 Yazi
     ];
 }
