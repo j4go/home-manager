@@ -98,7 +98,6 @@ in {
       {
         # Editor & System
         v = "vim";
-        vi = "nvim";
         sedit = "sudo -E systemctl edit";
         rga = "rg -uuL";
         grep = "grep --color=auto";
