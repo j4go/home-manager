@@ -1,8 +1,4 @@
 {...}: {
-  imports = [
-    ../../modules/common-import.nix
-  ];
-
   # 🚀 为这台机器量身定做开关
   myOptions = {
     proxy = {

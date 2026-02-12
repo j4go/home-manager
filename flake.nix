@@ -1,30 +1,25 @@
+# flake.nix
 {
   description = "Multi-Host Configuration";
 
   inputs = {
-    # 锁定到最新的稳定分支
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11"; # 建议与 home.stateVersion 保持一致
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    # home-manager 依赖主 nixpkgs
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # nixvim 依赖主 nixpkgs
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # snitch
     snitch = {
       url = "github:karol-broda/snitch";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # 引入 unstable 源作为备用
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
   outputs = {
@@ -36,45 +31,54 @@
     nixpkgs-unstable,
     ...
   } @ inputs: let
-    # 定义支持的系统架构 (匹配hosts配置)
+    # --- 辅助函数 ---
     systems = ["x86_64-linux" "aarch64-linux"];
-
-    # 辅助函数：为所有架构生成配置
     forAllSystems = nixpkgs.lib.genAttrs systems;
 
-    overlay-unstable = final: prev: {
-      unstable = import nixpkgs-unstable {
-        system = prev.stdenv.hostPlatform.system;
+    # [优化点 1]: 创建一个统一的 pkgs 构造器，避免重复
+    pkgsFor = system:
+      import nixpkgs {
+        inherit system;
         config.allowUnfree = true;
+        overlays = [
+          # 添加 unstable 源
+          (final: prev: {
+            unstable = import nixpkgs-unstable {
+              inherit system;
+              config.allowUnfree = true;
+            };
+          })
+        ];
       };
-    };
 
+    # [优化点 2]: 重构 mkHome，使其成为模块编排中心
     mkHome = hostName: system:
       home-manager.lib.homeManagerConfiguration {
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [overlay-unstable];
-          config.allowUnfree = true;
-        };
+        # 使用统一构造器
+        pkgs = pkgsFor system;
 
-        # 将 hostName 显式传递给所有模块
+        # 将 inputs 和 hostName 传递给所有模块
         extraSpecialArgs = {inherit inputs hostName;};
+
+        # [核心优化]: 在此处定义完整的模块结构
+        # 1. 加载通用基础配置 (所有主机共享)
+        # 2. 加载主机专属配置 (定义变量和开关)
+        # 3. 加载外部插件模块 (如 nixvim, snitch)
         modules = [
-          ./home.nix # 基础通用配置
-          ./hosts/${hostName} # 加载对应的 host 文件夹
-          nixvim.homeModules.nixvim # nixvim 模块
+          # --- 1. 通用模块 ---
+          ./home.nix # 包含别名、通用程序配置，并负责导入 basic_tools 和 shell
 
-          # 添加 Snitch 的 Home Manager 模块
+          # --- 2. 主机特定模块 ---
+          ./hosts/${hostName} # 仅包含数据，不再有 imports
+
+          # --- 3. 外部插件模块 ---
+          nixvim.homeModules.nixvim
           snitch.homeManagerModules.default
-
-          # 可选：如果你想确保使用 flake 里的最新版而不是 nixpkgs 里的
-          {
-            programs.snitch.package = snitch.packages.${system}.default;
-          }
+          # 确保使用 flake 中的最新版 snitch 包
+          {programs.snitch.package = snitch.packages.${system}.default;}
         ];
       };
   in {
-    # 格式化工具 (运行 nix fmt 时调用)
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
     homeConfigurations = {

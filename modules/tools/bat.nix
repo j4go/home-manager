@@ -1,5 +1,5 @@
 {
-  config,
+  lib,
   pkgs,
   ...
 }: {
@@ -12,7 +12,7 @@
       #  其他深色主题 TwoDark Dracula
       theme = "OneHalfDark"; # 设置你喜欢的主题
       # style = "numbers,changes";  # 可选：简约风格
-      style = "header,grid,numbers";
+      style = lib.mkDefault "header,grid,numbers";
     };
   };
 
