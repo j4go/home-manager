@@ -17,7 +17,9 @@ in {
   imports = [
     ./nh.nix
     ./basic_tools.nix
-    ./modules/import.nix
+    ./env
+    ./shell
+    ./tools
   ];
 
   # --- 自定义选项 ---
