@@ -11,7 +11,7 @@
   hasEza = config.programs.eza.enable;
 
   # 代理白名单
-  noProxyList = ["localhost" "127.0.0.1" "::1" "192.168.0.0/16" "172.16.0.0/12" "10.0.0.0/8" "*.local" ".lan"];
+  noProxyList = ["localhost" "127.0.0.1" "::1" "192.168.0.0/16" "172.16.0.0/12" "10.0.0.0/8" "*.local" ".lan" ".haday.cn"];
   noProxyStr = builtins.concatStringsSep "," noProxyList;
 in {
   imports = [
