@@ -2,7 +2,7 @@
   # 🚀 为这台机器量身定做开关
   myOptions = {
     proxy = {
-      enable = true;
+      enable = false;
       address = "10.255.126.1:10808";
     };
   };
