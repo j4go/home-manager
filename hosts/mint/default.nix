@@ -3,7 +3,7 @@
   myOptions = {
     proxy = {
       enable = false;
-      address = "10.255.126.1:10808";
+      address = "192.168.11.113:10808";
     };
   };
 
