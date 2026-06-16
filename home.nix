@@ -28,7 +28,7 @@ in {
       enable = lib.mkEnableOption "是否开启代理";
       address = lib.mkOption {
         type = lib.types.str;
-        default = "127.0.0.1:10808";
+        default = "192.168.11.253:10808";
         description = "代理服务器地址 (IP:Port)";
       };
     };

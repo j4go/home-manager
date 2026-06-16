@@ -115,16 +115,13 @@ in {
       };
 
       # 网络与缓冲区 (合并静态设置与动态代理)
-      http =
-        {
-          sslVerify = false;
-          postBuffer = 957286400;
-        }
-        // (lib.optionalAttrs proxy.enable {
-          proxy = "http://${proxy.address}";
-        });
+      http = {
+        sslVerify = false;
+        postBuffer = 957286400;
+        proxy = "http://${proxy.address}";
+      };
 
-      https = lib.mkIf proxy.enable {
+      https = {
         proxy = "http://${proxy.address}";
       };
     };

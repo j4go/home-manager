@@ -34,9 +34,7 @@ in {
         hostname = "ssh.github.com";
         port = 443;
         user = "git";
-        proxyCommand =
-          lib.mkIf proxy.enable
-          "${nc} -X connect -x ${proxy.address} %h %p";
+        proxyCommand = "${nc} -X connect -x ${proxy.address} %h %p";
       };
     };
   };
