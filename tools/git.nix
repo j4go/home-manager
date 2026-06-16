@@ -114,7 +114,6 @@ in {
         lg = "log --graph --pretty=format:'%C(bold yellow)%h%Creset %C(magenta)-%Creset %s %C(auto)%d%Creset %C(dim white)(%cr)%Creset %C(bold blue)<%an>%Creset' --abbrev-commit -n 20";
       };
 
-      # 网络与缓冲区 (合并静态设置与动态代理)
       http = {
         sslVerify = false;
         postBuffer = 957286400;
