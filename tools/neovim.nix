@@ -1,4 +1,4 @@
-{...}: {
+{pkgs, ...}: {
   programs.nixvim = {
     enable = true;
     defaultEditor = true;
@@ -212,7 +212,29 @@
           scope.enabled = true; # 高亮当前代码块的缩进线
         };
       };
+
+      # 代码格式化
+      conform-nvim = {
+        enable = true;
+        settings = {
+          format_on_save = {
+            lspFallback = true;
+            timeoutMs = 500;
+          };
+          formatters_by_ft = {
+            nix = ["alejandra"];
+            sh = ["shfmt"];
+            bash = ["shfmt"];
+          };
+        };
+      };
     };
+
+    # Formatter 可执行文件，让 conform-nvim 能在 PATH 中找到它们
+    extraPackages = with pkgs; [
+      alejandra # Nix formatter
+      shfmt # Shell formatter
+    ];
 
     # ==========================================
     # 自动命令 (AutoCmd)

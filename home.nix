@@ -58,13 +58,6 @@ in {
     # --- 深度集成程序 (需配置参数的工具) ---
     # 除了安装软件包，Home Manager 还生成和管理对应的参数配置
     programs = {
-      bat = {
-        enable = true;
-        config = {
-          style = "numbers,changes,header";
-        };
-      };
-
       fd = {
         enable = true;
         hidden = true;
